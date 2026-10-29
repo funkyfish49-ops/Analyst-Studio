@@ -12,3 +12,11 @@ Open the GitHub Pages URL below, then add your Mistral API key in the **Settings
 Live app: https://funkyfish49-ops.github.io/Analyst-Studio/
 
 Everything runs client-side in the browser — there is no server component.
+
+## Cloud sync & track record (optional)
+
+Sign in with Google from **Settings → ☁️ Cloud sync** to save episodes, opportunities and topics
+to your own private Firestore (see the [firebaseSA](https://github.com/funkyfish49-ops/firebaseSA)
+repo for the database design and security rules). The Monitor tab tracks each opportunity's
+track record (won / lost / void) and its check history. Without sign-in, the app works fully
+offline from browser local storage.

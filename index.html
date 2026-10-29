@@ -365,6 +365,15 @@ body.mode-desk .opppanel{position:sticky;top:96px;flex:0 1 280px;min-width:240px
 body.mode-desk .anamain{padding-left:16px;min-width:280px}
 body.mode-desk #srctable{overflow:visible}
 body.mode-desk #srctable table{min-width:0}
+/* ---- centered thinking indicator — animated while a pipeline creates an episode or analyst call ---- */
+.thinking{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:999;pointer-events:none;display:none;text-align:center}
+.thinking .tcore{position:relative;width:92px;height:92px;margin:0 auto}
+.thinking .tring{position:absolute;inset:0;border-radius:50%;border:4px solid rgba(255,255,255,.16);border-top-color:var(--acc);animation:thinkspin 1s linear infinite}
+.thinking .tico{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:44px;animation:thinkpulse 1.2s ease-in-out infinite}
+.thinking .tlbl{margin-top:12px;font-weight:700;font-size:13.5px;color:var(--txt);text-shadow:0 1px 6px rgba(0,0,0,.5);animation:thinkblink 1.6s ease-in-out infinite}
+@keyframes thinkspin{to{transform:rotate(360deg)}}
+@keyframes thinkpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@keyframes thinkblink{0%,100%{opacity:.55}50%{opacity:1}}
 </style>
 </head>
 <body>
@@ -669,6 +678,11 @@ body.mode-desk #srctable table{min-width:0}
       </div>
       <div class="hint" style="margin-top:12px">Producing the call runs the <b>Trading Analyst Pipeline</b> — once the show is written, it plays in the <b>Episode</b> tab and the board fills the <b>Analysts</b> tab.</div>
     </div>
+    <div class="card">
+      <h2>☁️ Cloud sync</h2>
+      <div class="hint">Sign in with Google to sync episodes, board opportunities and topics — with their track record — to your Firebase database. The app works fully without it: this browser's local storage always keeps your latest episode.</div>
+      <div id="cloud-panel"></div>
+    </div>
   </section>
 
   <!-- ============ HELP ============ -->
@@ -694,8 +708,11 @@ body.mode-desk #srctable table{min-width:0}
       <h3>The Monitor tab</h3>
       <p>The <b>📊 Monitor</b> tab tracks everything your latest episode claimed. Pick an entry from the <b>watchlist dropdown</b> — the <b>trading opportunities</b> from the analyst board (grouped into their trading categories: STOCKS / PREDICTIONS / BONDS / OTHER) alongside <b>Topics</b>, one entry per episode segment listed by its whole topic name; re-checked entries carry a status marker (✓ / ↻ / ✖). The right panel shows, top to bottom: the <b>verdict or point</b> (the call with its action badge and thesis tag, or the segment's point), the <b>quantitative proof</b> (entry, size, risk/reward, confidence — or the dated sources behind a topic), the <b>qualitative proof</b> (the case, for/against arguments, or the segment script), and a <b>still-valid check</b>. Press <b>Re-check with live search</b> and the <b>Monitor Analyst</b> agent searches the live web for what has changed since the episode was produced, then rules the item <b>STILL VALID</b>, <b>SHOULD CHANGE</b>, or <b>EVOLVED</b> — with a severity grade on the change impact: <b>HIGH</b> means the direction flipped (a buy is now a sell — requires immediate attention), <b>MEDIUM</b> means the call stands but entry, size or timing must change, <b>LOW</b> means minor nuance. The Monitor Analyst weighs the evidence with the same <b>advanced analytics toolkit</b> as the desk — causal vs. predictive claims, heterogeneous effects, emergent-behavior simulation, and data-quality checks — before ruling. Re-checks are saved with the episode, and any sources the Monitor Analyst finds are added to the Sources &amp; Dates registry. Producing a new episode starts a fresh watchlist.</p>
 
+      <h3>Cloud sync &amp; track record</h3>
+      <p>The <b>Settings</b> tab has a <b>☁️ Cloud sync</b> card: sign in with Google and every episode you produce — podcast or analyst call — is saved to your Firebase cloud library, together with one trackable document per board opportunity and per episode topic. The <b>Monitor</b> tab doubles as your track record: each re-check appends to that item's cloud history, and the <b>🏆 Track record</b> row lets you resolve any opportunity as <b>Won</b>, <b>Lost</b> or <b>Void</b> — or reopen it — with the outcome saved with the episode and synced to the cloud. Press <b>Load cloud library</b> in Settings to bring any past episode back onto this device with its full watchlist and track record intact. Everything works offline too: without sign-in (or without a connection) the app runs entirely on this browser's local storage.</p>
+
       <h3>1 · The agents</h3>
-      <div class="hint" style="margin:6px 0">Each style has its own agent team — the agent cards above the log show exactly who's working on your episode.</div>
+      <div class="hint" style="margin:6px 0">Each style has its own agent team — the agent cards above the log show exactly who's working on your episode. While a pipeline is creating an episode or an analyst call, a centered animated <b>thinking icon</b> marks the wait — it pulses in the middle of the screen until the item is created, then disappears. The app stays fully usable in the meantime, so you can still press <b>Stop</b> to cancel the run.</div>
       <ul>
         <li><b>📜 Historian</b> — searches the web for origins, key milestones and dated events in the topic's past.</li>
         <li><b>📡 News Analyst</b> — searches for the latest developments (last ~12 months), each stamped with its date.</li>
@@ -756,11 +773,17 @@ body.mode-desk #srctable table{min-width:0}
   </div>
 </div>
 
+  <!-- centered thinking indicator — shown while a pipeline runs -->
+  <div class="thinking" id="thinking">
+    <div class="tcore"><div class="tring"></div><span class="tico" id="thinking-ico">🧠</span></div>
+    <div class="tlbl" id="thinking-lbl">Thinking…</div>
+  </div>
+
 <script>
 "use strict";
 /* ============================== state ============================== */
-var LSKEY = "topiccast-key", LSMODEL = "topiccast-model", LSEP = "topiccast-episode", LSVOICE = "topiccast-voices", LSSTYLE = "topiccast-style", LSDESK = "topiccast-deskmins", LSEXPERTS = "topiccast-experts", LSDEV = "topiccast-devmode";
-var S = { running: false, cancel: false, ep: null, dur: "medium", plan: null, engine: "browser", voxVoices: null, style: "story", analystsSel: 0, analystsView: "indicators", takeAudio: null, takeState: "", experts: null, expertSel: "", monitorSel: "", monitorRun: "", monitorErr: "", deviceMode: "auto" };
+var LSKEY = "topiccast-key", LSMODEL = "topiccast-model", LSEP = "topiccast-episode", LSVOICE = "topiccast-voices", LSSTYLE = "topiccast-style", LSDESK = "topiccast-deskmins", LSEXPERTS = "topiccast-experts", LSDEV = "topiccast-devmode", LSCLOUD = "topiccast-cloud-eps";
+var S = { running: false, cancel: false, ep: null, dur: "medium", plan: null, engine: "browser", voxVoices: null, style: "story", analystsSel: 0, analystsView: "indicators", takeAudio: null, takeState: "", experts: null, expertSel: "", monitorSel: "", monitorRun: "", monitorErr: "", deviceMode: "auto", cloudUser: null, cloudEps: null, cloudLoading: false };
 var TTS = { playing: false, paused: false, seg: 0, line: 0, cursor: 0, gapTimer: null, inUtterance: false };
 var VOX = { groups: null, idx: 0, token: 0, cur: null, cache: {}, voicesLoaded: false };
 
@@ -877,6 +900,7 @@ function showTab(name) {
   if (name === "analysts") renderAnalysts();
   if (name === "monitor") renderMonitor();
   if (name === "experts") renderExperts();
+  if (name === "settings") renderCloudPanel();
   try { window.scrollTo({ top: 0, behavior: "auto" }); } catch (e) { window.scrollTo(0, 0); }
 }
 
@@ -1157,6 +1181,19 @@ function pickDur(d) {
   el("dursel").value = d;
 }
 
+/* ---- centered thinking indicator — animated while a pipeline creates an episode or analyst call ---- */
+function showThinking(icon, label) {
+  var t = el("thinking");
+  if (!t) return;
+  el("thinking-ico").textContent = icon || "\uD83E\uDDE0";
+  el("thinking-lbl").textContent = label || "Thinking\u2026";
+  t.style.display = "block";
+}
+function hideThinking() {
+  var t = el("thinking");
+  if (t) t.style.display = "none";
+}
+
 function logLine(html, cls) {
   var box = el("log");
   box.style.display = "block";
@@ -1272,6 +1309,7 @@ async function runEpisode(ep) {
   el("log").innerHTML = ""; el("log").style.display = "none";
   el("dossierbox").innerHTML = "";
   renderAgents(ep);
+  showThinking(ep.style === "analysts" ? "\uD83D\uDCC8" : "\uD83C\uDF99\uFE0F", ep.style === "analysts" ? "Producing today\u2019s call\u2026" : "Producing your episode\u2026");
   logLine("Producing <b>" + esc(styleOf(ep).label) + " · " + esc(dur.label) + "</b> episode on \u201c" + esc(ep.topic) + "\u201d · " + dur.words + " words target · today is " + todayHuman(), "hi");
 
   try {
@@ -1286,13 +1324,16 @@ async function runEpisode(ep) {
     setAgent(ep, "showrunner", "done", "script ready · " + ep.words + " words · est. " + estRuntime(ep));
 
     S.running = false;
+    hideThinking();
     el("go").disabled = false; el("demo").disabled = false;
     el("cancel").style.display = "none";
     saveEpisode();
     openEpisode();
+    if (cloudEnabled()) cloudSaveEpisode();
     logLine("🎧 Episode ready — press play.", "ok");
   } catch (e) {
     S.running = false;
+    hideThinking();
     el("go").disabled = false; el("demo").disabled = false;
     el("cancel").style.display = "none";
     if (e && e.kind === "cancel") {
@@ -2040,6 +2081,7 @@ async function analyzeOpportunity() {
   el("log").innerHTML = ""; el("log").style.display = "none";
   el("dossierbox").innerHTML = "";
   renderAgents(ep);
+  showThinking("\uD83D\uDD0D", "Analyzing \u201c" + opp + "\u201d\u2026");
   setAgent(ep, "scanner", "off", "skipped \u2014 single-opportunity analysis");
   setAgent(ep, "showrunner", "off", "skipped \u2014 analysis only, no show script");
   logLine("Analyzing \u201c<b>" + esc(opp) + "</b>\u201d \u00b7 " + esc(cat) + " \u00b7 desk research \u2192 debate \u2192 verdict \u00b7 today is " + todayHuman(), "hi");
@@ -2098,6 +2140,7 @@ async function analyzeOpportunity() {
       ep.expertGuest = { id: expert.id, name: expert.name, domain: expert.domain, fullName: exName, verdict: expertVerdict(exr.text) };
     }
     S.running = false;
+    hideThinking();
     el("go").disabled = false; el("demo").disabled = false;
     el("cancel").style.display = "none";
     S.analystsSel = 0;
@@ -2105,8 +2148,10 @@ async function analyzeOpportunity() {
     renderCall(0);
     showTab("analysts");
     logLine("\uD83D\uDD0D Analysis ready \u2014 the verdict is on the board.", "ok");
+    if (cloudEnabled()) cloudSaveEpisode();
   } catch (e) {
     S.running = false;
+    hideThinking();
     el("go").disabled = false; el("demo").disabled = false;
     el("cancel").style.display = "none";
     if (e && e.kind === "cancel") {
@@ -2435,6 +2480,264 @@ function saveEpisode() {
   try { lsSet(LSEP, JSON.stringify(S.ep)); } catch (e) {}
 }
 
+/* ============================== cloud sync (firebase) ============================== */
+/* Optional Firebase sync. Sign in with Google from Settings and every produced episode is
+   saved to Firestore (/episodes, full JSON payload for round-trip loading) together with one
+   trackable doc per board opportunity (/opportunities) and per episode topic (/topics).
+   Monitor re-checks append to the item's cloud checks[] history and the track record
+   (won/lost/void) syncs to the opportunity doc. Everything degrades gracefully: with no
+   connection or no sign-in the app runs fully on localStorage. */
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBPpjjCjuQXijbtiv5el2KoQQDSyji0NQ8",
+  authDomain: "gen-lang-client-0885864962.firebaseapp.com",
+  projectId: "gen-lang-client-0885864962",
+  appId: "1:636637439633:web:a9955db4ad3fb784f6c130",
+  storageBucket: "gen-lang-client-0885864962.firebasestorage.app",
+  messagingSenderId: "636637439633",
+  firestoreDatabaseId: "ai-studio-9f1f8c7e-40a7-4e20-9824-a2c9f757d0d2"
+};
+var FB = { ready: false, err: "", authErr: "", panelErr: "", mod: null, app: null, db: null, auth: null, savedEps: {} };
+
+function cloudEnabled() { return !!(FB.ready && S.cloudUser && S.cloudUser.uid); }
+function cloudIsPerm(e) { return String((e && e.code) || "").indexOf("permission-denied") >= 0; }
+function cloudErrMsg(e) {
+  var m = e && e.message ? e.message : String(e);
+  return cloudIsPerm(e) ? "permission denied — publish the updated firestore.rules in the Firebase Console first" : m;
+}
+function cloudSlug(s) {
+  return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 40) || "item";
+}
+function cloudEpId(ep) {
+  if (!ep.id) ep.id = "ep-" + todayISO().replace(/-/g, "") + "-" + Math.random().toString(36).slice(2, 8);
+  return ep.id;
+}
+function cloudDocIdForItem(ep, x) {
+  if (x.kind === "opportunity") return ep.id + "__" + cloudSlug(x.title);
+  var m = /^seg-(\d+)$/.exec(String(x.id || ""));
+  return ep.id + "__seg" + (m ? m[1] : "0") + "__" + cloudSlug(x.title);
+}
+function cloudCheckEntry(a) {
+  return { status: a.status || "", severity: a.severity || "", newCall: a.newCall || "", headline: a.headline || "", checkedOn: a.checkedOn || "", checkedISO: a.checkedISO || "" };
+}
+function cloudEpisodeRecord(ep) {
+  return {
+    userId: S.cloudUser.uid,
+    title: String(ep.title || ep.topic || "Episode").slice(0, 200),
+    topic: String(ep.topic || ep.title || "Episode").slice(0, 300),
+    style: String(ep.style || "story").slice(0, 40),
+    duration: String(ep.duration || "").slice(0, 20),
+    words: ep.words || countWords(ep.script),
+    verdict: String(ep.verdict || "").slice(0, 200),
+    createdLabel: String(ep.createdLabel || ep.created || "").slice(0, 60),
+    payload: JSON.stringify(ep)
+  };
+}
+function cloudOppRecord(ep, x) {
+  var mo = (ep.monitor && ep.monitor[x.id]) || null;
+  var c = x.call || {};
+  return {
+    userId: S.cloudUser.uid, episodeId: ep.id, category: x.cat || c.category || "OTHER",
+    title: String(x.title || c.asset || "Idea").slice(0, 150),
+    action: String(x.action || "WATCH").slice(0, 40) || "WATCH",
+    tag: String(c.tag || "").slice(0, 60), confidence: String(c.confidence || "").slice(0, 10),
+    analyst: String(c.analyst || "").slice(0, 120),
+    entry: String(c.entry || "").slice(0, 120), size: String(c.size || "").slice(0, 120),
+    rr: String(c.rr || "").slice(0, 200), price: String(c.price || "").slice(0, 40),
+    priceAsOf: String(c.priceAsOf || "").slice(0, 12),
+    priceStatus: (c.priceCheck && c.priceCheck.status) || "ok",
+    rationale: String(c.rationale || "").slice(0, 2000),
+    forArgs: (c.forArgs || []).slice(0, 10), againstArgs: (c.againstArgs || []).slice(0, 10),
+    isManagerPick: !!(ep.analysts && ep.analysts.manager && isManagerPick(c, ep.analysts)),
+    status: (mo && mo.outcome) ? mo.outcome : "open",
+    outcomeOn: (mo && mo.outcome) ? String(mo.outcomeOn || "").slice(0, 60) : "",
+    outcomeISO: (mo && mo.outcome) ? String(mo.outcomeISO || "").slice(0, 12) : ""
+  };
+}
+function cloudTopicRecord(ep, x) {
+  return {
+    userId: S.cloudUser.uid, episodeId: ep.id, kind: "topic",
+    segmentLabel: String(x.label || (x.seg && (x.seg.label || x.seg.tag)) || "").slice(0, 60),
+    title: String(x.title || "Topic").slice(0, 300),
+    point: String(monitorTopicPoint(x.seg)).slice(0, 2000),
+    status: "open"
+  };
+}
+/* write one doc — the first-ever write includes createdAt (and an empty checks list for
+   trackable docs); later writes never touch createdAt or checks, so the cloud re-check
+   history survives full episode re-saves */
+async function cloudWriteDoc(coll, docId, data) {
+  var fs = FB.mod.fs, ref = fs.doc(FB.db, coll, docId);
+  var exists = !!FB.savedEps[docId];
+  if (!exists) {
+    try { var snap = await fs.getDoc(ref); exists = !!(snap && snap.exists && snap.exists()); } catch (e) { exists = false; }
+  }
+  var out = {};
+  for (var k in data) out[k] = data[k];
+  if (exists) { delete out.createdAt; delete out.checks; }
+  else {
+    if (coll === "opportunities" || coll === "topics") out.checks = [];
+    out.createdAt = fs.serverTimestamp();
+  }
+  out.updatedAt = fs.serverTimestamp();
+  await fs.setDoc(ref, out, { merge: true });
+  FB.savedEps[docId] = 1;
+}
+async function cloudSaveEpisode() {
+  if (!cloudEnabled() || !S.ep) return false;
+  var ep = S.ep;
+  try {
+    var id = cloudEpId(ep);
+    await cloudWriteDoc("episodes", id, cloudEpisodeRecord(ep));
+    var items = monitorItems();
+    for (var i = 0; i < items.length; i++) {
+      var x = items[i];
+      var mo = (ep.monitor && ep.monitor[x.id]) || null;
+      var rec = x.kind === "opportunity" ? cloudOppRecord(ep, x) : cloudTopicRecord(ep, x);
+      if (mo) { rec.lastCheck = mo.status || ""; rec.lastCheckedISO = mo.checkedISO || ""; }
+      await cloudWriteDoc(x.kind === "opportunity" ? "opportunities" : "topics", cloudDocIdForItem(ep, x), rec);
+    }
+    lsSet(LSCLOUD, JSON.stringify(FB.savedEps));
+    logLine("☁️ Episode synced to your cloud library.", "ok");
+    return true;
+  } catch (e) {
+    logLine("☁️ Cloud sync failed: " + cloudErrMsg(e), "err");
+    return false;
+  }
+}
+async function cloudRecordCheck(id, a) {
+  if (!cloudEnabled() || !S.ep) return;
+  var x = monitorById(id);
+  if (!x) return;
+  try {
+    var fs = FB.mod.fs;
+    await fs.updateDoc(fs.doc(FB.db, x.kind === "opportunity" ? "opportunities" : "topics", cloudDocIdForItem(S.ep, x)), {
+      checks: fs.arrayUnion(cloudCheckEntry(a)),
+      lastCheck: a.status || "", lastCheckedISO: a.checkedISO || "",
+      updatedAt: fs.serverTimestamp()
+    });
+    logLine("☁️ Re-check recorded in the cloud track record.", "ok");
+  } catch (e) {
+    logLine("☁️ Cloud re-check sync failed: " + cloudErrMsg(e), "err");
+  }
+}
+async function cloudSetOutcome(id) {
+  if (!cloudEnabled() || !S.ep) return;
+  var x = monitorById(id);
+  if (!x || x.kind !== "opportunity") return;
+  var mo = (S.ep.monitor && S.ep.monitor[id]) || null;
+  var data = { updatedAt: FB.mod.fs.serverTimestamp() };
+  if (mo && mo.outcome) { data.status = mo.outcome; data.outcomeOn = mo.outcomeOn || ""; data.outcomeISO = mo.outcomeISO || ""; }
+  else { data.status = "open"; data.outcomeOn = ""; data.outcomeISO = ""; }
+  try {
+    await FB.mod.fs.updateDoc(FB.mod.fs.doc(FB.db, "opportunities", cloudDocIdForItem(S.ep, x)), data);
+    logLine("☁️ Track record updated in the cloud.", "ok");
+  } catch (e) {
+    logLine("☁️ Cloud outcome sync failed: " + cloudErrMsg(e), "err");
+  }
+}
+async function cloudInit() {
+  try {
+    var appMod = await import("https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js");
+    var authMod = await import("https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js");
+    var fsMod = await import("https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js");
+    FB.mod = { auth: authMod, fs: fsMod };
+    FB.app = appMod.initializeApp(FIREBASE_CONFIG);
+    FB.db = fsMod.getFirestore(FB.app, FIREBASE_CONFIG.firestoreDatabaseId);
+    FB.auth = authMod.getAuth(FB.app);
+    try { FB.savedEps = JSON.parse(lsGet(LSCLOUD) || "{}") || {}; } catch (e) { FB.savedEps = {}; }
+    FB.ready = true; FB.err = ""; FB.authErr = "";
+    authMod.onAuthStateChanged(FB.auth, function (u) {
+      S.cloudUser = u ? { uid: u.uid, name: u.displayName || String(u.email || "analyst").split("@")[0], email: u.email || "" } : null;
+      if (!S.cloudUser) S.cloudEps = null;
+      renderCloudPanel();
+    });
+  } catch (e) {
+    FB.ready = false;
+    FB.err = "Firebase could not be reached — cloud sync is off, everything else keeps working locally.";
+  }
+  renderCloudPanel();
+}
+async function cloudSignIn() {
+  if (!FB.ready) return;
+  FB.authErr = "";
+  try { await FB.mod.auth.signInWithPopup(FB.auth, new FB.mod.auth.GoogleAuthProvider()); }
+  catch (e) { FB.authErr = "Sign-in failed: " + cloudErrMsg(e); renderCloudPanel(); }
+}
+async function cloudSignOut() {
+  if (!FB.ready) return;
+  try { await FB.mod.auth.signOut(FB.auth); } catch (e) {}
+  S.cloudUser = null; S.cloudEps = null; renderCloudPanel();
+}
+async function cloudLoadLibrary() {
+  if (!cloudEnabled()) return;
+  S.cloudLoading = true; S.cloudEps = null; FB.panelErr = ""; renderCloudPanel();
+  try {
+    var fs = FB.mod.fs;
+    var q = fs.query(fs.collection(FB.db, "episodes"), fs.where("userId", "==", S.cloudUser.uid));
+    var snap = await fs.getDocs(q);
+    S.cloudEps = snap.docs.map(function (d) {
+      var v = d.data() || {};
+      return { id: d.id, title: v.title || "Episode", created: v.createdLabel || "", when: (v.createdAt && v.createdAt.seconds) ? v.createdAt.seconds : 0 };
+    }).sort(function (a, b) { return b.when - a.when; });
+  } catch (e) {
+    FB.panelErr = "Library failed to load: " + cloudErrMsg(e);
+  }
+  S.cloudLoading = false;
+  renderCloudPanel();
+}
+async function cloudLoadEpisode(id) {
+  if (!cloudEnabled()) return;
+  FB.panelErr = "";
+  try {
+    var fs = FB.mod.fs;
+    var snap = await fs.getDoc(fs.doc(FB.db, "episodes", id));
+    var d = (snap && snap.exists && snap.exists()) ? snap.data() : null;
+    if (!d || !d.payload) throw new Error("episode not found in the cloud");
+    var ep = JSON.parse(d.payload);
+    ep.id = id;
+    S.ep = ep;
+    FB.savedEps[id] = 1; lsSet(LSCLOUD, JSON.stringify(FB.savedEps));
+    saveEpisode();
+    openEpisode();
+    showTab("episode");
+    logLine("☁️ Episode loaded from your cloud library.", "ok");
+  } catch (e) {
+    FB.panelErr = "Load failed: " + cloudErrMsg(e);
+  }
+  renderCloudPanel();
+}
+function renderCloudPanel() {
+  var p = el("cloud-panel");
+  if (!p) return;
+  var html = "";
+  if (!FB.ready) {
+    html = '<div class="hint">' + esc(FB.err || "Connecting to Firebase\u2026") + "</div>";
+    if (FB.err) html += '<div class="row" style="margin-top:8px"><button class="btn small" onclick="cloudInit()">↻ Retry connection</button></div>';
+  } else if (!S.cloudUser) {
+    html = '<div class="hint">Sign in with Google to sync episodes, board opportunities and topics — with their track record — to your Firebase database.</div>' +
+      (FB.authErr ? '<div class="errbox" style="margin-top:8px">' + esc(FB.authErr) + "</div>" : "") +
+      '<div class="row" style="margin-top:10px"><button class="btn" onclick="cloudSignIn()">🔐 Sign in with Google</button></div>';
+  } else {
+    html = '<div class="chips"><span class="chip acc">☁️ ' + esc(S.cloudUser.name || S.cloudUser.email || "signed in") + '</span></div>' +
+      '<div class="row" style="margin-top:10px">' +
+      '<button class="btn small" onclick="cloudSaveEpisode()">☁️ Sync current episode</button>' +
+      '<button class="btn small" onclick="cloudLoadLibrary()">Load cloud library</button>' +
+      '<button class="btn small" onclick="cloudSignOut()">Sign out</button></div>';
+    if (S.cloudLoading) html += '<div class="hint" style="margin-top:8px">Loading your cloud library…</div>';
+    else if (S.cloudEps && S.cloudEps.length) {
+      html += '<div class="hint" style="margin-top:10px">Cloud library — press Load to open an episode on this device:</div>';
+      S.cloudEps.forEach(function (e) {
+        html += '<div class="indrow"><span class="lbl">' + esc(e.title) + '</span><span class="val">' + esc(e.created || "") +
+          ' <button class="btn small" onclick="cloudLoadEpisode(\'' + esc(e.id) + '\')">Load</button></span></div>';
+      });
+    } else if (S.cloudEps) {
+      html += '<div class="hint" style="margin-top:8px">No episodes in your cloud library yet — produce one and it syncs automatically.</div>';
+    }
+    if (FB.panelErr) html += '<div class="errbox" style="margin-top:8px">' + esc(FB.panelErr) + "</div>";
+  }
+  p.innerHTML = html;
+}
+
 /* ============================== device mode ============================== */
 /* phone vs desktop detection — a vote across three signals: viewport width against the app's
    760px breakpoint, touch-first input, and a mobile user-agent. No single signal is trusted
@@ -2513,7 +2816,7 @@ function monitorById(id) {
 }
 function monitorAssessment(id) { var ep = S.ep; return (ep && ep.monitor && ep.monitor[id]) || null; }
 function monitorStatusInfo(a) {
-  if (!a) return null;
+  if (!a || !a.status) return null;
   if (a.status === "VALID") return { cls: "valid", mark: "✓", label: "STILL VALID" };
   if (a.status === "CHANGE") return { cls: "change", mark: "✖", label: "SHOULD CHANGE" };
   return { cls: "evolved", mark: "↻", label: "EVOLVED" };
@@ -2648,7 +2951,7 @@ function renderMonitorItem(x) {
     html += '<div class="hint" style="margin:10px 0 0">The Monitor Analyst is searching live sources for what has changed since ' + esc(ep.createdLabel || ep.created || "the episode") + "…</div>";
   } else if (S.monitorErr) {
     html += '<div class="errbox">' + esc(S.monitorErr) + "</div>";
-  } else if (!a) {
+  } else if (!info) {
     html += '<div class="hint" style="margin:10px 0 0">Not re-checked yet. The Monitor Analyst searches the live web and rules whether this ' +
       (x.kind === "opportunity" ? "call" : "point") + " still holds, should change, or has evolved — with a severity grade on the change impact.</div>";
   } else {
@@ -2670,6 +2973,22 @@ function renderMonitorItem(x) {
     html += '<div class="by" style="margin-top:8px">Re-checked ' + esc(a.checkedOn || "") + "</div>";
   }
   html += "</div>";
+  /* track record: resolve the call as won / lost / void — synced to the cloud when signed in */
+  if (x.kind === "opportunity") {
+    var oc = (a && a.outcome) ? a.outcome : "";
+    html += '<div class="moncheck"><div class="monhead2"><h3>🏆 Track record</h3><span class="chips">' +
+      (oc ? '<span class="chip acc">' + esc(oc.toUpperCase()) + (a.outcomeOn ? " · " + esc(a.outcomeOn) : "") + '</span>'
+          : '<span class="chip">Call open — not yet resolved</span>') + "</span></div>" +
+      '<div class="row" style="margin-top:10px">';
+    if (oc) html += '<button class="btn small" onclick="markOutcome(\'' + esc(x.id) + '\',\'reopen\')">↩ Reopen call</button>';
+    else html += '<button class="btn small" onclick="markOutcome(\'' + esc(x.id) + '\',\'won\')">✅ Won</button>' +
+      '<button class="btn small" onclick="markOutcome(\'' + esc(x.id) + '\',\'lost\')">❌ Lost</button>' +
+      '<button class="btn small" onclick="markOutcome(\'' + esc(x.id) + '\',\'void\')">⊘ Void</button>';
+    html += "</div>" +
+      (cloudEnabled() ? '<div class="hint" style="margin:8px 0 0">Outcomes sync to your cloud track record.</div>'
+                      : '<div class="hint" style="margin:8px 0 0">Outcomes are saved with the episode — sign in under Settings → ☁️ Cloud sync to keep them in your cloud track record.</div>') +
+      "</div>";
+  }
   el("monmain").innerHTML = html;
 }
 
@@ -2785,11 +3104,31 @@ async function monitorRecheck(id) {
     mergeSources(ep, [], r.cites, "Monitor Analyst");
     renumberSources(ep);
     saveEpisode();
+    if (cloudEnabled()) cloudRecordCheck(id, a);
   } catch (e) {
     S.monitorErr = "Re-check failed: " + (e && e.message ? e.message : String(e));
   }
   S.monitorRun = "";
   renderMonitor();
+}
+
+/* track record: resolve an opportunity as won / lost / void (or reopen it) — saved with the
+   episode locally and synced to the cloud opportunity doc when signed in */
+function markOutcome(id, outcome) {
+  var ep = S.ep;
+  if (!ep) return;
+  if (!ep.monitor) ep.monitor = {};
+  var m = ep.monitor[id] || (ep.monitor[id] = {});
+  if (outcome === "reopen") {
+    delete m.outcome; delete m.outcomeOn; delete m.outcomeISO;
+  } else {
+    m.outcome = outcome;
+    m.outcomeOn = todayHuman();
+    m.outcomeISO = todayISO();
+  }
+  saveEpisode();
+  renderMonitor();
+  if (cloudEnabled()) cloudSetOutcome(id);
 }
 
 /* ============================== episode rendering ============================== */
@@ -3832,6 +4171,7 @@ function init() {
     openEpisode();
     showTab("studio");
   }
+  cloudInit();
   try {
     if (typeof window !== "undefined" && window.frameElement !== undefined) {
       el("previewnote").style.display = "block";
