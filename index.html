@@ -538,7 +538,18 @@ body.mode-desk #srctable table{min-width:0}
   <!-- ============ ANALYSTS ============ -->
   <section class="view" id="view-analysts">
     <div class="card">
-      <div class="notice" id="analysts-empty" style="display:none;margin-top:12px">No analyst board yet — press <b>Produce today's call</b> in the <b>Settings</b> tab to run the Trading Analyst Pipeline. Once produced, the board reloads automatically with the episode.</div>
+      <div class="row" id="analysts-ctl" style="margin-top:14px">
+        <button class="btn" id="analysts-call" onclick="produceAnalystsCall()">📈 Analysts Call</button>
+        <input type="text" id="analysts-opp" placeholder="enter opportunity" style="flex:1;min-width:160px" onkeydown="if(event.key==='Enter')analyzeOpportunity()">
+        <select id="analysts-cat" style="width:auto">
+          <option value="STOCKS">STOCKS</option>
+          <option value="PREDICTIONS">PREDICTIONS</option>
+          <option value="BONDS">BONDS</option>
+          <option value="OTHER">OTHER</option>
+        </select>
+        <button class="btn" id="analysts-analyze" onclick="analyzeOpportunity()">🔍 Analyze</button>
+      </div>
+      <div class="notice" id="analysts-empty" style="display:none;margin-top:12px">No analyst board yet — press <b>Analysts Call</b> above (or <b>Produce today's call</b> in the <b>Settings</b> tab) to run today's Trading Analyst Pipeline, or type a single opportunity above, pick its category and press <b>Analyze</b> for a one-idea research, debate and verdict.</div>
 
       <div id="analysts-board" style="display:none">
         <div class="analystlayout">
@@ -678,7 +689,7 @@ body.mode-desk #srctable table{min-width:0}
       </ul>
 
       <h3>The Analysts tab</h3>
-      <p>The <b>📈 Analysts</b> tab runs the <b>Trading Analyst Pipeline</b> for today's date: the <b>Market Scanner</b> pulls the day's analyst calls, the <b>CFA Analyst Desk</b> turns them into trade recommendations (market-native action verbs, ENTER / NO ENTRY decisions, confidence, position size and risk/reward in dollars on a $100k book), the <b>Debating Researchers</b> argue every idea for and against, and the <b>Investment Manager</b> makes her trade choice. The board shows her choice and her point-form <b>Research Report</b> — concise bullets of statistical indicators and precise qualitative statements, with key figures bolded and important dates and trading terms highlighted — press <b>Hear her take</b> to hear it spoken in her voice — tap it again to pause the take (the badge flips to a pause button while it plays), and once more to resume where it left off — plus a tile per CFA recommendation; pressing a tile loads that idea's for/against arguments. Every call panel opens with that idea's <b>exact trade execution details</b> at the top — entry decision, position size, risk/reward (target, stop, max loss, reward:risk) and confidence. Prices are validated end to end: every idea must carry a <b>freshly verified as-of price</b> (the desk is forbidden from quoting prices from analyst notes, price targets or older research as current), the manager re-verifies each price before deciding, and a built-in <b>price check</b> flags any idea that ships without a verified quote, whose as-of price is dated, or whose target or stop sits on the wrong side of the live price — flagged prices show an amber warning in the call panel and the production log. The Showrunner then turns the meeting into a playable episode, with the MANAGER speaking in her own distinct voice. When your <b>Experts</b> roster holds an expert whose domain fits the day's board, an <b>interactive guest</b> joins the show: the pipeline picks the best-matched roster expert, and in the show's outlook the <b>EXPERT</b> weighs the manager's call in first person — stating their position (agree, disagree, or agree with reservations) with dated, proven reasons drawn from their recorded knowledge and fresh searches, pushing back on the weakest link, and putting one sharp question to the desk, which the manager answers live. The Analysts board shows their verdict as a point right beside her call — <b>AGREE</b>, <b>DISAGREE</b> or <b>AGREE WITH RESERVATIONS</b>, with their stated reason. The guest speaks in their own distinct voice — pick it under <b>Expert guest voice</b> in Settings (Studio voices), or it auto-pairs; with browser voices it gets its own pitch. The <b>Investment Manager keeps asking the CFA desk for more ideas until her book holds 5 recommendations at 80%+ confidence in each of the four daily-scan categories</b> — STOCKS, PREDICTIONS, BONDS, OTHER — so expect several desk rounds before the show is written. Her re-asks are capped by a <b>desk clock</b>, a time limit you can configure in the <b>Settings</b> tab (default 5 minutes): when the clock runs out she produces the show with whatever high-conviction ideas the desk has delivered so far, and the log keeps her running tally per category. Stock ideas show a live daily candle chart (with technicals) sourced from <b>Finviz</b> beside the desk write-up — press a tile to see it, and pressing the chart opens its live data-source page in a new tab (the Finviz quote page for stocks, the FRED series page for bond yields). Every category has its own contextual data panel: bond ideas map to the matching yield series on <b>FRED</b> (the St. Louis Fed) — treasuries, TIPS real yields, high-yield credit spreads; prediction-market ideas link to the live contract on <b>Polymarket</b> and <b>Kalshi</b>; sports and odds ideas link to current lines across books. If an image is blocked (e.g. in an embedded preview), the panel links straight to the source. In the Episode tab, the daily call displays as a <b>live indicator board</b> instead of the raw script: one minimal card per idea, grouped by the four categories, showing the quantitative indicators (entry decision, position size, risk/reward, confidence) and the qualitative ones (the desk's case, the researchers' best for and against arguments). As the manager reads the script and discusses each opportunity, that idea's card lights up and the indicators she is talking about highlight; toggle back to the raw script with the <b>Show script</b> button — the script is always saved with the episode. From research to verdict, the desk agents apply an <b>advanced analytics toolkit</b>: separating prediction from causation, Double/Debiased-ML-style confounder reasoning, causal-forest thinking about which sub-groups an effect concentrates in, agent-based simulation of emergent system behavior (bank runs, market failures, supply-chain disruptions beyond DSGE-style equilibrium), market-design analysis for pricing claims, and data-harmonization checks on messy or digitized series.</p>
+      <p>The <b>📈 Analysts</b> tab runs the <b>Trading Analyst Pipeline</b> for today's date: the <b>Market Scanner</b> pulls the day's analyst calls, the <b>CFA Analyst Desk</b> turns them into trade recommendations (market-native action verbs, ENTER / NO ENTRY decisions, confidence, position size and risk/reward in dollars on a $100k book), the <b>Debating Researchers</b> argue every idea for and against, and the <b>Investment Manager</b> makes her trade choice. The board shows her choice and her point-form <b>Research Report</b> — concise bullets of statistical indicators and precise qualitative statements, with key figures bolded and important dates and trading terms highlighted — press <b>Hear her take</b> to hear it spoken in her voice — tap it again to pause the take (the badge flips to a pause button while it plays), and once more to resume where it left off — plus a tile per CFA recommendation; pressing a tile loads that idea's for/against arguments. At the top of the tab there are two ways to run the desk: <b>Analysts Call</b> produces today's full call, and next to it the <b>Analyze</b> form runs the same research machinery on a single opportunity of your choosing — type the opportunity (e.g. <b>NVDA into earnings</b>), pick its scan category from the dropdown, press <b>Analyze</b>, and the CFA desk researches it, the Debating Researchers argue it for and against, the Investment Manager delivers her verdict (with the same price validation as the daily call), and the result is displayed in the same call-panel format — execution strip, choice badge, research report, expert verdict and chart. Every call panel opens with that idea's <b>exact trade execution details</b> at the top — entry decision, position size, risk/reward (target, stop, max loss, reward:risk) and confidence. Prices are validated end to end: every idea must carry a <b>freshly verified as-of price</b> (the desk is forbidden from quoting prices from analyst notes, price targets or older research as current), the manager re-verifies each price before deciding, and a built-in <b>price check</b> flags any idea that ships without a verified quote, whose as-of price is dated, or whose target or stop sits on the wrong side of the live price — flagged prices show an amber warning in the call panel and the production log. The Showrunner then turns the meeting into a playable episode, with the MANAGER speaking in her own distinct voice. When your <b>Experts</b> roster holds an expert whose domain fits the day's board, an <b>interactive guest</b> joins the show: the pipeline picks the best-matched roster expert, and in the show's outlook the <b>EXPERT</b> weighs the manager's call in first person — stating their position (agree, disagree, or agree with reservations) with dated, proven reasons drawn from their recorded knowledge and fresh searches, pushing back on the weakest link, and putting one sharp question to the desk, which the manager answers live. The Analysts board shows their verdict as a point right beside her call — <b>AGREE</b>, <b>DISAGREE</b> or <b>AGREE WITH RESERVATIONS</b>, with their stated reason. The guest speaks in their own distinct voice — pick it under <b>Expert guest voice</b> in Settings (Studio voices), or it auto-pairs; with browser voices it gets its own pitch. The <b>Investment Manager keeps asking the CFA desk for more ideas until her book holds 5 recommendations at 80%+ confidence in each of the four daily-scan categories</b> — STOCKS, PREDICTIONS, BONDS, OTHER — so expect several desk rounds before the show is written. Her re-asks are capped by a <b>desk clock</b>, a time limit you can configure in the <b>Settings</b> tab (default 5 minutes): when the clock runs out she produces the show with whatever high-conviction ideas the desk has delivered so far, and the log keeps her running tally per category. Stock ideas show a live daily candle chart (with technicals) sourced from <b>Finviz</b> beside the desk write-up — press a tile to see it, and pressing the chart opens its live data-source page in a new tab (the Finviz quote page for stocks, the FRED series page for bond yields). Every category has its own contextual data panel: bond ideas map to the matching yield series on <b>FRED</b> (the St. Louis Fed) — treasuries, TIPS real yields, high-yield credit spreads; prediction-market ideas link to the live contract on <b>Polymarket</b> and <b>Kalshi</b>; sports and odds ideas link to current lines across books. If an image is blocked (e.g. in an embedded preview), the panel links straight to the source. In the Episode tab, the daily call displays as a <b>live indicator board</b> instead of the raw script: one minimal card per idea, grouped by the four categories, showing the quantitative indicators (entry decision, position size, risk/reward, confidence) and the qualitative ones (the desk's case, the researchers' best for and against arguments). As the manager reads the script and discusses each opportunity, that idea's card lights up and the indicators she is talking about highlight; toggle back to the raw script with the <b>Show script</b> button — the script is always saved with the episode. From research to verdict, the desk agents apply an <b>advanced analytics toolkit</b>: separating prediction from causation, Double/Debiased-ML-style confounder reasoning, causal-forest thinking about which sub-groups an effect concentrates in, agent-based simulation of emergent system behavior (bank runs, market failures, supply-chain disruptions beyond DSGE-style equilibrium), market-design analysis for pricing claims, and data-harmonization checks on messy or digitized series.</p>
 
       <h3>The Monitor tab</h3>
       <p>The <b>📊 Monitor</b> tab tracks everything your latest episode claimed. Pick an entry from the <b>watchlist dropdown</b> — the <b>trading opportunities</b> from the analyst board (grouped into their trading categories: STOCKS / PREDICTIONS / BONDS / OTHER) alongside <b>Topics</b>, one entry per episode segment listed by its whole topic name; re-checked entries carry a status marker (✓ / ↻ / ✖). The right panel shows, top to bottom: the <b>verdict or point</b> (the call with its action badge and thesis tag, or the segment's point), the <b>quantitative proof</b> (entry, size, risk/reward, confidence — or the dated sources behind a topic), the <b>qualitative proof</b> (the case, for/against arguments, or the segment script), and a <b>still-valid check</b>. Press <b>Re-check with live search</b> and the <b>Monitor Analyst</b> agent searches the live web for what has changed since the episode was produced, then rules the item <b>STILL VALID</b>, <b>SHOULD CHANGE</b>, or <b>EVOLVED</b> — with a severity grade on the change impact: <b>HIGH</b> means the direction flipped (a buy is now a sell — requires immediate attention), <b>MEDIUM</b> means the call stands but entry, size or timing must change, <b>LOW</b> means minor nuance. The Monitor Analyst weighs the evidence with the same <b>advanced analytics toolkit</b> as the desk — causal vs. predictive claims, heterogeneous effects, emergent-behavior simulation, and data-quality checks — before ruling. Re-checks are saved with the episode, and any sources the Monitor Analyst finds are added to the Sources &amp; Dates registry. Producing a new episode starts a fresh watchlist.</p>
@@ -1812,6 +1823,25 @@ function expertPromptForCall(ex, d) {
     sourcePromptSuffix();
 }
 
+/* the CFA desk’s house style — shared by the daily pipeline and the single-opportunity analysis */
+function analystHouseStyle() {
+  return "House style — follow it exactly:\n" +
+  "- CATEGORIES: every idea belongs to one of the four scan categories — STOCKS (equities: BUY / SELL / LONG / SHORT), PREDICTIONS (prediction-market event contracts: BET YES / BET NO), BONDS (rates, treasuries, credit), OTHER (sports odds: BACK / FADE — and anything else tradeable).\n" +
+  "- ANALYST CALL: use the market-native verb — BUY / SELL / LONG / SHORT for stocks and assets, BET YES / BET NO for prediction markets, BACK / FADE for sports odds. Never phrase a prediction-market position as buying/selling a stock.\n" +
+  "- ENTRY DECISION: ENTER, NO ENTRY, or CONDITIONAL with the exact trigger that flips it to ENTER. Never recommend entering where the market price already exceeds the conviction-implied edge.\n" +
+  "- AS-OF PRICE: every idea states its live market price as \u201cAS-OF PRICE: <price> (as of <date>)\u201d — verified with a fresh web search. Never carry a price from an analyst note, a price target, an earnings report, an older article or a previous desk round as the current price; if the live quote cannot be confirmed, write \u201cAS-OF PRICE: UNCONFIRMED\u201d and say why.\n" +
+  "- PRICE SANITY: the target must sit on the profit side of the as-of price (above it for BUY / LONG / BACK / BET YES, below it for SELL / SHORT / FADE / BET NO) and the stop on the loss side of it; if the market has already moved past the entry trigger or the target, adjust the ENTRY DECISION instead of quoting a stale price.\n" +
+  "- CONFIDENCE: always a number, NN%.\n" +
+  "- POSITION SIZE: as a percentage and in dollars on a $100,000 portfolio — binary/event bets risk 1-2%, quarter-Kelly sizing caps at 5% of the book, directional trades risk 1-2% of capital.\n" +
+  "- RISK/REWARD: in dollars — target, stop, max loss, and reward:risk.\n" +
+  "- RATIONALE: 2-3 sentences led by the catalyst and its date or deadline; aim for a 10-day horizon. Strict date control — anchor every fact to its date.\n" +
+  "Format each idea exactly as:\n" +
+  "IDEA 1 — CATEGORY: <STOCKS|PREDICTIONS|BONDS|OTHER> — ASSET: <TICKER or contract>\nANALYST CALL: <verb + asset>\nAS-OF PRICE: <current market price — freshly verified with a fresh search, with its date>\nENTRY DECISION: <ENTER / NO ENTRY / CONDITIONAL + trigger>\nCONFIDENCE: <NN%>\nPOSITION SIZE: <x% — $x,xxx on the $100k book>\nRISK/REWARD: <target $ · stop $ · max loss $ · reward:risk 1:x>\nRATIONALE: <catalyst-driven case>\n" +
+  "Verify the calls with your own searches before recommending.\n" +
+  analyticsToolkit() +
+  sourcePromptSuffix();
+}
+
 async function pipelineAnalysts(ep) {
   var dur = DUR[ep.duration] || DUR.medium;
   /* ---- 1 · MARKET SCANNER ---- */
@@ -1825,22 +1855,7 @@ async function pipelineAnalysts(ep) {
     sourcePromptSuffix(),
     "Market Scanner", "scanner");
   /* ---- 2-4 · DESK ↔ MANAGER LOOP — the manager keeps asking the desk for more ideas until her book holds 5 recommendations at 80%+ confidence in EACH of the four scan categories, or the desk clock (default 5 min) runs out ---- */
-  var houseStyle =
-    "House style — follow it exactly:\n" +
-    "- CATEGORIES: every idea belongs to one of the four scan categories — STOCKS (equities: BUY / SELL / LONG / SHORT), PREDICTIONS (prediction-market event contracts: BET YES / BET NO), BONDS (rates, treasuries, credit), OTHER (sports odds: BACK / FADE — and anything else tradeable).\n" +
-    "- ANALYST CALL: use the market-native verb — BUY / SELL / LONG / SHORT for stocks and assets, BET YES / BET NO for prediction markets, BACK / FADE for sports odds. Never phrase a prediction-market position as buying/selling a stock.\n" +
-    "- ENTRY DECISION: ENTER, NO ENTRY, or CONDITIONAL with the exact trigger that flips it to ENTER. Never recommend entering where the market price already exceeds the conviction-implied edge.\n" +
-    "- AS-OF PRICE: every idea states its live market price as \u201cAS-OF PRICE: <price> (as of <date>)\u201d — verified with a fresh web search. Never carry a price from an analyst note, a price target, an earnings report, an older article or a previous desk round as the current price; if the live quote cannot be confirmed, write \u201cAS-OF PRICE: UNCONFIRMED\u201d and say why.\n" +
-    "- PRICE SANITY: the target must sit on the profit side of the as-of price (above it for BUY / LONG / BACK / BET YES, below it for SELL / SHORT / FADE / BET NO) and the stop on the loss side of it; if the market has already moved past the entry trigger or the target, adjust the ENTRY DECISION instead of quoting a stale price.\n" +
-    "- CONFIDENCE: always a number, NN%.\n" +
-    "- POSITION SIZE: as a percentage and in dollars on a $100,000 portfolio — binary/event bets risk 1-2%, quarter-Kelly sizing caps at 5% of the book, directional trades risk 1-2% of capital.\n" +
-    "- RISK/REWARD: in dollars — target, stop, max loss, and reward:risk.\n" +
-    "- RATIONALE: 2-3 sentences led by the catalyst and its date or deadline; aim for a 10-day horizon. Strict date control — anchor every fact to its date.\n" +
-    "Format each idea exactly as:\n" +
-    "IDEA 1 — CATEGORY: <STOCKS|PREDICTIONS|BONDS|OTHER> — ASSET: <TICKER or contract>\nANALYST CALL: <verb + asset>\nAS-OF PRICE: <current market price — freshly verified with a fresh search, with its date>\nENTRY DECISION: <ENTER / NO ENTRY / CONDITIONAL + trigger>\nCONFIDENCE: <NN%>\nPOSITION SIZE: <x% — $x,xxx on the $100k book>\nRISK/REWARD: <target $ · stop $ · max loss $ · reward:risk 1:x>\nRATIONALE: <catalyst-driven case>\n" +
-    "Verify the calls with your own searches before recommending.\n" +
-    analyticsToolkit() +
-    sourcePromptSuffix();
+  var houseStyle = analystHouseStyle();
   var wantPerCat = 5, minConf = 80, maxRounds = 40;
   var deskMins = (ep.deskMins && ep.deskMins > 0) ? ep.deskMins : deskMinsSetting();
   var deadline = Date.now() + deskMins * 60000;
@@ -1977,6 +1992,8 @@ async function produceAnalystsCall() {
     return;
   }
   el("analysts-go").disabled = true;
+  el("analysts-call").disabled = true;
+  el("analysts-analyze").disabled = true;
   var ep = {
     topic: "The daily analysts call — " + todayHuman(), focus: "", duration: S.dur, style: "analysts", deskMins: deskMinsSetting(),
     created: todayISO(), createdLabel: todayHuman(), model: el("model").value, title: "",
@@ -1986,8 +2003,128 @@ async function produceAnalystsCall() {
     await runEpisode(ep);
   } finally {
     el("analysts-go").disabled = false;
+    el("analysts-call").disabled = false;
+    el("analysts-analyze").disabled = false;
   }
   if (!ep.segments || !ep.segments.length) showTab("studio");
+}
+
+/* ============================== single-opportunity analysis ============================== */
+/* Analyze one user-submitted opportunity: desk research → researchers' debate → manager's verdict → optional expert guest.
+   No scanner, no showrunner, no script — the verdict lands on the analyst board in the same call-panel format as the daily call. */
+async function analyzeOpportunity() {
+  if (S.running) return;
+  var key = el("key").value.trim();
+  var opp = el("analysts-opp").value.trim();
+  var cat = el("analysts-cat") ? String(el("analysts-cat").value || "STOCKS") : "STOCKS";
+  if (!key) {
+    showTab("settings");
+    showGenError("Add your Mistral API key in the Settings tab (get one at console.mistral.ai) to analyze an opportunity.");
+    return;
+  }
+  if (!opp) {
+    showGenError("Enter an opportunity to analyze \u2014 e.g. \u201cNVDA into earnings\u201d or \u201cLakers vs Celtics tonight\u201d \u2014 pick its category, then press Analyze.");
+    return;
+  }
+  el("analysts-analyze").disabled = true;
+  el("analysts-call").disabled = true;
+  el("analysts-go").disabled = true;
+  var ep = {
+    topic: "Opportunity analysis \u2014 " + opp, focus: cat + " \u00b7 " + opp, duration: S.dur, style: "analysts", deskMins: deskMinsSetting(),
+    created: todayISO(), createdLabel: todayHuman(), model: el("model").value, title: "",
+    sources: [], timeline: [], dossiers: {}, script: "", segments: [], words: 0, agents: {}
+  };
+  S.ep = ep; S.running = true; S.cancel = false;
+  el("go").disabled = true; el("demo").disabled = true;
+  el("cancel").style.display = "inline-block";
+  el("log").innerHTML = ""; el("log").style.display = "none";
+  el("dossierbox").innerHTML = "";
+  renderAgents(ep);
+  setAgent(ep, "scanner", "off", "skipped \u2014 single-opportunity analysis");
+  setAgent(ep, "showrunner", "off", "skipped \u2014 analysis only, no show script");
+  logLine("Analyzing \u201c<b>" + esc(opp) + "</b>\u201d \u00b7 " + esc(cat) + " \u00b7 desk research \u2192 debate \u2192 verdict \u00b7 today is " + todayHuman(), "hi");
+  try {
+    /* ---- 1 · CFA DESK — research the submitted opportunity and build the trade idea ---- */
+    var cfa = await researchStep(ep, "cfa", "researching the opportunity\u2026",
+      "You are the CFA ANALYST DESK on a trading podcast research team. Today\u2019s date is " + todayHuman() + ".\n" +
+      "A single trading opportunity has been submitted to the desk for analysis.\n\n" +
+      "OPPORTUNITY: \u201c" + opp + "\u201d\nSCAN CATEGORY: " + cat + "\n\n" +
+      "Research it with web search: verify its CURRENT market price fresh, the analyst or market activity behind it, its key catalysts with exact dates, and its risks.\n" +
+      "Then build the desk\u2019s trade recommendation and output it in the exact IDEA format below.\n\n" +
+      analystHouseStyle(),
+      "CFA Analyst Desk", "cfa");
+    /* ---- 2 · RESEARCHERS — argue both sides of this one idea ---- */
+    var res = await researchStep(ep, "researchers", "arguing both sides of the idea\u2026",
+      "You are the DEBATING RESEARCHERS on a trading podcast research team \u2014 two sharp researchers who argue both sides of every idea. Today\u2019s date is " + todayHuman() + ".\n" +
+      "For the single idea in the CFA desk\u2019s analysis below, use web search to build both cases:\n" +
+      "First pin the idea\u2019s CURRENT market price with a fresh search and argue from the live quote \u2014 if the desk\u2019s AS-OF PRICE is stale or missing, correct it in your arguments and say so.\n" +
+      "FOR: 3-4 dated arguments for executing the trade (evidence, catalysts, positioning).\n" +
+      "AGAINST: 3-4 dated arguments for NOT executing the trade (risk, valuation, macro, timing).\n" +
+      "Every argument starts with its date or \u201cas of today\u201d.\n\n" +
+      "Apply the advanced analytics toolkit when building the two cases \u2014 separate predictive from causal arguments, probe heterogeneous effects and confounders, and flag weak or harmonized data.\n\n" +
+      "== CFA DESK ANALYSIS ==\n" + cfa.text + "\n\n" +
+      analyticsToolkit() +
+      sourcePromptSuffix(),
+      "Debating Researchers", "researchers");
+    /* ---- 3 · MANAGER — make the call on this opportunity ---- */
+    var mgr = await researchStep(ep, "manager", "making the call\u2026",
+      "You are the INVESTMENT MANAGER on a trading podcast research team. You run the book. Today\u2019s date is " + todayHuman() + ".\n" +
+      "Read the desk analysis and the researchers\u2019 debate below and decide whether the book trades this opportunity.\n\n" +
+      "== CFA DESK ANALYSIS ==\n" + cfa.text + "\n\n== RESEARCHERS\u2019 DEBATE ==\n" + res.text + "\n\n" +
+      "Output, in this exact order:\n" +
+      "1) MY TRADE CHOICE: the call on this idea with its native verb (BUY / SELL / LONG / SHORT / BET YES / BET NO / BACK / FADE) \u2014 or PASS, with one line saying why.\n" +
+      "2) RESEARCH REPORT: 6-8 crisp bullet points, one per line, each starting with \u201c\u2022 \u201d \u2014 no prose, no transitions, no filler. Every bullet is either a concise statistical indicator (entry level, position size in % and dollars on the $100k book, target/stop, reward:risk, confidence %, key prices, dated catalysts) or one precise qualitative statement (the single-line case for or against executing, or one named risk). Lead with entry, size and risk/reward. In each point, wrap its single most important figure or term in **double asterisks** so it renders bold (e.g. **$180**, **1.5% \u2014 $1,500**, **88%**, **Oct 20 2026**, **1:2**).\n" +
+      "3) THE BOOK: one line \u2014 \u201cASSET (CATEGORY, CONFIDENCE): EXECUTE / WATCH / PASS \u2014 one short reason\u201d.\n" +
+      "4) CALL DATA: a fenced ```json code block \u2014 valid JSON, no comments, exactly ONE entry, for THIS idea only \u2014 carry its ENTRY DECISION, POSITION SIZE and RISK/REWARD from the desk write-up into the entry / size / rr fields \u2014 and re-verify its CURRENT market price with a fresh web search (never carry the desk\u2019s price over unverified): put the live quote you verified into price and the date you verified it (YYYY-MM-DD) into priceAsOf; if you cannot verify a price, write UNCONFIRMED \u2014 exactly this shape:\n" +
+      '{"manager":{"name":"<your full name>","choice":"<your call on the idea, e.g. BUY NVDA \u2014 or PASS>","tag":"<1-2 words describing the call thesis, e.g. Undervalued / Momentum / Contrarian / Overbought>","opinion":"<your RESEARCH REPORT bullets from section 2, one bullet per line, each starting with a bullet marker>"},"calls":[{"analyst":"<analyst or firm>","asset":"<TICKER or contract>","category":"<STOCKS|PREDICTIONS|BONDS|OTHER>","action":"<ANALYST CALL verb>","tag":"<1-2 word thesis descriptor>","confidence":"<NN%>","entry":"<ENTER / NO ENTRY / CONDITIONAL + trigger>","size":"<position size \u2014 % and dollars on the $100k book>","rr":"<target \u00b7 stop \u00b7 max loss \u00b7 reward:risk>","price":"<current market price you verified \u2014 live quote>","priceAsOf":"<YYYY-MM-DD you verified it>","rationale":"<1-2 sentence case>","forArgs":["<dated argument>","<dated argument>"],"againstArgs":["<dated argument>","<dated argument>"]}]}\n' +
+      "\nWeigh the evidence with the advanced analytics toolkit before you decide \u2014 your verdict must survive causal scrutiny, not just fit the tape:\n" +
+      analyticsToolkit() +
+      sourcePromptSuffix(),
+      "Investment Manager", "manager");
+    var data = parseCallData(mgr.text);
+    if (!data || !data.calls || !data.calls.length) throw mkErr("empty", 0, "The Investment Manager returned no usable CALL DATA for this opportunity. Try again or rephrase the opportunity.");
+    data = validateCallPrices(data);
+    var flagged = data.calls.filter(function (c) { return c.priceCheck && c.priceCheck.status === "flagged"; });
+    if (flagged.length) logLine("Price check \u2014 flagged " + flagged.length + " idea" + (flagged.length > 1 ? "s" : "") + ": " + flagged.map(function (c) { return c.asset + " (" + c.priceCheck.issues[0] + ")"; }).join(" \u00b7 "), "err");
+    else logLine("Price check \u2014 the idea carries a verified as-of price.", "ok");
+    ep.analysts = data;
+    renumberSources(ep);
+    /* ---- 4 · EXPERT GUEST — the roster expert best matched to the call weighs in ---- */
+    if (data.manager && (S.experts || []).length) {
+      var expert = pickExpertForCall(data);
+      var exName = (expert.person && expert.person.fullName) || expert.name;
+      var exr = await researchStep(ep, "expert", exName + " is weighing the call\u2026",
+        expertPromptForCall(expert, data), "Expert Analyst", "expert");
+      ep.expertGuest = { id: expert.id, name: expert.name, domain: expert.domain, fullName: exName, verdict: expertVerdict(exr.text) };
+    }
+    S.running = false;
+    el("go").disabled = false; el("demo").disabled = false;
+    el("cancel").style.display = "none";
+    S.analystsSel = 0;
+    renderAnalysts();
+    renderCall(0);
+    showTab("analysts");
+    logLine("\uD83D\uDD0D Analysis ready \u2014 the verdict is on the board.", "ok");
+  } catch (e) {
+    S.running = false;
+    el("go").disabled = false; el("demo").disabled = false;
+    el("cancel").style.display = "none";
+    if (e && e.kind === "cancel") {
+      logLine("Analysis stopped by user.", "err");
+      agentsOf(ep).forEach(function (a) { if (ep.agents[a.id] && ep.agents[a.id].status === "run") setAgent(ep, a.id, "off", "stopped"); });
+    } else if (e && e.kind === "auth") {
+      showGenError("API key rejected (" + (e.message || "") + "). Check your Mistral key and try again.");
+    } else if (e && e.kind === "empty") {
+      showGenError(e.message || "Empty response from the model.");
+    } else {
+      var msg = e && e.message ? e.message : String(e);
+      showGenError("Analysis failed: " + msg, !!(e && (e.kind === "network" || e.kind === "retry")));
+      agentsOf(ep).forEach(function (a) { if (ep.agents[a.id] && ep.agents[a.id].status === "run") setAgent(ep, a.id, "error", "failed"); });
+    }
+  }
+  el("analysts-analyze").disabled = false;
+  el("analysts-call").disabled = false;
+  el("analysts-go").disabled = false;
 }
 
 function callActionClass(a) {
