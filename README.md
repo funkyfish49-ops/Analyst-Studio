@@ -11,6 +11,22 @@ deep-dive (editable priors, re-score) and the score synced to the cloud track re
 as a second opinion beside expected value, not a verdict: entropic scores can be anti-predictive,
 and the app shows the raw number rather than hiding it.
 
+## Economics dashboard & world markets
+
+The **Economics** tab is a live dashboard of economic indicators and world market data built from
+free, keyless official APIs: the US Treasury daily yield curve (3-month through 30-year, with
+1-day moves and curve spreads), BLS labour and inflation releases (unemployment, payrolls,
+participation, earnings, CPI / core CPI / PPI year over year), World Bank global macro (GDP
+growth, inflation, unemployment, GDP per capita, current account across the major economies),
+ECB FX reference rates for the US dollar, and live crypto (BTC, ETH, SOL with 24-hour moves).
+Press **▶ Analysts Call** and a business journalist delivers a spoken one-minute update on the
+most recent business and economic headlines — each headline a named link that opens its source
+website. Global equities and commodities (S&P 500, developed-world and emerging equities, gold,
+silver, oil via ETF quotes) are optional: add a free Alpha Vantage key in the Settings tab.
+No free, browser-callable source exists for live equity/commodity prices (Trading Economics has
+no free API; Yahoo, Stooq and the FRED API all block browser requests), which is why the app uses
+open official sources everywhere else.
+
 ## Run it
 
 Open the GitHub Pages URL below, then add your Mistral API key in the **Settings** tab

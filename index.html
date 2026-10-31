@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- TopicCast Studio · causal-entropic edition (F = T·∇Sτ) + economics & world-markets dashboard · 2026-10-31 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -388,6 +389,29 @@ body.mode-desk #srctable table{min-width:0}
 @keyframes thinkspin{to{transform:rotate(360deg)}}
 @keyframes thinkpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
 @keyframes thinkblink{0%,100%{opacity:.55}50%{opacity:1}}
+/* ---- economics dashboard tiles ---- */
+.ecogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.ecotile{background:var(--panel);border:1px solid var(--line);border-radius:var(--rad);padding:14px 16px;min-width:0}
+.ecotile h3{font-size:13.5px;margin:0 0 2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ecotile .ecoasof{font-size:11px;color:var(--gmut);font-weight:600;margin-bottom:6px}
+.ecorow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.ecorow:last-child{border-bottom:none;padding-bottom:2px}
+.ecolab{color:var(--mut);min-width:0}
+.ecolab a{color:var(--gmut);text-decoration:none}
+.ecolab a:hover{color:var(--acc)}
+.ecoval{font-weight:700;font-size:15px;white-space:nowrap}
+.ecoval .u{color:var(--green);font-size:11.5px;margin-left:5px;font-weight:600}
+.ecoval .d{color:var(--red);font-size:11.5px;margin-left:5px;font-weight:600}
+.ecoval .n{color:var(--mut);font-size:11.5px;margin-left:5px;font-weight:600}
+.ecomut{color:var(--gmut);font-size:11.5px}
+.econ2col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:860px){.econ2col{grid-template-columns:1fr}}
+.econscript{font-size:14px;line-height:1.65;margin:0}
+.econews{list-style:none;padding:0;margin:0}
+.econews li{padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.econews li:last-child{border-bottom:none}
+.econews a{color:var(--txt);text-decoration:underline;text-decoration-color:var(--line2)}
+.econews a:hover{color:var(--acc)}
 </style>
 </head>
 <body>
@@ -403,6 +427,7 @@ body.mode-desk #srctable table{min-width:0}
     <button class="tab" id="tab-episode" onclick="showTab('episode')" disabled>Episode</button>
     <button class="tab" id="tab-analysts" onclick="showTab('analysts')">Analysts</button>
     <button class="tab" id="tab-monitor" onclick="showTab('monitor')">Monitor</button>
+    <button class="tab" id="tab-economics" onclick="showTab('economics')">Economics</button>
     <button class="tab" id="tab-experts" onclick="showTab('experts')">Experts</button>
     <button class="tab" id="tab-sources" onclick="showTab('sources')" disabled>Sources &amp; Dates</button>
     <button class="tab" id="tab-settings" onclick="showTab('settings')">Settings</button>
@@ -629,6 +654,23 @@ body.mode-desk #srctable table{min-width:0}
     </div>
   </section>
 
+  <!-- ============ ECONOMICS ============ -->
+  <section class="view" id="view-economics">
+    <div class="card">
+      <h2>📊 Economics</h2>
+      <div class="hint">A live dashboard of economic indicators and world market data from free official sources — the US Treasury daily yield curve, BLS labour and inflation releases, World Bank global macro, ECB FX reference rates, live crypto, and (with a free optional key) global equities and commodities. Most values link to their source page: press a label to open it.</div>
+      <div class="row">
+        <button class="btn" id="econ-call" onclick="econAnalystsCall()"><span id="econ-call-ic">▶</span> Analysts Call</button>
+        <button class="btn ghost small" id="econ-refresh" onclick="econRefresh()">⟳ Refresh indicators</button>
+        <span class="dim" id="econ-status" style="font-size:12.5px"></span>
+      </div>
+      <div class="errbox" id="econerr" style="display:none"></div>
+      <div class="notice" id="econnote" style="display:none"></div>
+    </div>
+    <div class="ecogrid" id="ecogrid"></div>
+    <div class="card" id="econ-update" style="display:none"></div>
+  </section>
+
   <!-- ============ EXPERTS ============ -->
   <section class="view" id="view-experts">
     <div class="card">
@@ -671,6 +713,11 @@ body.mode-desk #srctable table{min-width:0}
           <option value="mistral-large-latest">mistral-large-latest (best)</option>
         </select>
       </div>
+    </div>
+    <div class="card">
+      <h2>💹 Market data key <span class="dim" style="font-weight:400;font-size:12px">(optional)</span></h2>
+      <div class="hint">A free <b>Alpha Vantage</b> key powers the <b>Global stocks &amp; commodities</b> tile in the <b>Economics</b> tab — S&amp;P 500, world &amp; emerging equities, gold, silver and oil via ETF quotes. Get a free key at <b>alphavantage.co/support/#api-key</b> (25 requests/day; one dashboard refresh uses 6). Stored only in this browser, sent only to <code>www.alphavantage.co</code>.</div>
+      <input type="text" id="avkey" placeholder="Alpha Vantage API key (optional — Economics tab)" style="width:100%;min-width:240px" oninput="saveAVKey()">
     </div>
     <div class="card">
       <h2>⚙️ Settings</h2>
@@ -727,6 +774,8 @@ body.mode-desk #srctable table{min-width:0}
 
       <h3>🌀 Entropic second opinion</h3>
       <p>Every BUY / SELL opportunity the desk produces is auto-scored by an embedded <b>causal-entropic engine</b> (F = T·∇Sτ, after Alex Wissner-Gross's work on intelligence as freedom-seeking): it simulates thousands of ten-day futures from the idea's <b>own board numbers</b> — conviction, reward:risk, position size — and asks whether committing to the trade preserves more of the desk's future freedom of action than staying in cash. The board tiles, indicator cards and Monitor panels show the resulting <b>🌀 F chip</b> (green = the trade keeps more future options open, red = it forecloses them), and every opportunity carries a <b>🌀 Entropic deep-dive</b> — its regime priors, expected value, ∇Sτ and impairment probability, with editable priors you can re-score against your own view. PREDICTIONS and OTHER ideas are proxy-scored as price paths, so treat those F values as rougher. Treat the score as a <b>second opinion</b> beside the desk's expected value, never a replacement for analyst judgment: walk-forward backtests of this engine show entropic scores can be anti-predictive on some structures — which is exactly why the app surfaces the raw F instead of hiding it. When cloud sync is on, each opportunity's entropic score is stored in your cloud track record alongside its outcome, so over time you can see whether high-F calls really did keep more options open.</p>
+
+      <p>The <b>📊 Economics</b> tab is a live dashboard of economic indicators built from <b>free, keyless official APIs</b> (Trading Economics has no free API — its guest access was discontinued — so the app uses open sources instead): the <b>US Treasury</b> daily par yield curve (3-month bill through 30-year bond, plus the 2s–10s and 3M–10Y spreads, updated every business day), <b>BLS</b> labour market and inflation releases (unemployment, nonfarm payrolls, participation, average hourly earnings, CPI, core CPI, PPI — refreshed with each official monthly release), and <b>World Bank</b> GDP growth and inflation across the major economies. The dashboard loads when you open the tab, reloads on <b>⟳ Refresh indicators</b>, and keeps its last successful read cached for offline use — the keyless BLS public access is capped at about 25 dashboard loads per day, so the refresh button is not unlimited. Every value links to its source: press an indicator's label to open the underlying series page (Treasury or FRED for yields, BLS for labour and prices, World Bank for global growth). Press <b>▶ Analysts Call</b> and a <b>business journalist</b> researches the latest business and economic headlines via live web search (needs your Mistral API key) and delivers a spoken <b>one-minute update</b> — press the button again to pause it, and once more to resume — while each headline appears beside the update as a <b>named link</b> that opens the source website in a new tab. The update speaks through your configured voice engine (browser voices or Studio voices), and the last one stays on the tab for replay with <b>Hear again</b>. Beyond the growth tile, the World Bank also feeds a <b>Global macro</b> tile — unemployment, GDP per capita and current-account balance for the same economies — and three market tiles round out the dashboard: <b>💱 FX</b> (ECB daily reference rates for the US dollar via the keyless Frankfurter API), <b>🪙 Crypto</b> (live BTC, ETH and SOL with 24-hour moves from Binance's public data API, CoinGecko as fallback), and <b>🌐 Global stocks &amp; commodities</b> (S&amp;P 500, developed-world and emerging equities, gold, silver and oil via ETF quotes from Alpha Vantage — this one is optional and needs a free Alpha Vantage key in <b>Settings</b>, since no keyless, browser-callable source exists for live equity and commodity prices; Yahoo, Stooq and the FRED API all block browser requests). Market data is informational, not a recommendation.</p>
 
       <h3>1 · The agents</h3>
       <div class="hint" style="margin:6px 0">Each style has its own agent team — the agent cards above the log show exactly who's working on your episode. While a pipeline is creating an episode or an analyst call, a centered animated <b>thinking icon</b> marks the wait — it pulses in the middle of the screen until the item is created, then disappears. The app stays fully usable in the meantime, so you can still press <b>Stop</b> to cancel the run.</div>
@@ -910,12 +959,13 @@ function countWords(s) { var t = String(s || "").trim(); return t ? t.split(/\s+
 
 /* ============================== tabs ============================== */
 function showTab(name) {
-  ["studio", "episode", "analysts", "monitor", "experts", "sources", "settings", "help"].forEach(function (t) {
+  ["studio", "episode", "analysts", "monitor", "economics", "experts", "sources", "settings", "help"].forEach(function (t) {
     el("tab-" + t).classList.toggle("on", t === name);
     el("view-" + t).classList.toggle("on", t === name);
   });
   if (name === "analysts") renderAnalysts();
   if (name === "monitor") renderMonitor();
+  if (name === "economics") econTabShown();
   if (name === "experts") renderExperts();
   if (name === "settings") renderCloudPanel();
   try { window.scrollTo({ top: 0, behavior: "auto" }); } catch (e) { window.scrollTo(0, 0); }
@@ -2746,6 +2796,512 @@ function entropicResetPriors() {
 }
 function entropicCloseDive() { var ov = el("entropic-overlay"); if (ov) ov.style.display = "none"; }
 
+/* ============================== economics dashboard ============================== */
+/* Free, keyless, browser-callable official APIs (Trading Economics has no free API — its guest
+   account was discontinued and the entry plan is paid — so the dashboard uses open sources):
+   - US Treasury daily par yield curve  (home.treasury.gov CSV, CORS-open)  -> rates tile
+   - BLS Public API v2                  (api.bls.gov, CORS-open, keyless, ~25 queries/day) -> labour + prices tiles
+   - World Bank Indicators API v2       (api.worldbank.org, CORS-open, keyless) -> global tile
+   The journalist update (Analysts Call) runs the Mistral Conversations API with web_search. */
+var LSECON = "topiccast-econ", LSECONCALL = "topiccast-econcall", LSAVKEY = "topiccast-avkey";
+var ECON_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+var ECON_TREAS_URL = "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/";
+var ECON_TREAS_PAGE = "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/ViewTypeDetails?type=daily_treasury_yield_curve";
+var ECON_BLS_URL = "https://api.bls.gov/publicAPI/v2/timeseries/data/";
+var ECON_BLS_SERIES = ["LNS14000000", "CES0000000001", "LNS11300000", "CES0500000003", "CUSR0000SA0", "CUSR0000SA0L1E", "WPSFD49201"];
+var ECON_WB_COUNTRIES = [["USA", "United States"], ["CAN", "Canada"], ["EMU", "Euro area"], ["CHN", "China"], ["JPN", "Japan"], ["GBR", "United Kingdom"]];
+var ECON_FX_URL = "https://api.frankfurter.dev/v1/latest?from=USD&to=EUR,CAD,JPY,GBP,CNY";
+var ECON_ECB_PAGE = "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html";
+var ECON_BINANCE_URL = "https://data-api.binance.vision/api/v3/ticker/24hr?symbols=";
+var ECON_GECKO_URL = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true";
+var ECON_AV_URL = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=";
+var ECON_AV_KEYPAGE = "https://www.alphavantage.co/support/#api-key";
+/* global equities & commodities via ETF quotes (Alpha Vantage, optional free key) */
+var ECON_MARKETS = [
+  ["SPY", "US stocks — S&P 500", "https://finance.yahoo.com/quote/SPY"],
+  ["EFA", "World developed stocks", "https://finance.yahoo.com/quote/EFA"],
+  ["EEM", "Emerging-market stocks", "https://finance.yahoo.com/quote/EEM"],
+  ["GLD", "Gold", "https://finance.yahoo.com/quote/GLD"],
+  ["SLV", "Silver", "https://finance.yahoo.com/quote/SLV"],
+  ["USO", "Crude oil", "https://finance.yahoo.com/quote/USO"]
+];
+var ECON_CRYPTO = [
+  ["BTCUSDT", "bitcoin", "Bitcoin", "https://www.coingecko.com/en/coins/bitcoin"],
+  ["ETHUSDT", "ethereum", "Ethereum", "https://www.coingecko.com/en/coins/ethereum"],
+  ["SOLUSDT", "solana", "Solana", "https://www.coingecko.com/en/coins/solana"]
+];
+
+function econFetchOk(r) { if (!r.ok) throw mkErr("http", r.status, "HTTP " + r.status); return r; }
+
+/* ---- US Treasury daily par yield curve (pure parse, testable) ---- */
+function econTreasuryParse(csv) {
+  var lines = String(csv || "").split(/\r?\n/).filter(function (l) { return l.trim(); });
+  if (lines.length < 2) throw mkErr("parse", 0, "empty Treasury CSV");
+  var head = lines[0].split(",").map(function (h) { return h.replace(/^"|"$/g, "").trim(); });
+  var idx = {};
+  head.forEach(function (h, i) { idx[h] = i; });
+  if (idx["Date"] == null || idx["10 Yr"] == null) throw mkErr("parse", 0, "unexpected Treasury CSV columns");
+  var rows = lines.slice(1).map(function (l) { return l.split(","); });
+  /* Treasury CSV rows are newest-first: the first valid rows are the latest sessions. */
+  var last = null, prev = null;
+  for (var i = 0; i < rows.length; i++) {
+    var dt = (rows[i][idx["Date"]] || "").trim();
+    var v10 = (rows[i][idx["10 Yr"]] || "").trim();
+    if (!dt || !/^\d/.test(v10)) continue;
+    if (!last) { last = rows[i]; continue; }
+    prev = rows[i];
+    break;
+  }
+  if (!last) throw mkErr("parse", 0, "no Treasury rows");
+  function num(row, col) { var i = idx[col]; if (i == null || !row[i]) return null; var f = parseFloat(row[i].trim()); return isNaN(f) ? null : f; }
+  var cols = {}, chg = {};
+  ["3 Mo", "2 Yr", "10 Yr", "30 Yr"].forEach(function (c) {
+    cols[c] = num(last, c);
+    chg[c] = (prev && num(last, c) != null && num(prev, c) != null) ? +(num(last, c) - num(prev, c)).toFixed(2) : null;
+  });
+  return { asof: (last[idx["Date"]] || "").trim(), cols: cols, chg: chg };
+}
+function econTreasury() {
+  var y = new Date().getFullYear();
+  var url = ECON_TREAS_URL + y + "/all?type=daily_treasury_yield_curve&field_tdr_date_value=" + y + "&page&_format=csv";
+  return fetch(url).then(function (r) { return econFetchOk(r).text(); }).then(econTreasuryParse);
+}
+
+/* ---- BLS labour + prices (pure compute, testable) ---- */
+function econBLSCompute(d) {
+  var by = {};
+  ((d && d.Results && d.Results.series) || []).forEach(function (s) {
+    var pts = (s.data || []).filter(function (p) { return /^M(0[1-9]|1[0-2])$/.test(p.period); })
+      .map(function (p) { return { y: +p.year, m: +p.period.slice(1), v: parseFloat(p.value) }; })
+      .filter(function (p) { return !isNaN(p.v); })
+      .sort(function (a, b) { return (a.y - b.y) || (a.m - b.m); });
+    by[s.seriesID] = pts;
+  });
+  if (!by.LNS14000000 || !by.LNS14000000.length) throw mkErr("parse", 0, "no BLS data returned");
+  function latest(id) { var a = by[id] || []; return a.length ? a[a.length - 1] : null; }
+  function prevPt(id) { var a = by[id] || []; return a.length > 1 ? a[a.length - 2] : null; }
+  function yoy(id) {
+    var a = by[id] || [];
+    if (!a.length) return null;
+    var l = a[a.length - 1];
+    for (var i = a.length - 1; i >= 0; i--) {
+      if (a[i].y === l.y - 1 && a[i].m === l.m) return +(100 * (l.v - a[i].v) / a[i].v).toFixed(1);
+    }
+    return null;
+  }
+  var u = latest("LNS14000000"), emp = latest("CES0000000001"), empP = prevPt("CES0000000001");
+  var par = latest("LNS11300000"), earn = latest("CES0500000003");
+  if (!u) throw mkErr("parse", 0, "no BLS unemployment data");
+  return {
+    asof: ECON_MONTHS[u.m - 1] + " " + u.y,
+    unrate: u.v,
+    payrolls: emp ? emp.v : null,
+    payChg: (emp && empP) ? +(emp.v - empP.v).toFixed(0) : null,
+    part: par ? par.v : null,
+    earn: earn ? earn.v : null,
+    earnYoY: yoy("CES0500000003"),
+    cpiYoY: yoy("CUSR0000SA0"),
+    coreYoY: yoy("CUSR0000SA0L1E"),
+    ppiYoY: yoy("WPSFD49201")
+  };
+}
+function econBLS() {
+  var y2 = new Date().getFullYear();
+  return fetch(ECON_BLS_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ seriesid: ECON_BLS_SERIES, startyear: String(y2 - 1), endyear: String(y2) })
+  }).then(function (r) { return econFetchOk(r).json(); }).then(econBLSCompute);
+}
+
+/* ---- World Bank global growth + inflation ---- */
+function econWBLatest(payload) {
+  var out = {};
+  ((payload && payload[1]) || []).forEach(function (o) {
+    if (o.value == null) return;
+    var k = o.countryiso3code || (o.country && o.country.id) || "";
+    if (!out[k] || +o.date > out[k].y) out[k] = { y: +o.date, v: o.value };
+  });
+  return out;
+}
+function econWorldBank() {
+  var cs = ECON_WB_COUNTRIES.map(function (c) { return c[0]; }).join(";");
+  function q(ind) {
+    return fetch("https://api.worldbank.org/v2/country/" + cs + "/indicator/" + ind + "?format=json&date=2022:2026&per_page=120")
+      .then(function (r) { return econFetchOk(r).json(); });
+  }
+  return Promise.all([
+    q("NY.GDP.MKTP.KD.ZG"), q("FP.CPI.TOTL.ZG"),
+    q("SL.UEM.TOTL.ZS"), q("NY.GDP.PCAP.CD"), q("BN.CAB.XOKA.GD.ZS")
+  ]).then(function (res) {
+    return { gdp: econWBLatest(res[0]), cpi: econWBLatest(res[1]), unem: econWBLatest(res[2]), pcap: econWBLatest(res[3]), ca: econWBLatest(res[4]) };
+  });
+}
+
+/* ---- FX: ECB daily reference rates via Frankfurter (keyless) ---- */
+function econFX() {
+  return fetch(ECON_FX_URL).then(function (r) { return econFetchOk(r).json(); }).then(function (d) {
+    if (!d || !d.rates || !Object.keys(d.rates).length) throw mkErr("parse", 0, "no FX rates returned");
+    return { asof: d.date || "", rates: d.rates };
+  });
+}
+
+/* ---- crypto: Binance public market data (pure compute, testable) ---- */
+function econBinanceCompute(list) {
+  var by = {};
+  (list || []).forEach(function (t) { by[t.symbol] = t; });
+  var rows = [];
+  ECON_CRYPTO.forEach(function (c) {
+    var t = by[c[0]];
+    if (!t) return;
+    rows.push({ key: c[0], name: c[2], price: parseFloat(t.lastPrice), chg: parseFloat(t.priceChangePercent) });
+  });
+  if (!rows.length) throw mkErr("parse", 0, "no crypto data returned");
+  return { asof: "live · 24h change", rows: rows };
+}
+function econGeckoCompute(d) {
+  var rows = [];
+  ECON_CRYPTO.forEach(function (c) {
+    var g = d && d[c[1]];
+    if (g && g.usd != null) rows.push({ key: c[0], name: c[2], price: g.usd, chg: (g.usd_24h_change != null) ? +g.usd_24h_change.toFixed(2) : null });
+  });
+  if (!rows.length) throw mkErr("parse", 0, "no crypto data returned");
+  return { asof: "live · 24h change", rows: rows };
+}
+function econCrypto() {
+  return fetch(ECON_BINANCE_URL + encodeURIComponent(JSON.stringify(ECON_CRYPTO.map(function (c) { return c[0]; }))))
+    .then(function (r) { return econFetchOk(r).json(); }).then(econBinanceCompute)
+    .catch(function () {
+      return fetch(ECON_GECKO_URL).then(function (r) { return econFetchOk(r).json(); }).then(econGeckoCompute);
+    });
+}
+
+/* ---- global equities & commodities via ETF quotes (Alpha Vantage, optional free key) ---- */
+function saveAVKey() { lsSet(LSAVKEY, el("avkey").value.trim()); }
+function avKey() { return el("avkey") ? el("avkey").value.trim() : ""; }
+function econAVRow(q) { /* pure, testable */
+  var g = q && q["Global Quote"];
+  if (!g) {
+    if (q && (q.Note || q.Information)) throw mkErr("rate", 429, "Alpha Vantage rate limit — try again in a minute");
+    throw mkErr("parse", 0, "unexpected Alpha Vantage response");
+  }
+  var price = parseFloat(g["05. price"]);
+  if (isNaN(price)) throw mkErr("parse", 0, "no quote data returned");
+  var chg = parseFloat(g["10. change percent"]);
+  return { price: price, chg: isNaN(chg) ? null : chg, day: g["07. latest trading day"] || "" };
+}
+async function econMarkets() {
+  var key = avKey();
+  if (!key) return null; /* tile shows the optional-setup hint */
+  var rows = [];
+  for (var i = 0; i < ECON_MARKETS.length; i++) {
+    var m = ECON_MARKETS[i];
+    var d = await fetch(ECON_AV_URL + m[0] + "&apikey=" + encodeURIComponent(key))
+      .then(function (r) { return econFetchOk(r).json(); })
+      .catch(function () { return null; });
+    if (!d) continue;
+    var row = econAVRow(d); /* throws on rate limit */
+    rows.push({ symbol: m[0], name: m[1], price: row.price, chg: row.chg, day: row.day });
+  }
+  if (!rows.length) throw mkErr("http", 0, "Alpha Vantage returned no quotes");
+  return { asof: rows[0].day || "", rows: rows };
+}
+
+/* ---- rendering ---- */
+function econFmt(v, dec, suf) { return (v == null || isNaN(v)) ? "—" : (+v).toFixed(dec) + (suf || ""); }
+function econDelta(v, dec, suf) {
+  if (v == null || isNaN(v)) return "";
+  var cls = v > 0 ? "u" : (v < 0 ? "d" : "n");
+  var arrow = v > 0 ? "▲" : (v < 0 ? "▼" : "=");
+  return '<span class="' + cls + '">' + arrow + " " + (dec != null ? (+v).toFixed(dec) : v) + (suf || "") + "</span>";
+}
+function econRow(label, link, val, extra) {
+  var lab = link
+    ? '<span class="ecolab"><a href="' + esc(link) + '" target="_blank" rel="noopener">' + esc(label) + "</a></span>"
+    : '<span class="ecolab">' + esc(label) + "</span>";
+  return '<div class="ecorow">' + lab + '<b class="ecoval">' + val + (extra || "") + "</b></div>";
+}
+function econTile(icon, title, srcUrl, srcName, asof, rowsHtml) {
+  return '<div class="ecotile"><h3>' + icon + " " + esc(title) + ' <a class="ecomut" href="' + esc(srcUrl) + '" target="_blank" rel="noopener">' + esc(srcName) + " ↗</a></h3>" +
+    (asof ? '<div class="ecoasof">as of ' + esc(asof) + "</div>" : "") + rowsHtml + "</div>";
+}
+function econTileMissing(icon, title) {
+  return '<div class="ecotile"><h3>' + icon + " " + esc(title) + "</h3>" +
+    '<div class="ecoasof" style="margin-top:8px">data unavailable — press <b>⟳ Refresh indicators</b></div></div>';
+}
+function renderEcon() {
+  var g = el("ecogrid");
+  if (!g) return;
+  var d = S.econ || {};
+  var html = "";
+  /* rates tile */
+  if (d.rates && d.rates.cols) {
+    var c = d.rates.cols, ch = d.rates.chg;
+    var spread = (c["2 Yr"] != null && c["10 Yr"] != null) ? +(c["10 Yr"] - c["2 Yr"]).toFixed(2) : null;
+    var spread3m10 = (c["3 Mo"] != null && c["10 Yr"] != null) ? +(c["10 Yr"] - c["3 Mo"]).toFixed(2) : null;
+    var inv = spread != null && spread < 0;
+    var rows =
+      econRow("3-month bill", "https://fred.stlouisfed.org/series/DGS3MO", econFmt(c["3 Mo"], 2, "%"), econDelta(ch["3 Mo"], 2)) +
+      econRow("2-year note", "https://fred.stlouisfed.org/series/DGS2", econFmt(c["2 Yr"], 2, "%"), econDelta(ch["2 Yr"], 2)) +
+      econRow("10-year note", "https://fred.stlouisfed.org/series/DGS10", econFmt(c["10 Yr"], 2, "%"), econDelta(ch["10 Yr"], 2)) +
+      econRow("30-year bond", "https://fred.stlouisfed.org/series/DGS30", econFmt(c["30 Yr"], 2, "%"), econDelta(ch["30 Yr"], 2)) +
+      econRow("2s–10s spread" + (inv ? " · inverted" : ""), "https://fred.stlouisfed.org/series/T10Y2Y", (spread == null ? "—" : (spread > 0 ? "+" : "") + spread.toFixed(2) + "%"), spread != null ? '<span class="' + (inv ? "d" : "u") + '">' + (inv ? "▼" : "▲") + "</span>" : "") +
+      econRow("3M–10Y spread", "https://fred.stlouisfed.org/series/T10Y3M", (spread3m10 == null ? "—" : (spread3m10 > 0 ? "+" : "") + spread3m10.toFixed(2) + "%"));
+    html += econTile("🏛️", "Interest rates & yield curve", ECON_TREAS_PAGE, "US Treasury", d.rates.asof, rows);
+  } else html += econTileMissing("🏛️", "Interest rates & yield curve");
+  /* labour tile */
+  if (d.labour && d.labour.unrate != null) {
+    var L = d.labour;
+    var rowsL =
+      econRow("Unemployment rate", "https://data.bls.gov/timeseries/LNS14000000", econFmt(L.unrate, 1, "%")) +
+      econRow("Nonfarm payrolls", "https://data.bls.gov/timeseries/CES0000000001", L.payrolls == null ? "—" : (L.payrolls * 1000).toLocaleString() + " jobs", L.payChg != null ? econDelta(L.payChg, 0, "k/mo") : "") +
+      econRow("Participation rate", "https://data.bls.gov/timeseries/LNS11300000", econFmt(L.part, 1, "%")) +
+      econRow("Avg hourly earnings", "https://data.bls.gov/timeseries/CES0500000003", L.earn == null ? "—" : "$" + L.earn.toFixed(2), L.earnYoY != null ? '<span class="' + (L.earnYoY >= 0 ? "u" : "d") + '">+' + L.earnYoY.toFixed(1) + "% y/y</span>" : "");
+    html += econTile("🧑‍💼", "Labour market", "https://www.bls.gov/", "BLS", L.asof, rowsL);
+  } else html += econTileMissing("🧑‍💼", "Labour market");
+  /* prices tile */
+  if (d.labour && d.labour.cpiYoY != null) {
+    var P = d.labour;
+    var rowsP =
+      econRow("CPI inflation (y/y)", "https://data.bls.gov/timeseries/CUSR0000SA0", econFmt(P.cpiYoY, 1, "%")) +
+      econRow("Core CPI (y/y)", "https://data.bls.gov/timeseries/CUSR0000SA0L1E", econFmt(P.coreYoY, 1, "%")) +
+      econRow("PPI final demand (y/y)", "https://data.bls.gov/timeseries/WPSFD49201", econFmt(P.ppiYoY, 1, "%"));
+    html += econTile("📈", "Inflation & prices", "https://www.bls.gov/cpi/", "BLS", P.asof, rowsP);
+  } else html += econTileMissing("📈", "Inflation & prices");
+  /* global tile */
+  if (d.global && d.global.gdp) {
+    var G = d.global;
+    var rowsG = ECON_WB_COUNTRIES.map(function (cc) {
+      var iso = cc[0], name = cc[1];
+      var g = G.gdp[iso], p = G.cpi[iso];
+      var sub = p ? " <span class=\"ecomut\">· CPI " + econFmt(p.v, 1, "%") + (p.y ? " " + p.y : "") + "</span>" : "";
+      var link = "https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG?locations=" + iso;
+      var val = g ? (g.v > 0 ? "+" : "") + econFmt(g.v, 1, "%") + (g.y ? " · " + g.y : "") : "—";
+      return econRow(name + sub, link, val);
+    }).join("");
+    html += econTile("🌍", "Global economy — GDP growth", "https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG", "World Bank", "latest annual", rowsG);
+  } else html += econTileMissing("🌍", "Global economy — GDP growth");
+  /* global macro tile (more World Bank series: unemployment · GDP per capita · current account) */
+  if (d.global && d.global.unem) {
+    var M = d.global;
+    var rowsM = ECON_WB_COUNTRIES.map(function (cc) {
+      var iso = cc[0], name = cc[1];
+      var u = M.unem[iso], pc = M.pcap[iso], ca = M.ca[iso];
+      var val = (u ? econFmt(u.v, 1, "%") : "—") + " · " + (pc ? "$" + (pc.v / 1000).toFixed(1) + "k" : "—") + " · " + (ca ? (ca.v > 0 ? "+" : "") + ca.v.toFixed(1) + "%" : "—");
+      return econRow(name, "https://data.worldbank.org/indicator/SL.UEM.TOTL.ZS?locations=" + iso, val);
+    }).join("");
+    html += econTile("🌍", "Global macro — unemp · GDP per capita · current account", "https://data.worldbank.org/", "World Bank", "latest annual", rowsM);
+  } else html += econTileMissing("🌍", "Global macro — unemp · GDP per capita · current account");
+  /* FX tile (ECB reference rates) */
+  if (d.fx && d.fx.rates) {
+    var F = d.fx;
+    var FXR = [["EUR", "Euro"], ["CAD", "Canadian dollar"], ["JPY", "Japanese yen"], ["GBP", "Pound sterling"], ["CNY", "Chinese yuan"]];
+    var rowsF = FXR.map(function (c) {
+      var v = F.rates[c[0]];
+      return econRow("1 USD → " + c[1], null, v == null ? "—" : (+v).toFixed(v < 5 ? 4 : 2));
+    }).join("");
+    html += econTile("💱", "US dollar — FX reference rates", ECON_ECB_PAGE, "ECB · Frankfurter", F.asof, rowsF);
+  } else html += econTileMissing("💱", "US dollar — FX reference rates");
+  /* crypto tile */
+  if (d.crypto && d.crypto.rows) {
+    var C = d.crypto;
+    var rowsC = C.rows.map(function (r) {
+      var meta = ECON_CRYPTO.filter(function (c) { return c[0] === r.key; })[0];
+      return econRow(r.name, meta ? meta[3] : null, "$" + r.price.toLocaleString(), r.chg != null ? econDelta(r.chg, 2, "%") : "");
+    }).join("");
+    html += econTile("🪙", "Crypto", "https://www.coingecko.com/", "Binance / CoinGecko", C.asof, rowsC);
+  } else html += econTileMissing("🪙", "Crypto");
+  /* global equities & commodities (optional Alpha Vantage key) */
+  if (d.markets && d.markets.rows) {
+    var rowsMk = d.markets.rows.map(function (r) {
+      var meta = ECON_MARKETS.filter(function (m) { return m[0] === r.symbol; })[0];
+      return econRow(r.name + " (" + r.symbol + ")", meta ? meta[2] : null, "$" + r.price.toFixed(2),
+        r.chg != null ? '<span class="' + (r.chg >= 0 ? "u" : "d") + '">' + (r.chg >= 0 ? "+" : "") + r.chg.toFixed(2) + "%</span>" : "");
+    }).join("");
+    html += econTile("🌐", "Global stocks & commodities", ECON_AV_KEYPAGE, "Alpha Vantage ETF quotes", d.markets.asof, rowsMk);
+  } else if (!avKey()) {
+    html += '<div class="ecotile"><h3>🌐 Global stocks & commodities</h3>' +
+      '<div class="ecoasof" style="margin-top:8px">optional — add a free <a href="' + ECON_AV_KEYPAGE + '" target="_blank" rel="noopener">Alpha Vantage key</a> in the <b>Settings</b> tab to load S&amp;P 500, world &amp; emerging equities, gold, silver and oil via ETF quotes. One refresh uses 6 of the free tier\'s 25 daily requests.</div></div>';
+  } else html += econTileMissing("🌐", "Global stocks & commodities");
+  g.innerHTML = html;
+  renderEconCall();
+}
+function econDomain(u) { return String(u || "").replace(/^https?:\/\//, "").split("/")[0].replace(/^www\./, ""); }
+function renderEconCall() {
+  var box = el("econ-update");
+  if (!box) return;
+  var call = S.econCall;
+  if (!call || !call.script) { box.style.display = "none"; box.innerHTML = ""; return; }
+  var when = new Date(call.ts || Date.now());
+  box.style.display = "block";
+  box.innerHTML =
+    "<h2>📻 Analysts Call — one-minute business update</h2>" +
+    '<div class="hint">A business journalist scans the wires and delivers the latest business and economic headlines. Press a headline to open the source website.</div>' +
+    '<div class="econ2col">' +
+      "<div>" +
+        '<div class="ecoasof">recorded ' + esc(when.toLocaleString ? when.toLocaleString() : String(when)) + "</div>" +
+        '<p class="econscript">' + esc(call.script) + "</p>" +
+        '<div class="row" style="margin-top:12px"><button class="btn small ghost" onclick="econSpeak()">🔊 Hear again</button></div>' +
+      "</div>" +
+      "<div>" +
+        '<h3 style="font-size:13.5px;margin:0 0 4px">🔗 Headlines — press to open the source</h3>' +
+        '<ul class="econews">' + (call.sources || []).map(function (s) {
+          return "<li><a href=\"" + esc(s.url) + "\" target=\"_blank\" rel=\"noopener\">" + esc(s.title) + "</a>" +
+            (s.date ? ' <span class="ecomut">(' + esc(s.date) + ")</span>" : "") +
+            ' <span class="ecomut">· ' + esc(econDomain(s.url)) + "</span></li>";
+        }).join("") + "</ul>" +
+      "</div>" +
+    "</div>";
+}
+
+/* ---- load + cache ---- */
+function econShowError(msg, isNetwork) {
+  var box = el("econerr");
+  box.style.display = "block";
+  box.innerHTML = esc(msg) +
+    (isNetwork ? "<br><br><b>If you're inside an embedded preview:</b> network calls are blocked there. Open the live site or download this HTML file and open it in your browser. The dashboard also keeps its last successful read for offline use." : "");
+}
+async function econLoad() {
+  var st = el("econ-status"), err = el("econerr"), btn = el("econ-refresh");
+  if (st) st.textContent = "loading indicators…";
+  if (err) err.style.display = "none";
+  if (btn) btn.disabled = true;
+  var res = await Promise.allSettled([econTreasury(), econBLS(), econWorldBank(), econFX(), econCrypto(), econMarkets()]);
+  var econ = { ts: Date.now() }, fails = 0, lastErr = null;
+  if (res[0].status === "fulfilled") econ.rates = res[0].value; else { fails++; lastErr = res[0].reason; }
+  if (res[1].status === "fulfilled") econ.labour = res[1].value; else { fails++; lastErr = res[1].reason; }
+  if (res[2].status === "fulfilled") econ.global = res[2].value; else { fails++; lastErr = res[2].reason; }
+  if (res[3].status === "fulfilled") econ.fx = res[3].value; else { fails++; lastErr = res[3].reason; }
+  if (res[4].status === "fulfilled") econ.crypto = res[4].value; else { fails++; lastErr = res[4].reason; }
+  if (res[5].status === "fulfilled") econ.markets = res[5].value; else if (res[5].reason && res[5].reason.kind !== "parse") { lastErr = res[5].reason; }
+  if (econ.rates || econ.labour || econ.global || econ.fx || econ.crypto) {
+    S.econ = econ;
+    lsSet(LSECON, JSON.stringify(econ));
+    if (st) st.textContent = fails ? ("updated just now · " + fails + " source" + (fails > 1 ? "s" : "") + " unavailable") : "updated just now";
+    renderEcon();
+  } else {
+    if (st) st.textContent = "";
+    var m = (lastErr && lastErr.message) ? lastErr.message : "network error";
+    if (S.econ) {
+      if (st) st.textContent = "showing the last cached read (" + m + ")";
+      renderEcon();
+    }
+    econShowError("Couldn't reach the economic data sources (" + m + ").", true);
+  }
+  if (btn) btn.disabled = false;
+}
+function econRefresh() { stopSpeech(); econLoad(); }
+function econTabShown() {
+  var cached = null;
+  if (!S.econ) {
+    try { cached = JSON.parse(lsGet(LSECON) || "null"); } catch (e) { cached = null; }
+    if (cached) S.econ = cached;
+  }
+  var call = S.econCall;
+  if (!call) {
+    try { call = JSON.parse(lsGet(LSECONCALL) || "null"); } catch (e) { call = null; }
+    if (call) { S.econCall = call; }
+  }
+  renderEcon();
+  if (!S.econ) econLoad();
+}
+
+/* ---- journalist update (Analysts Call) ---- */
+function syncEconCallIcon() {
+  var ic = el("econ-call-ic");
+  if (ic) ic.textContent = (S.econTake === "playing") ? "⏸" : "▶";
+}
+function econStopTake() {
+  S.econTake = "";
+  if (S.econAudio) { try { S.econAudio.pause(); } catch (e) {} S.econAudio = null; }
+  syncEconCallIcon();
+}
+function econSpeak() {
+  var call = S.econCall;
+  if (!call || !call.script) return;
+  stopSpeech();
+  S.econTake = "playing";
+  syncEconCallIcon();
+  var text = speakable(call.script);
+  if (S.engine === "vox" && el("vx-host") && el("vx-host").value) {
+    voxAudioUrl(text, voxVoiceId("HOST")).then(function (url) {
+      if (S.econAudio) { try { S.econAudio.pause(); } catch (e2) {} }
+      S.econAudio = new Audio(url);
+      S.econAudio.onended = function () { S.econAudio = null; S.econTake = ""; syncEconCallIcon(); };
+      S.econAudio.onerror = S.econAudio.onended;
+      S.econAudio.play().catch(function () {});
+    }).catch(function (e) {
+      S.econTake = "";
+      syncEconCallIcon();
+      voxStatus("Couldn't fetch the studio voice (" + ((e && e.message) ? e.message : "network error") + ").");
+    });
+    return;
+  }
+  if (speechOK()) {
+    var u = new SpeechSynthesisUtterance(text);
+    var v = voiceFor("HOST");
+    if (v) u.voice = v;
+    u.rate = parseFloat(el("rate").value) || 1;
+    u.pitch = 0.98;
+    u.onend = function () { S.econTake = ""; syncEconCallIcon(); };
+    u.onerror = u.onend;
+    speechSynthesis.speak(u);
+  }
+}
+async function econAnalystsCall() {
+  /* playing → pause the update; paused → resume it */
+  if (S.econTake === "playing") {
+    if (S.econAudio) { try { S.econAudio.pause(); } catch (e) {} S.econTake = "paused"; syncEconCallIcon(); return; }
+    if (speechOK()) { try { speechSynthesis.pause(); } catch (e) {} }
+    S.econTake = "paused"; syncEconCallIcon(); return;
+  }
+  if (S.econTake === "paused") {
+    if (S.econAudio) { S.econAudio.play().catch(function () {}); S.econTake = "playing"; syncEconCallIcon(); return; }
+    if (speechOK()) { try { speechSynthesis.resume(); } catch (e) {} }
+    S.econTake = "playing"; syncEconCallIcon(); return;
+  }
+  var key = el("key").value.trim();
+  if (!key) {
+    econShowError("Add your Mistral API key in the Settings tab (get one at console.mistral.ai) — the journalist update runs a live web search.", false);
+    return;
+  }
+  var btn = el("econ-call"), st = el("econ-status"), err = el("econerr");
+  stopSpeech();
+  if (err) err.style.display = "none";
+  btn.disabled = true;
+  showThinking("📻", "Journalist scanning the wires…");
+  try {
+    var today = todayISO();
+    var prompt =
+      "You are a veteran business journalist at a financial news desk, recording a one-minute on-air update. Today is " + today + ".\n" +
+      "Search the web for the most recent business and economic headlines (the last 24-48 hours): markets, macro data and central banks, major companies, deals and earnings.\n" +
+      "Then write a SPOKEN update of 150-170 words (about one minute at newsreader pace):\n" +
+      "- Open with a one-line hook, then cover the 5-7 most consequential headlines in descending order of importance.\n" +
+      "- Say concrete numbers, levels, percentages and company names, and attribute each fact to its outlet or agency (e.g. 'per Reuters').\n" +
+      "- Plain speakable sentences only — no headings, no bullet lists, no markdown, and no URLs inside the update itself.\n" +
+      "After the update, list every headline you covered as a source, one line each.\n" +
+      sourcePromptSuffix();
+    var r = await agentTurn(prompt, true);
+    var sources = parseSourcesBlock(r.text);
+    var script = String(r.text || "").split(/\r?\n/).filter(function (l) {
+      var t = l.trim();
+      return t && !/^sources\b/i.test(t) && !/https?:\/\//.test(t);
+    }).join(" ").replace(/\s+/g, " ").trim();
+    if (countWords(script) < 40) throw mkErr("http", 0, "The journalist returned an empty update — try again.");
+    S.econCall = { ts: Date.now(), script: script, sources: sources };
+    lsSet(LSECONCALL, JSON.stringify(S.econCall));
+    if (st) st.textContent = "";
+    renderEconCall();
+    econSpeak();
+  } catch (e) {
+    econShowError("The journalist update failed (" + ((e && e.message) ? e.message : String(e)) + ").", !e || e.kind === "network" || !e.kind);
+  } finally {
+    hideThinking();
+    btn.disabled = false;
+    syncEconCallIcon();
+  }
+}
+
 /* ============================== cloud sync (firebase) ============================== */
 /* Optional Firebase sync. Sign in with Google from Settings and every produced episode is
    saved to Firestore (/episodes, full JSON payload for round-trip loading) together with one
@@ -4057,6 +4613,7 @@ function stopSpeech() {
   VOX.token++;
   if (VOX.cur) { try { VOX.cur.pause(); } catch (e) {} VOX.cur = null; }
   stopTakePlayback();
+  econStopTake();
   if (speechOK()) speechSynthesis.cancel();
   clearHighlight();
   updPlayBtn();
@@ -4425,6 +4982,7 @@ function deleteExpert(id) {
 /* ============================== init ============================== */
 function init() {
   var key = lsGet(LSKEY); if (key) el("key").value = key;
+  var avkey = lsGet(LSAVKEY); if (avkey && el("avkey")) el("avkey").value = avkey;
   var model = lsGet(LSMODEL); if (model) el("model").value = model;
   var deskmins = parseFloat(lsGet(LSDESK)); if (deskmins > 0 && el("analysts-mins")) el("analysts-mins").value = deskmins;
   var savedStyle = lsGet(LSSTYLE); pickStyle(savedStyle && STYLES[savedStyle] ? savedStyle : "story");
