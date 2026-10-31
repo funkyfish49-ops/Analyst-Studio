@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- TopicCast Studio · causal-entropic edition (F = T·∇Sτ) + economics & world-markets dashboard · 2026-10-31 -->
+<!-- TopicCast Studio · causal-entropic edition (F = T·∇Sτ) + economics dashboard · content-sized tiles · 2026-10-31 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -390,7 +390,7 @@ body.mode-desk #srctable table{min-width:0}
 @keyframes thinkpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
 @keyframes thinkblink{0%,100%{opacity:.55}50%{opacity:1}}
 /* ---- economics dashboard tiles ---- */
-.ecogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.ecogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;align-items:start}
 .ecotile{background:var(--panel);border:1px solid var(--line);border-radius:var(--rad);padding:14px 16px;min-width:0}
 .ecotile h3{font-size:13.5px;margin:0 0 2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .ecotile .ecoasof{font-size:11px;color:var(--gmut);font-weight:600;margin-bottom:6px}
@@ -3025,10 +3025,7 @@ function econTile(icon, title, srcUrl, srcName, asof, rowsHtml) {
   return '<div class="ecotile"><h3>' + icon + " " + esc(title) + ' <a class="ecomut" href="' + esc(srcUrl) + '" target="_blank" rel="noopener">' + esc(srcName) + " ↗</a></h3>" +
     (asof ? '<div class="ecoasof">as of ' + esc(asof) + "</div>" : "") + rowsHtml + "</div>";
 }
-function econTileMissing(icon, title) {
-  return '<div class="ecotile"><h3>' + icon + " " + esc(title) + "</h3>" +
-    '<div class="ecoasof" style="margin-top:8px">data unavailable — press <b>⟳ Refresh indicators</b></div></div>';
-}
+/* Tiles are only rendered for data that actually loaded — no placeholder tiles. */
 function renderEcon() {
   var g = el("ecogrid");
   if (!g) return;
@@ -3048,7 +3045,7 @@ function renderEcon() {
       econRow("2s–10s spread" + (inv ? " · inverted" : ""), "https://fred.stlouisfed.org/series/T10Y2Y", (spread == null ? "—" : (spread > 0 ? "+" : "") + spread.toFixed(2) + "%"), spread != null ? '<span class="' + (inv ? "d" : "u") + '">' + (inv ? "▼" : "▲") + "</span>" : "") +
       econRow("3M–10Y spread", "https://fred.stlouisfed.org/series/T10Y3M", (spread3m10 == null ? "—" : (spread3m10 > 0 ? "+" : "") + spread3m10.toFixed(2) + "%"));
     html += econTile("🏛️", "Interest rates & yield curve", ECON_TREAS_PAGE, "US Treasury", d.rates.asof, rows);
-  } else html += econTileMissing("🏛️", "Interest rates & yield curve");
+  }
   /* labour tile */
   if (d.labour && d.labour.unrate != null) {
     var L = d.labour;
@@ -3058,7 +3055,7 @@ function renderEcon() {
       econRow("Participation rate", "https://data.bls.gov/timeseries/LNS11300000", econFmt(L.part, 1, "%")) +
       econRow("Avg hourly earnings", "https://data.bls.gov/timeseries/CES0500000003", L.earn == null ? "—" : "$" + L.earn.toFixed(2), L.earnYoY != null ? '<span class="' + (L.earnYoY >= 0 ? "u" : "d") + '">+' + L.earnYoY.toFixed(1) + "% y/y</span>" : "");
     html += econTile("🧑‍💼", "Labour market", "https://www.bls.gov/", "BLS", L.asof, rowsL);
-  } else html += econTileMissing("🧑‍💼", "Labour market");
+  }
   /* prices tile */
   if (d.labour && d.labour.cpiYoY != null) {
     var P = d.labour;
@@ -3067,7 +3064,7 @@ function renderEcon() {
       econRow("Core CPI (y/y)", "https://data.bls.gov/timeseries/CUSR0000SA0L1E", econFmt(P.coreYoY, 1, "%")) +
       econRow("PPI final demand (y/y)", "https://data.bls.gov/timeseries/WPSFD49201", econFmt(P.ppiYoY, 1, "%"));
     html += econTile("📈", "Inflation & prices", "https://www.bls.gov/cpi/", "BLS", P.asof, rowsP);
-  } else html += econTileMissing("📈", "Inflation & prices");
+  }
   /* global tile */
   if (d.global && d.global.gdp) {
     var G = d.global;
@@ -3080,7 +3077,7 @@ function renderEcon() {
       return econRow(name + sub, link, val);
     }).join("");
     html += econTile("🌍", "Global economy — GDP growth", "https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG", "World Bank", "latest annual", rowsG);
-  } else html += econTileMissing("🌍", "Global economy — GDP growth");
+  }
   /* global macro tile (more World Bank series: unemployment · GDP per capita · current account) */
   if (d.global && d.global.unem) {
     var M = d.global;
@@ -3091,7 +3088,7 @@ function renderEcon() {
       return econRow(name, "https://data.worldbank.org/indicator/SL.UEM.TOTL.ZS?locations=" + iso, val);
     }).join("");
     html += econTile("🌍", "Global macro — unemp · GDP per capita · current account", "https://data.worldbank.org/", "World Bank", "latest annual", rowsM);
-  } else html += econTileMissing("🌍", "Global macro — unemp · GDP per capita · current account");
+  }
   /* FX tile (ECB reference rates) */
   if (d.fx && d.fx.rates) {
     var F = d.fx;
@@ -3101,7 +3098,7 @@ function renderEcon() {
       return econRow("1 USD → " + c[1], null, v == null ? "—" : (+v).toFixed(v < 5 ? 4 : 2));
     }).join("");
     html += econTile("💱", "US dollar — FX reference rates", ECON_ECB_PAGE, "ECB · Frankfurter", F.asof, rowsF);
-  } else html += econTileMissing("💱", "US dollar — FX reference rates");
+  }
   /* crypto tile */
   if (d.crypto && d.crypto.rows) {
     var C = d.crypto;
@@ -3110,7 +3107,7 @@ function renderEcon() {
       return econRow(r.name, meta ? meta[3] : null, "$" + r.price.toLocaleString(), r.chg != null ? econDelta(r.chg, 2, "%") : "");
     }).join("");
     html += econTile("🪙", "Crypto", "https://www.coingecko.com/", "Binance / CoinGecko", C.asof, rowsC);
-  } else html += econTileMissing("🪙", "Crypto");
+  }
   /* global equities & commodities (optional Alpha Vantage key) */
   if (d.markets && d.markets.rows) {
     var rowsMk = d.markets.rows.map(function (r) {
@@ -3119,11 +3116,23 @@ function renderEcon() {
         r.chg != null ? '<span class="' + (r.chg >= 0 ? "u" : "d") + '">' + (r.chg >= 0 ? "+" : "") + r.chg.toFixed(2) + "%</span>" : "");
     }).join("");
     html += econTile("🌐", "Global stocks & commodities", ECON_AV_KEYPAGE, "Alpha Vantage ETF quotes", d.markets.asof, rowsMk);
-  } else if (!avKey()) {
-    html += '<div class="ecotile"><h3>🌐 Global stocks & commodities</h3>' +
-      '<div class="ecoasof" style="margin-top:8px">optional — add a free <a href="' + ECON_AV_KEYPAGE + '" target="_blank" rel="noopener">Alpha Vantage key</a> in the <b>Settings</b> tab to load S&amp;P 500, world &amp; emerging equities, gold, silver and oil via ETF quotes. One refresh uses 6 of the free tier\'s 25 daily requests.</div></div>';
-  } else html += econTileMissing("🌐", "Global stocks & commodities");
+  }
   g.innerHTML = html;
+  /* no placeholder tiles — the optional markets tile gets a one-line note instead */
+  var note = el("econnote");
+  if (note) {
+    var hasData = !!(d.rates || d.labour || d.global || d.fx || d.crypto);
+    var msg = "";
+    if (hasData && !d.markets && !avKey()) {
+      msg = '💡 Optional: add a free <a href="' + ECON_AV_KEYPAGE + '" target="_blank" rel="noopener">Alpha Vantage key</a> in the <b>Settings</b> tab to add the 🌐 global stocks &amp; commodities tile (S&amp;P 500, world &amp; emerging equities, gold, silver, oil).';
+    } else if (hasData && !d.markets && avKey()) {
+      msg = "⚠️ Global stocks &amp; commodities couldn't load — check the Alpha Vantage key in the <b>Settings</b> tab (free tier: 25 requests/day, one refresh uses 6).";
+    } else if (!hasData) {
+      msg = "No indicators loaded yet — press <b>⟳ Refresh indicators</b>. If you're in an embedded preview, network calls are blocked: open the live site instead.";
+    }
+    note.innerHTML = msg;
+    note.style.display = msg ? "block" : "none";
+  }
   renderEconCall();
 }
 function econDomain(u) { return String(u || "").replace(/^https?:\/\//, "").split("/")[0].replace(/^www\./, ""); }
