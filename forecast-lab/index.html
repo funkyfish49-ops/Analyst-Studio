@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entropic Forecast Lab</title>
+<style>
+:root{--bg:#0a120e;--panel:#101d16;--panel2:#0d1811;--line:#1e3527;--line2:#274a36;--txt:#d9ffe9;--mut:#bfe9d6;--dim:#8fb3a4;--gtxt:#149a52;--acc:#149a52;--red:#e03c3c;--amber:#e6a23c;--blue:#5b9bd5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:60px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 16px}
+header{padding:18px 0 6px}
+header h1{font-size:21px;letter-spacing:.3px}
+header .sub{color:var(--dim);font-size:12.5px;margin-top:3px}
+.badge{display:inline-block;background:var(--panel2);border:1px solid var(--line2);color:var(--gtxt);font-family:ui-monospace,Menlo,monospace;font-size:13px;padding:2px 10px;border-radius:6px;margin-left:8px;vertical-align:2px}
+.tabs{display:flex;gap:8px;margin:14px 0 18px;flex-wrap:wrap}
+.tabs button{background:var(--panel);border:1px solid var(--line);color:var(--mut);padding:8px 16px;border-radius:8px;cursor:pointer;font:inherit;font-size:13.5px}
+.tabs button.on{background:rgba(20,154,82,.16);border-color:var(--acc);color:var(--gtxt);font-weight:700}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.card h2{font-size:15px;margin-bottom:8px;color:var(--gtxt)}
+.card h3{font-size:13.5px;margin:12px 0 6px;color:var(--mut)}
+.hint{color:var(--dim);font-size:12.5px;line-height:1.6}
+label{display:block;font-size:12px;color:var(--mut);margin:8px 0 3px}
+input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line2);color:var(--txt);border-radius:8px;padding:7px 10px;font:inherit;font-size:13px}
+textarea{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>div{flex:1;min-width:110px}
+.btn{background:var(--gtxt);border:0;color:#04170c;font-weight:700;font-size:13.5px;padding:8px 16px;border-radius:8px;cursor:pointer}
+.btn.ghost{background:var(--panel2);border:1px solid var(--line2);color:var(--gtxt);font-weight:600}
+.btn:disabled{opacity:.5;cursor:default}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--dim);font-weight:600;font-size:12px}
+.kpi{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.kpi .box{flex:1;min-width:130px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpi .box .v{font-family:ui-monospace,Menlo,monospace;font-size:19px;margin-top:2px}
+.kpi .box .l{font-size:11.5px;color:var(--dim)}
+.pos{color:#2fd475}.neg{color:#ff6b6b}.neu{color:var(--dim)}
+.verdict{margin-top:12px;padding:10px 12px;border-radius:8px;font-size:13.5px;line-height:1.6}
+.verdict.good{background:rgba(20,154,82,.12);border:1px solid rgba(20,154,82,.4)}
+.verdict.bad{background:rgba(224,60,60,.10);border:1px solid rgba(224,60,60,.35)}
+.verdict.mid{background:rgba(230,162,60,.10);border:1px solid rgba(230,162,60,.35)}
+.progress{height:8px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:10px}
+.progress i{display:block;height:100%;background:var(--gtxt);width:0%}
+svg{display:block;width:100%;height:auto;margin-top:10px}
+.legend{display:flex;gap:14px;margin-top:6px;font-size:12px;color:var(--dim);flex-wrap:wrap}
+.legend b{color:var(--txt)}
+.src{font-size:11.5px;color:var(--dim);margin-top:6px}
+.err{color:#ff6b6b;font-size:12.5px;margin-top:6px}
+code{background:var(--panel2);border:1px solid var(--line2);border-radius:4px;padding:0 5px;font-size:12px}
+.formula{font-family:ui-monospace,Menlo,monospace;background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:10px 12px;margin:8px 0;font-size:13.5px;color:var(--gtxt)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.note{border-left:3px solid var(--acc);padding:2px 10px;color:var(--mut);font-size:13px;line-height:1.65}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>🌀 Entropic Forecast Lab <span class="badge">F = T · ∇Sτ</span></h1>
+  <div class="sub">Causal-entropic opportunity scoring &amp; walk-forward backtesting — after A. Wissner-Gross &amp; C. Freer, "Causal Entropic Forces" (2013)</div>
+</header>
+<div class="tabs">
+  <button id="tab-score" class="on" onclick="showTab('score')">🎯 Score</button>
+  <button id="tab-back" onclick="showTab('back')">🧪 Backtest</button>
+  <button id="tab-data" onclick="showTab('data')">🗂 Data</button>
+  <button id="tab-help" onclick="showTab('help')">📖 Model</button>
+</div>
+
+<!-- ================= SCORE ================= -->
+<section id="view-score">
+  <div class="card">
+    <h2>Score an opportunity</h2>
+    <div class="hint">The engine estimates a three-regime world model from a price series (or agent priors), simulates <b>τ</b>-day Monte Carlo futures, and scores the trade by <b>expected value</b> and the <b>causal entropic force</b> F = T · ∇Sτ — does this trade create or destroy future freedom of action?</div>
+    <div class="row" style="margin-top:10px">
+      <div><label>Price series</label><select id="sc-series"></select></div>
+      <div><label>Structure</label><select id="sc-struct" onchange="renderStructParams()">
+        <option value="convex">Convex call-like long</option>
+        <option value="trend">Trend long</option>
+        <option value="short">Leveraged short fade</option>
+        <option value="quality">Quality / carry long</option>
+      </select></div>
+      <div><label>Trailing window (days)</label><input type="number" id="sc-win" value="60" min="20" max="250"></div>
+    </div>
+    <div id="sc-params"></div>
+    <div class="grid2" style="margin-top:6px">
+      <div>
+        <label>Estimated regime priors <span class="hint">(auto from trailing returns; editable)</span></label>
+        <textarea id="sc-priors" rows="5"></textarea>
+      </div>
+      <div>
+        <label>Model settings</label>
+        <div class="row">
+          <div><label>τ horizon (days)</label><input type="number" id="sc-tau" value="10" min="2" max="60"></div>
+          <div><label>MC paths</label><input type="number" id="sc-n" value="4000" min="500" max="20000"></div>
+        </div>
+        <div class="row">
+          <div><label>T — risk budget</label><input type="number" id="sc-T" value="0.6" min="0" max="1" step="0.05"></div>
+          <div><label>Seed</label><input type="number" id="sc-seed" value="42"></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:12px"><button class="btn" onclick="runScore()">⚡ Score opportunity</button></div>
+    <div id="sc-out"></div>
+  </div>
+  <div class="card">
+    <h2>🤖 Agent scenario priors (optional, Mistral 4)</h2>
+    <div class="hint">Instead of statistical priors, ask Mistral 4 to convert a research thesis into regime priors. Paste a thesis, provide your Mistral API key (stored only in this browser, like TopicCast), and the agent returns a JSON prior set that replaces the priors above. Needs network — works when the file is downloaded or on the live site, not in the chat preview.</div>
+    <div class="row" style="margin-top:8px">
+      <div style="flex:3;min-width:240px"><label>Research thesis</label><textarea id="sc-thesis" rows="3" placeholder="e.g. NVDA into earnings: hyperscaler capex strong, supply loosening, valuation rich; main risk is a guide-down…"></textarea></div>
+      <div style="flex:2;min-width:180px"><label>Mistral API key</label><input type="password" id="sc-key" placeholder="optional"></div>
+    </div>
+    <div style="margin-top:10px"><button class="btn ghost" onclick="agentPriors()">🧠 Generate priors with Mistral</button></div>
+    <div id="sc-agent-out" class="hint" style="margin-top:8px"></div>
+  </div>
+</section>
+
+<!-- ================= BACKTEST ================= -->
+<section id="view-back" style="display:none">
+  <div class="card">
+    <h2>Walk-forward backtest</h2>
+    <div class="hint">At each step the priors are re-estimated from the trailing window, the entropic engine scores the trade, and the realized outcome comes from the <i>actual</i> price path that followed. The F-filtered strategy only takes the trade when F clears the threshold — the backtest asks: <b>does the entropic force know something expected value doesn't?</b></div>
+    <div class="row" style="margin-top:10px">
+      <div><label>Price series</label><select id="bt-series" onchange="syncStructSelects()"></select></div>
+      <div><label>Structure</label><select id="bt-struct" onchange="renderBtParams()">
+        <option value="convex">Convex call-like long</option>
+        <option value="trend">Trend long</option>
+        <option value="short">Leveraged short fade</option>
+        <option value="quality">Quality / carry long</option>
+      </select></div>
+      <div><label>Step (trading days)</label><input type="number" id="bt-step" value="5" min="1" max="20"></div>
+    </div>
+    <div id="bt-params"></div>
+    <div class="row">
+      <div><label>Trailing window (days)</label><input type="number" id="bt-win" value="60" min="20" max="250"></div>
+      <div><label>F threshold (take trade if F &gt;)</label><input type="number" id="bt-thr" value="0" step="0.01"></div>
+      <div><label>MC paths / step</label><input type="number" id="bt-n" value="2500" min="500" max="10000"></div>
+      <div><label>Seed</label><input type="number" id="bt-seed" value="42"></div>
+    </div>
+    <div style="margin-top:8px"><label style="display:flex;align-items:center;gap:6px;font-size:12.5px"><input type="checkbox" id="bt-ev" style="width:auto"> also require EV &gt; 0</label></div>
+    <div style="margin-top:12px"><button class="btn" id="bt-run" onclick="runBacktest()">▶ Run backtest</button></div>
+    <div class="progress" id="bt-progwrap" style="display:none"><i id="bt-prog"></i></div>
+    <div id="bt-out"></div>
+  </div>
+</section>
+
+<!-- ================= DATA ================= -->
+<section id="view-data" style="display:none">
+  <div class="card">
+    <h2>Snapshots (stocks — same-site CSV)</h2>
+    <div class="hint">Daily OHLC snapshots shipped with this page and refreshed daily by a GitHub Actions cron. Same-origin fetch: no CORS issues.</div>
+    <div id="data-repo" style="margin-top:8px"></div>
+  </div>
+  <div class="card">
+    <h2>Crypto (Binance, live)</h2>
+    <div class="hint">Binance's public API allows direct browser fetch — full history pulled live, no key needed.</div>
+    <div class="row" style="margin-top:8px;align-items:flex-end">
+      <div><label>Symbol</label><select id="data-binsym">
+        <option value="BTCUSDT">BTCUSDT</option><option value="ETHUSDT">ETHUSDT</option>
+        <option value="SOLUSDT">SOLUSDT</option><option value="BNBUSDT">BNBUSDT</option>
+      </select></div>
+      <div><label>Years of history</label><input type="number" id="data-binyr" value="4" min="1" max="8"></div>
+      <div style="flex:0"><button class="btn" onclick="loadBinance()">⬇ Fetch</button></div>
+    </div>
+    <div id="data-bin-out"></div>
+  </div>
+  <div class="card">
+    <h2>Paste any series</h2>
+    <div class="hint">Paste any CSV — including a <code>yfinance</code> export — with columns <code>date,open,high,low,close</code> or just <code>date,close</code>. This is the universal fallback: any data you can see, you can backtest.</div>
+    <div class="row" style="margin-top:8px;align-items:flex-end">
+      <div><label>Series name</label><input type="text" id="data-paste-name" placeholder="e.g. MSFT-yf"></div>
+      <div style="flex:0"><button class="btn" onclick="loadPaste()">⬇ Load</button></div>
+    </div>
+    <textarea id="data-paste" rows="6" style="margin-top:8px" placeholder="Date,Open,High,Low,Close,Volume&#10;2026-01-02,418.5,420.1,415.2,419.1,52120000&#10;…"></textarea>
+    <div id="data-paste-out"></div>
+  </div>
+  <div class="card">
+    <h2>Loaded series</h2>
+    <div id="data-list" class="hint">Nothing loaded yet.</div>
+  </div>
+</section>
+
+<!-- ================= HELP ================= -->
+<section id="view-help" style="display:none">
+  <div class="card">
+    <h2>The model</h2>
+    <div class="note">Wissner-Gross &amp; Freer (2013) proposed that intelligent behavior emerges from maximizing <b>future freedom of action</b>: intelligence is a force F = T ∇Sτ pushing systems toward states with a richer space of accessible futures — where T is the strength (resources/urgency) and Sτ is the entropy of possible futures over horizon τ. Their Entropica software demonstrated exactly this formalism on portfolio maximization in social-networked exchanges. This lab operationalizes that expression for trading decisions.</div>
+    <h3>Mathematical core</h3>
+    <div class="formula">Sτ(a) = H(W) + E<sub>w</sub>[ log(1 + ρ<sub>w</sub>·|A<sub>w</sub>(a)|) ]</div>
+    <div class="hint"><b>H(W)</b> — entropy over the reachable worlds (regime × terminal-return bin), from the prior estimates.<br>
+    <b>|A<sub>w</sub>(a)|</b> — count of viable future actions in world w after committing action a (exit at profit, hedge, add, roll, harvest…).<br>
+    <b>ρ<sub>w</sub></b> — surviving capital fraction in world w; a blowup world collapses every future option.</div>
+    <div class="formula">∇Sτ = Sτ(enter) − Sτ(cash) &nbsp;&nbsp;→&nbsp;&nbsp; F = T · ∇Sτ</div>
+    <div class="hint">The causal entropic gradient compares committing to the trade against staying in cash (maximum optionality). F &gt; 0: the trade <b>creates</b> more future freedom than it costs — rare, precious (cheap convexity, asymmetric catalysts). F &lt; 0 despite positive EV: the trade pays you to <b>lock yourself in</b> (naked leveraged shorts, illiquid traps). T is your risk-budget temperature — with more remaining drawdown budget, the same entropy gradient exerts more force.</div>
+    <h3>What the backtest validates</h3>
+    <div class="hint">Walk-forward: priors re-estimated at each step from trailing returns only (no lookahead), score computed, then realized outcome read from the actual path. If F carries information, (a) the F-filtered equity curve should beat the always-in curve, (b) forward returns should rise monotonically across F quintiles, and (c) the Spearman rank information coefficient between F and realized P&amp;L should be positive. If none of that shows, the honest conclusion is that the entropic layer adds nothing for this series/structure — the lab is built to tell you that truth, not to flatter the theory.</div>
+    <h3>Data routes (the CORS reality)</h3>
+    <div class="hint">
+    • <b>Stock snapshots</b> — Yahoo blocks browser requests (no CORS headers), so stocks ship as CSV snapshots refreshed daily by GitHub Actions (curl from GitHub's servers, which Yahoo permits).<br>
+    • <b>Crypto</b> — Binance's public API sends <code>Access-Control-Allow-Origin: *</code>, so full history is fetched live in the browser.<br>
+    • <b>Paste</b> — any series (yfinance export, broker history) pasted as CSV works for everything.<br>
+    • Refresh the snapshots anytime by re-running the repo's workflow or asking for a "publish".</div>
+    <h3>Limitations &amp; honesty</h3>
+    <div class="hint">Three-regime tercile priors are a deliberate simplification — they capture heteroskedasticity, not true regime dynamics. Action sets are template approximations, not a real market microstructure model. The backtest compounds at the configured capital fraction with no transaction costs, slippage, or borrow availability constraints. Treat outputs as a structured second opinion for the research agents — not as investment advice, and never trade a model you haven't tried to break.</div>
+  </div>
+</section>
+</div>
+
+<script>
+"use strict";
+/* ================= utils ================= */
+function el(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" })[c]; }); }
+function fmtN(x, d){ if (!isFinite(x)) return "—"; return x.toFixed(d === undefined ? 2 : d); }
+function mean(a){ var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s / a.length; }
+function std(a){ var m = mean(a), s = 0; for (var i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m); return Math.sqrt(s / Math.max(a.length - 1, 1)); }
+function clamp(x, lo, hi){ return Math.min(hi, Math.max(lo, x)); }
+function spearman(xs, ys){
+  var rank = function(arr){ var idx = arr.map(function(v, i){ return { v: v, i: i }; })
+    .sort(function(a, b){ return a.v - b.v; });
+    var r = new Array(arr.length); var i = 0;
+    while (i < idx.length){ var j = i; while (j + 1 < idx.length && idx[j + 1].v === idx[i].v) j++;
+      var ravg = (i + j) / 2; for (var k = i; k <= j; k++) r[idx[k].i] = ravg; i = j + 1; } return r; };
+  var rx = rank(xs), ry = rank(ys);
+  var mx = mean(rx), my = mean(ry), num = 0, dx = 0, dy = 0;
+  for (var i = 0; i < xs.length; i++){ num += (rx[i] - mx) * (ry[i] - my); dx += (rx[i] - mx) * (rx[i] - mx); dy += (ry[i] - my) * (ry[i] - my); }
+  return (dx && dy) ? num / Math.sqrt(dx * dy) : 0;
+}
+/* seeded RNG + Box-Muller */
+function mulberry32(seed){ var a = seed >>> 0; return function(){ a |= 0; a = (a + 0x6D2B79F5) | 0;
+  var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function makeNormals(rng){ var spare = null; return function(){
+  if (spare !== null){ var v = spare; spare = null; return v; }
+  var u = 0, v = 0, s = 0;
+  do { u = rng() * 2 - 1; v = rng() * 2 - 1; s = u * u + v * v; } while (s >= 1 || s === 0);
+  var m = Math.sqrt(-2 * Math.log(s) / s); spare = v * m; return u * m; }; }
+
+/* ================= data registry ================= */
+var SERIES = {};  // name -> {dates:[], closes:[], src:"repo|binance|paste"}
+var REPO_SYMBOLS = ["SPY", "QQQ", "AAPL", "NVDA", "TSLA", "GLD"];
+try { var cached = JSON.parse(localStorage.getItem("efl-series") || "{}"); if (cached && cached.__v === 3) SERIES = cached.data; } catch (e) {}
+function saveSeriesCache(){ try { localStorage.setItem("efl-series", JSON.stringify({ __v: 3, data: SERIES })); } catch (e) {} }
+
+function parseCSV(text){
+  var dates = [], closes = [], lines = text.split(/\r?\n/).filter(function(l){ return l.trim(); });
+  var start = 0;
+  if (lines.length && /date/i.test(lines[0])) start = 1;
+  for (var i = start; i < lines.length; i++){
+    var c = lines[i].split(",");
+    if (c.length < 2) continue;
+    var close = null;
+    for (var j = c.length - 1; j >= 1; j--){ var v = parseFloat(c[j]); if (isFinite(v) && v > 0){ close = v; break; } }
+    if (close !== null){ dates.push(c[0].trim()); closes.push(close); }
+  }
+  return { dates: dates, closes: closes };
+}
+function dailyReturns(closes){ var r = []; for (var i = 1; i < closes.length; i++) r.push(Math.log(closes[i] / closes[i - 1])); return r; }
+
+/* ================= priors ================= */
+function estimatePriors(rets, win){
+  var r = rets.slice(-win);
+  var s = r.slice().sort(function(a, b){ return a - b; });
+  var n = s.length, q1 = s[Math.floor(n / 3)], q2 = s[Math.floor(2 * n / 3)];
+  var buckets = [[], [], []];
+  for (var i = 0; i < r.length; i++){ var b = r[i] <= q1 ? 0 : (r[i] <= q2 ? 1 : 2); buckets[b].push(r[i]); }
+  var names = ["down-regime", "chop-regime", "up-regime"];
+  var priors = [];
+  for (var k = 0; k < 3; k++){
+    var arr = buckets[k];
+    priors.push({ label: names[k], p: arr.length / r.length,
+      mu_d: mean(arr), sig_d: Math.max(std(arr), 1e-4) });
+  }
+  return priors;
+}
+function priorsEntropy(priors){ var p = priors.map(function(x){ return x.p; }); var h = 0;
+  for (var i = 0; i < p.length; i++) if (p[i] > 0) h -= p[i] * Math.log(p[i]); return h; }
+
+/* ================= engine ================= */
+/* Simulate tau-day futures under regime priors. Regime per path recorded in mReg. */
+var mReg = null;
+function simulateWithReg(priors, tau, n, rng){
+  var norm = makeNormals(rng);
+  var ps = priors.map(function(x){ return x.p; }), cum = [], acc = 0;
+  for (var i = 0; i < ps.length; i++){ acc += ps[i]; cum.push(acc); }
+  var m = new Float64Array(n), r5 = new Float64Array(n), mid = Math.max(1, Math.round(tau / 2));
+  mReg = new Int8Array(n);
+  for (var p = 0; p < n; p++){
+    var u = rng(), reg = 0; while (reg < cum.length - 1 && u > cum[reg]) reg++;
+    mReg[p] = reg;
+    var mu = priors[reg].mu_d, sg = priors[reg].sig_d;
+    var lr = 0, lr1 = 0;
+    for (var d = 0; d < tau; d++){
+      var step = (mu - 0.5 * sg * sg) + sg * norm();
+      lr += step; if (d === mid - 1) lr1 = lr;
+    }
+    m[p] = Math.exp(lr); r5[p] = Math.exp(lr1);
+  }
+  return { m: m, r5: r5 };
+}
+function worldEntropy(priors, m, nBins){
+  var counts = [];
+  for (var i = 0; i < priors.length; i++) counts.push(new Float64Array(nBins));
+  for (var p = 0; p < m.length; p++){
+    var b = clamp(Math.floor((m[p] - 0.6) / 0.15), 0, nBins - 1);
+    counts[mReg[p]][b]++;
+  }
+  var h = 0, tot = m.length;
+  for (var k = 0; k < priors.length; k++) for (var j = 0; j < nBins; j++){
+    var pr = counts[k][j] / tot; if (pr > 0) h -= pr * Math.log(pr);
+  }
+  return h;
+}
+
+/* structure templates */
+var STRUCT_DEFS = {
+  convex: { label: "Convex call-like long", params: [
+    ["cap", "Capital at risk = premium (% of capital)", 2],
+    ["k", "Strike OTM (%)", 12],
+    ["gear", "Payoff gearing (per 100% move beyond strike)", 20] ] },
+  trend: { label: "Trend long", params: [ ["cap", "Capital deployed (%)", 10] ] },
+  short: { label: "Leveraged short fade", params: [
+    ["margin", "Margin deployed (%)", 15],
+    ["lev", "Leverage (×)", 3],
+    ["carry", "Carry / borrow income per τ (%)", 0.3] ] },
+  quality: { label: "Quality / carry long", params: [
+    ["cap", "Capital deployed (%)", 10],
+    ["carry", "Dividend / carry per τ (%)", 0.08] ] }
+};
+function structParams(struct, box){
+  var o = {};
+  var defs = STRUCT_DEFS[struct].params;
+  for (var i = 0; i < defs.length; i++){ o[defs[i][0]] = parseFloat(el(box + "-" + struct + "-" + defs[i][0]).value) || 0; }
+  return o;
+}
+/* payoff: pnl in % of capital, given terminal multiplier m */
+function payoff(struct, p, m){
+  if (struct === "convex") return p.cap * (p.gear * Math.max(m - (1 + p.k / 100), 0) - 1);
+  if (struct === "trend") return p.cap * (m - 1);
+  if (struct === "short") return p.margin * p.lev * (1 - m) + p.carry;
+  if (struct === "quality") return p.cap * (m - 1) + p.carry;
+  return 0;
+}
+/* viable future action count per world (rho = surviving capital fraction) */
+function actionCount(struct, p, r5, rho, m){
+  if (struct === "convex") return 2 + (r5 > 1.06) + (r5 > 0.94 && r5 < 1.06) + (rho > 0.90);
+  if (struct === "trend") return 2 + (r5 > 1.03) + (rho > 0.90);
+  if (struct === "short"){
+    var squeeze = (r5 > 1.25) || (m > 1.30);
+    return squeeze ? (1 + (rho > 0.85)) : (2 + (rho > 0.90) + (r5 < 0.90));
+  }
+  return 2 + (r5 > 1.01) + (rho > 0.92); /* quality */
+}
+function cashActions(){ return 3; }
+
+/* full score of one opportunity */
+function score(struct, params, priors, tau, n, seed, T){
+  var rng = mulberry32(seed >>> 0 || 1);
+  var sim = simulateWithReg(priors, tau, n, rng);
+  var m = sim.m, r5 = sim.r5, N = n;
+  var pnl = new Float64Array(N), rho = new Float64Array(N);
+  for (var i = 0; i < N; i++){ pnl[i] = payoff(struct, params, m[i]); rho[i] = clamp(1 + pnl[i] / 100, 0.15, 1.2); }
+  var hW = worldEntropy(priors, m, 8);
+  var sE = 0, sC = 0, impair = 0;
+  for (var q = 0; q < N; q++){
+    var a = actionCount(struct, params, r5[q], rho[q], m[q]);
+    sE += Math.log(1 + clamp(rho[q], 0.05, 1.2) * a);
+    sC += Math.log(1 + cashActions());
+    if (rho[q] < 0.85) impair++;
+  }
+  sE = hW + sE / N; sC = hW + sC / N;
+  var gradS = sE - sC;
+  return { ev: mean(Array.from(pnl)), pnl: pnl, m: m, hW: hW, sEnter: sE, sCash: sC,
+    gradS: gradS, F: T * gradS, T: T, pImpair: impair / N,
+    pnlStd: std(Array.from(pnl)) };
+}
+
+/* ================= walk-forward backtest ================= */
+function walkForward(series, struct, params, opts, onDone){
+  var closes = series.closes, rets = dailyReturns(closes);
+  var tau = opts.tau, win = opts.win, step = opts.step, n = opts.n;
+  var startIdx = Math.max(win + 1, tau);
+  var steps = [];
+  for (var t = startIdx; t + tau < closes.length; t += step){
+    var priors = estimatePriors(rets.slice(0, t), win);
+    var sc = score(struct, params, priors, tau, n, opts.seed + t, opts.T);
+    var mReal = closes[t + tau] / closes[t];
+    var pnlReal = payoff(struct, params, mReal);
+    steps.push({ t: t, date: series.dates[t], F: sc.F, ev: sc.ev, gradS: sc.gradS,
+      pImpair: sc.pImpair, mReal: mReal, pnlReal: pnlReal });
+  }
+  onDone(steps);
+}
+
+/* backtest analytics */
+function backtestReport(steps, opts){
+  var trade = function(s){ return s.F > opts.thr && (!opts.evGate || s.ev > 0); };
+  var eqF = 1, eqA = 1, traded = 0, impairEvents = 0;
+  var eqCurve = [{ v: 1, d: steps.length ? steps[0].date : "" }], aCurve = [{ v: 1, d: steps.length ? steps[0].date : "" }];
+  var peakF = 1, peakA = 1, ddF = 0, ddA = 0;
+  for (var i = 0; i < steps.length; i++){
+    var s = steps[i];
+    eqA *= (1 + s.pnlReal / 100); peakA = Math.max(peakA, eqA); ddA = Math.max(ddA, 1 - eqA / peakA);
+    aCurve.push({ v: eqA, d: s.date });
+    if (trade(s)){ eqF *= (1 + s.pnlReal / 100); traded++; peakF = Math.max(peakF, eqF); ddF = Math.max(ddF, 1 - eqF / peakF);
+      if (s.pnlReal < -5) impairEvents++; }
+    eqCurve.push({ v: eqF, d: s.date });
+  }
+  /* F quintiles vs realized pnl */
+  var sorted = steps.slice().sort(function(a, b){ return a.F - b.F; });
+  var quintiles = [];
+  var q = Math.floor(sorted.length / 5);
+  for (var k = 0; k < 5; k++){
+    var seg = sorted.slice(k * q, (k === 4) ? sorted.length : (k + 1) * q);
+    if (!seg.length) { quintiles.push(null); continue; }
+    var pnls = seg.map(function(s){ return s.pnlReal; });
+    quintiles.push({ n: seg.length, meanF: mean(seg.map(function(s){ return s.F; })),
+      meanPnl: mean(pnls), hit: seg.filter(function(s){ return s.pnlReal > 0; }).length / seg.length });
+  }
+  var ic = spearman(steps.map(function(s){ return s.F; }), steps.map(function(s){ return s.pnlReal; }));
+  var evIc = spearman(steps.map(function(s){ return s.ev; }), steps.map(function(s){ return s.pnlReal; }));
+  return { eqF: eqF, eqA: eqA, ddF: ddF, ddA: ddA, traded: traded, total: steps.length,
+    quintiles: quintiles, ic: ic, evIc: evIc, impair: impairEvents,
+    eqCurve: eqCurve, aCurve: aCurve,
+    meanPnlTraded: traded ? mean(steps.filter(trade).map(function(s){ return s.pnlReal; })) : 0,
+    meanPnlSkipped: (steps.length - traded) ? mean(steps.filter(function(s){ return !trade(s); }).map(function(s){ return s.pnlReal; })) : 0 };
+}
+
+/* ================= SVG charts ================= */
+function lineChart(curves, labels){
+  var W = 860, H = 300, pad = 42;
+  var all = []; curves.forEach(function(c){ c.forEach(function(p){ all.push(p.v); }); });
+  if (!all.length) return "";
+  var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+  if (hi - lo < 1e-9) { hi += 0.01; lo -= 0.01; }
+  var n = curves[0].length, xs = function(i){ return pad + i * (W - pad - 8) / Math.max(n - 1, 1); };
+  var ys = function(v){ return H - pad - (v - lo) * (H - pad - 20) / (hi - lo); };
+  var colors = ["#e6a23c", "#2fd475", "#5b9bd5", "#ff6b6b"];
+  var s = '<svg viewBox="0 0 ' + W + " " + H + '" xmlns="http://www.w3.org/2000/svg">';
+  s += '<rect x="' + pad + '" y="14" width="' + (W - pad - 8) + '" height="' + (H - pad - 14) + '" fill="rgba(255,255,255,.02)"/>';
+  for (var g = 0; g <= 4; g++){ var gy = 14 + g * (H - pad - 14) / 4, gv = hi - g * (hi - lo) / 4;
+    s += '<line x1="' + pad + '" y1="' + gy + '" x2="' + (W - 8) + '" y2="' + gy + '" stroke="#1e3527" stroke-width="1"/>';
+    s += '<text x="' + (pad - 6) + '" y="' + (gy + 4) + '" fill="#8fb3a4" font-size="11" text-anchor="end">' + fmtN(gv, 2) + "</text>"; }
+  curves.forEach(function(c, ci){
+    var path = "M";
+    for (var i = 0; i < c.length; i++) path += (i ? "L" : "") + xs(i).toFixed(1) + " " + ys(c[i].v).toFixed(1);
+    s += '<path d="' + path + '" fill="none" stroke="' + colors[ci % colors.length] + '" stroke-width="1.8"/>';
+  });
+  var leg = labels.map(function(l, i){ return '<span style="color:' + colors[i % colors.length] + '">■</span> <b>' + esc(l) + "</b>"; }).join(" &nbsp; ");
+  return s + '</svg><div class="legend">' + leg + "</div>";
+}
+function histSVG(vals, bins){
+  var W = 430, H = 170, pad = 34;
+  var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+  if (hi - lo < 1e-9){ hi += 1; lo -= 1; }
+  var counts = new Array(bins).fill(0);
+  vals.forEach(function(v){ counts[clamp(Math.floor((v - lo) / (hi - lo) * bins), 0, bins - 1)]++; });
+  var mx = Math.max.apply(null, counts);
+  var s = '<svg viewBox="0 0 ' + W + " " + H + '" xmlns="http://www.w3.org/2000/svg">';
+  var bw = (W - pad - 8) / bins;
+  for (var i = 0; i < bins; i++){
+    var h = counts[i] / mx * (H - pad - 14);
+    s += '<rect x="' + (pad + i * bw) + '" y="' + (H - pad - h) + '" width="' + (bw - 1) + '" height="' + h + '" fill="#149a52" opacity=".75"/>';
+  }
+  s += '<line x1="' + pad + '" y1="' + (H - pad) + '" x2="' + (W - 4) + '" y2="' + (H - pad) + '" stroke="#274a36"/>';
+  s += '<text x="' + pad + '" y="' + (H - 6) + '" fill="#8fb3a4" font-size="10">' + fmtN(lo, 1) + '</text>';
+  s += '<text x="' + (W - 30) + '" y="' + (H - 6) + '" fill="#8fb3a4" font-size="10">' + fmtN(hi, 1) + "</text>";
+  return s + "</svg>";
+}
+
+/* ================= tabs & UI ================= */
+function showTab(name){
+  ["score", "back", "data", "help"].forEach(function(t){
+    el("view-" + (t === "back" ? "back" : t)).style.display = (t === name) ? "" : "none";
+    el("tab-" + t).className = (t === name) ? "on" : "";
+  });
+  if (name === "data") renderDataTab();
+}
+function structParamHTML(prefix, struct){
+  var defs = STRUCT_DEFS[struct].params, h = '<div class="row">';
+  defs.forEach(function(d){
+    h += '<div><label>' + esc(d[1]) + '</label><input type="number" step="any" id="' + prefix + "-" + struct + "-" + d[0] + '" value="' + d[2] + '"></div>';
+  });
+  return h + "</div>";
+}
+function renderStructParams(){ el("sc-params").innerHTML = structParamHTML("sc", el("sc-struct").value); fillPriorsTextarea(); }
+function renderBtParams(){ el("bt-params").innerHTML = structParamHTML("bt", el("bt-struct").value); }
+function refreshSeriesSelects(){
+  var names = Object.keys(SERIES).sort();
+  var opts = names.map(function(nm){ return '<option value="' + esc(nm) + '">' + esc(nm) + " (" + SERIES[nm].closes.length + "d, " + SERIES[nm].dates[0] + "→" + SERIES[nm].dates[SERIES[nm].dates.length - 1] + ")</option>"; }).join("");
+  el("sc-series").innerHTML = opts || '<option value="">— load data in the Data tab —</option>';
+  el("bt-series").innerHTML = opts || '<option value="">— load data in the Data tab —</option>';
+  renderDataList();
+}
+function syncStructSelects(){ /* placeholder: tabs independent */ }
+function currentPriors(){ try { return JSON.parse(el("sc-priors").value); } catch (e){ return null; } }
+function fillPriorsTextarea(){
+  var nm = el("sc-series").value; if (!nm || !SERIES[nm]) { el("sc-priors").value = "Load a series first — priors will auto-estimate."; return; }
+  var win = parseInt(el("sc-win").value, 10) || 60;
+  var priors = estimatePriors(dailyReturns(SERIES[nm].closes), win);
+  el("sc-priors").value = JSON.stringify(priors.map(function(p){
+    return { label: p.label, p: +p.p.toFixed(4), mu_d: +p.mu_d.toFixed(5), sig_d: +p.sig_d.toFixed(5) };
+  }), null, 1);
+}
+
+/* ================= Score tab ================= */
+function kpi(l, v, cls){ return '<div class="box"><div class="l">' + l + '</div><div class="v ' + (cls || "") + '">' + v + "</div></div>"; }
+function runScore(){
+  var nm = el("sc-series").value, out = el("sc-out");
+  if (!nm || !SERIES[nm]){ out.innerHTML = '<div class="err">Load a price series in the 🗂 Data tab first.</div>'; return; }
+  var priors = currentPriors();
+  if (!priors || !priors.length){ out.innerHTML = '<div class="err">Priors are not valid JSON.</div>'; return; }
+  var struct = el("sc-struct").value;
+  var params = structParams(struct, "sc");
+  var sc = score(struct, params, priors, parseInt(el("sc-tau").value, 10) || 10,
+    parseInt(el("sc-n").value, 10) || 4000, parseInt(el("sc-seed").value, 10) || 42, parseFloat(el("sc-T").value) || 0.6);
+  var vcls = sc.F > 0.03 ? "good" : (sc.F < -0.03 ? "bad" : "mid");
+  var verdict;
+  if (sc.F > 0.03) verdict = "<b>Entropically attractive.</b> This structure creates more future freedom of action than it costs" + (sc.ev > 0 ? ", and expected value agrees." : ", though expected value is negative — the trade is an optionality purchase, not a bet.");
+  else if (sc.F < -0.03) verdict = "<b>Entropically repulsive.</b> Despite " + (sc.ev > 0 ? "positive expected value" : "negative expected value") + ", committing to this trade narrows your future action space — it pays you to lock yourself in" + (sc.pImpair > 0.03 ? ", and " + fmtN(sc.pImpair * 100, 1) + "% of simulated futures impair capital." : ".");
+  else verdict = "<b>Roughly optionality-neutral.</b> The trade neither creates nor destroys meaningful future freedom versus holding cash — judge it on expected value and conviction.";
+  var sample = Array.from(sc.pnl).filter(function(_, i){ return i % 4 === 0; });
+  out.innerHTML =
+    '<div class="kpi">' +
+    kpi("Expected value", (sc.ev >= 0 ? "+" : "") + fmtN(sc.ev, 2) + "%", sc.ev >= 0 ? "pos" : "neg") +
+    kpi("∇Sτ (optionality gradient)", (sc.gradS >= 0 ? "+" : "") + fmtN(sc.gradS, 3), sc.gradS >= 0 ? "pos" : "neg") +
+    kpi("F = T·∇Sτ", (sc.F >= 0 ? "+" : "") + fmtN(sc.F, 3), sc.F >= 0 ? "pos" : "neg") +
+    kpi("P(capital impaired)", fmtN(sc.pImpair * 100, 1) + "%", sc.pImpair > 0.03 ? "neg" : "neu") +
+    kpi("H(W) world entropy", fmtN(sc.hW, 2) + " nats", "") +
+    kpi("P&amp;L spread (σ)", fmtN(sc.pnlStd, 2) + "%", "") +
+    "</div>" +
+    '<div class="grid2" style="margin-top:8px"><div><h3>Simulated P&amp;L distribution (% of capital)</h3>' + histSVG(sample, 36) + "</div>" +
+    '<div><h3>Verdict</h3><div class="verdict ' + vcls + '">' + verdict + "</div></div></div>";
+}
+
+/* optional Mistral 4 agent priors */
+function agentPriors(){
+  var key = el("sc-key").value.trim(), thesis = el("sc-thesis").value.trim(), out = el("sc-agent-out");
+  if (!key){ out.innerHTML = '<span class="err">Enter your Mistral API key (get one at console.mistral.ai).</span>'; return; }
+  if (!thesis){ out.innerHTML = '<span class="err">Describe the thesis first.</span>'; return; }
+  out.innerHTML = "Asking Mistral 4…";
+  var prompt = "You are a scenario analyst. Convert this trading thesis into exactly 3 Monte Carlo regime priors for the next 10 trading days. Reply ONLY with JSON: [{\"label\":str,\"p\":probability (sum 1),\"mu_d\":daily log-drift,\"sig_d\":daily log-vol (0.005-0.12)}]. Thesis: " + thesis;
+  fetch("https://api.mistral.ai/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
+    body: JSON.stringify({ model: "mistral-large-latest", messages: [{ role: "user", content: prompt }], temperature: 0.4 })
+  }).then(function(r){ return r.json(); }).then(function(j){
+    var txt = j.choices[0].message.content;
+    var m = txt.match(/\[[\s\S]*\]/); if (!m) throw new Error("no JSON in reply");
+    var priors = JSON.parse(m[0]);
+    var s = 0; priors.forEach(function(p){ s += p.p; }); priors.forEach(function(p){ p.p = p.p / s; });
+    el("sc-priors").value = JSON.stringify(priors.map(function(p){
+      return { label: p.label, p: +p.p.toFixed(4), mu_d: +p.mu_d.toFixed(5), sig_d: +Math.abs(p.sig_d).toFixed(5) };
+    }), null, 1);
+    out.innerHTML = '✅ Agent priors loaded into the priors box — press <b>⚡ Score opportunity</b>. ' +
+      '<span class="hint">Source: ' + (j.model || "mistral") + "</span>";
+  }).catch(function(e){ out.innerHTML = '<span class="err">Agent call failed: ' + esc(e.message) + " — check the key, the connection, and that you are on the downloaded/live version of this page.</span>"; });
+}
+
+/* ================= Backtest tab ================= */
+function runBacktest(){
+  var nm = el("bt-series").value, out = el("bt-out");
+  if (!nm || !SERIES[nm]){ out.innerHTML = '<div class="err">Load a price series in the 🗂 Data tab first.</div>'; return; }
+  var opts = { tau: parseInt(el("sc-tau").value, 10) || 10, win: parseInt(el("bt-win").value, 10) || 60,
+    step: parseInt(el("bt-step").value, 10) || 5, n: parseInt(el("bt-n").value, 10) || 2500,
+    seed: parseInt(el("bt-seed").value, 10) || 42, T: parseFloat(el("sc-T").value) || 0.6,
+    thr: parseFloat(el("bt-thr").value) || 0, evGate: el("bt-ev").checked };
+  var struct = el("bt-struct").value, params = structParams(struct, "bt");
+  el("bt-run").disabled = true; el("bt-progwrap").style.display = ""; el("bt-prog").style.width = "5%";
+  out.innerHTML = '<div class="hint">Simulating… each step re-estimates priors and runs a fresh Monte Carlo.</div>';
+  setTimeout(function(){
+    walkForward(SERIES[nm], struct, params, opts, function(steps){
+      if (steps.length < 25){ out.innerHTML = '<div class="err">Not enough history for a meaningful walk-forward (need ≫ window + τ). Load a longer series.</div>'; el("bt-run").disabled = false; el("bt-progwrap").style.display = "none"; return; }
+      var rep = backtestReport(steps, opts);
+      el("bt-prog").style.width = "100%";
+      var qs = rep.quintiles.map(function(q, i){
+        if (!q) return "";
+        return "<tr><td>F quintile " + (i + 1) + " (lowest→highest)</td><td>" + fmtN(q.meanF, 3) + "</td><td>" +
+          (q.meanPnl >= 0 ? "+" : "") + fmtN(q.meanPnl, 2) + "%</td><td>" + fmtN(q.hit * 100, 0) + "%</td><td>" + q.n + "</td></tr>";
+      }).join("");
+      var mono = true;
+      for (var i = 1; i < rep.quintiles.length; i++){ if (rep.quintiles[i] && rep.quintiles[i - 1] && rep.quintiles[i].meanPnl < rep.quintiles[i - 1].meanPnl) mono = false; }
+      var icGood = rep.ic > 0.05, fBetter = rep.eqF > rep.eqA;
+      var verdictCls = (fBetter && icGood) ? "good" : ((rep.ic < -0.05) ? "bad" : "mid");
+      var verdictTxt;
+      if (fBetter && icGood) verdictTxt = "<b>The entropic filter adds value here.</b> Trading only when F &gt; " + fmtN(opts.thr, 2) +
+        " beat always-in (" + fmtN(rep.eqF * 100 - 100, 1) + "% vs " + fmtN(rep.eqA * 100 - 100, 1) + "%) and the F↔outcome rank correlation is " +
+        fmtN(rep.ic, 3) + " (EV alone: " + fmtN(rep.evIc, 3) + "). Mean P&amp;L taken: " + fmtN(rep.meanPnlTraded, 2) + "% vs skipped: " + fmtN(rep.meanPnlSkipped, 2) + "%.";
+      else if (rep.ic < -0.05) verdictTxt = "<b>The entropic score is anti-predictive on this series/structure</b> (rank IC " + fmtN(rep.ic, 3) + "). That is a real finding — do not use F as a filter here; revisit priors, template, or horizon.";
+      else verdictTxt = "<b>Inconclusive on this series/structure.</b> F-filtered: " + fmtN(rep.eqF * 100 - 100, 1) + "% vs always-in " +
+        fmtN(rep.eqA * 100 - 100, 1) + "%, rank IC " + fmtN(rep.ic, 3) + " (EV: " + fmtN(rep.evIc, 3) + "), quintile profile " + (mono ? "monotonic" : "non-monotonic") +
+        ". Try other structures, a longer window, or more history before drawing conclusions.";
+      out.innerHTML =
+        '<div class="kpi">' +
+        kpi("F-filtered return", fmtN(rep.eqF * 100 - 100, 1) + "%", rep.eqF >= rep.eqA ? "pos" : "neg") +
+        kpi("Always-in return", fmtN(rep.eqA * 100 - 100, 1) + "%", "") +
+        kpi("Max drawdown (filtered)", fmtN(rep.ddF * 100, 1) + "%", "") +
+        kpi("Trades taken", rep.traded + " / " + rep.total, "") +
+        kpi("F↔outcome rank IC", fmtN(rep.ic, 3), icGood ? "pos" : "neg") +
+        kpi("EV↔outcome rank IC", fmtN(rep.evIc, 3), "") +
+        "</div>" +
+        '<h3>Equity curves (compounded, % of capital per trade)</h3>' +
+        lineChart([rep.aCurve, rep.eqCurve], ["Always in the trade", "F-filtered (trade only if F > " + fmtN(opts.thr, 2) + ")"]) +
+        '<h3>Does F carry information? (forward P&amp;L by F quintile)</h3>' +
+        '<table><tr><th>Bucket</th><th>Mean F</th><th>Mean realized P&amp;L</th><th>Hit rate</th><th>Steps</th></tr>' + qs + "</table>" +
+        '<div class="src">Impairment events (realized loss &gt; 5% of capital while traded): ' + rep.impair + "</div>" +
+        '<div class="verdict ' + verdictCls + '" style="margin-top:10px">' + verdictTxt + "</div>";
+      el("bt-run").disabled = false;
+      setTimeout(function(){ el("bt-progwrap").style.display = "none"; }, 600);
+    });
+  }, 30);
+}
+
+/* ================= Data tab ================= */
+function renderDataTab(){
+  var h = '<div class="row">';
+  REPO_SYMBOLS.forEach(function(s){
+    h += '<div style="flex:0 0 auto"><button class="btn ghost" onclick="loadRepo(\'' + s + '\')">⬇ ' + s + '</button></div>';
+  });
+  el("data-repo").innerHTML = h + "</div>";
+  renderDataList();
+}
+function loadRepo(sym){
+  var out = el("data-repo");
+  fetch("data/" + sym + ".csv").then(function(r){
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.text();
+  }).then(function(txt){
+    var d = parseCSV(txt);
+    if (d.closes.length < 100) throw new Error("snapshot looks empty");
+    SERIES[sym] = { dates: d.dates, closes: d.closes, src: "repo" };
+    saveSeriesCache(); refreshSeriesSelects(); fillPriorsTextarea();
+    out.insertAdjacentHTML("beforeend", '<div class="src">✅ ' + sym + ": " + d.closes.length + " days (" + d.dates[0] + " → " + d.dates[d.dates.length - 1] + ")</div>");
+  }).catch(function(e){
+    out.insertAdjacentHTML("beforeend", '<div class="err">' + sym + " snapshot unavailable here (" + esc(e.message) + ") — snapshots load on the published site, or use Binance/paste below.</div>");
+  });
+}
+function loadBinance(){
+  var sym = el("data-binsym").value, yrs = parseInt(el("data-binyr").value, 10) || 4, out = el("data-bin-out");
+  out.innerHTML = '<div class="hint">Fetching ' + esc(sym) + " klines (1000/call)…</div>";
+  var dates = [], closes = [];
+  var start = Date.now() - yrs * 365.25 * 864e5;
+  function page(st){
+    fetch("https://api.binance.com/api/v3/klines?symbol=" + sym + "&interval=1d&limit=1000&startTime=" + st)
+      .then(function(r){ return r.json(); })
+      .then(function(k){
+        if (!k.length) return done();
+        for (var i = 0; i < k.length; i++){
+          dates.push(new Date(k[i][0]).toISOString().slice(0, 10)); closes.push(parseFloat(k[i][4]));
+        }
+        if (k.length < 1000) return done();
+        out.innerHTML = '<div class="hint">Fetched ' + dates.length + " days…</div>";
+        page(k[k.length - 1][0] + 1);
+      }).catch(function(e){ out.innerHTML = '<div class="err">Binance fetch failed: ' + esc(e.message) + " (network blocked in this preview — works on the downloaded/live page).</div>"; });
+  }
+  function done(){
+    if (closes.length < 100){ out.innerHTML = '<div class="err">Too little data returned.</div>'; return; }
+    SERIES[sym] = { dates: dates, closes: closes, src: "binance" };
+    saveSeriesCache(); refreshSeriesSelects(); fillPriorsTextarea();
+    out.innerHTML = '<div class="src">✅ ' + sym + ": " + closes.length + " days (" + dates[0] + " → " + dates[dates.length - 1] + ")</div>";
+  }
+  page(start);
+}
+function loadPaste(){
+  var name = el("data-paste-name").value.trim() || "pasted", txt = el("data-paste").value.trim(), out = el("data-paste-out");
+  if (!txt){ out.innerHTML = '<span class="err">Paste a CSV first.</span>'; return; }
+  var d = parseCSV(txt);
+  if (d.closes.length < 100){ out.innerHTML = '<span class="err">Need at least ~100 rows for a meaningful backtest (got ' + d.closes.length + ").</span>"; return; }
+  SERIES[name] = { dates: d.dates, closes: d.closes, src: "paste" };
+  saveSeriesCache(); refreshSeriesSelects(); fillPriorsTextarea();
+  out.innerHTML = '<div class="src">✅ ' + esc(name) + ": " + d.closes.length + " days (" + d.dates[0] + " → " + d.dates[d.dates.length - 1] + ")</div>";
+}
+function renderDataList(){
+  var elList = el("data-list"); if (!elList) return;
+  var names = Object.keys(SERIES).sort();
+  if (!names.length){ elList.innerHTML = '<span class="hint">Nothing loaded yet.</span>'; return; }
+  var h = "<table><tr><th>Series</th><th>Days</th><th>From</th><th>To</th><th>Source</th><th></th></tr>";
+  names.forEach(function(nm){
+    var s = SERIES[nm];
+    h += "<tr><td>" + esc(nm) + "</td><td>" + s.closes.length + "</td><td>" + esc(s.dates[0]) + "</td><td>" +
+      esc(s.dates[s.dates.length - 1]) + "</td><td>" + s.src + '</td><td><button class="btn ghost" onclick="dropSeries(\'' + esc(nm) + '\')">remove</button></td></tr>';
+  });
+  elList.innerHTML = h + "</table>";
+}
+function dropSeries(nm){ delete SERIES[nm]; saveSeriesCache(); refreshSeriesSelects(); fillPriorsTextarea(); }
+
+/* ================= init ================= */
+renderStructParams(); renderBtParams(); refreshSeriesSelects(); fillPriorsTextarea();
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+name: Refresh forecast data
+
+# Regenerates forecast-lab/data/*.csv (5y daily closes) every weekday evening
+# after the US market close (21:30 UTC = ~5:30 pm ET), and on demand.
+on:
+  schedule:
+    - cron: "30 21 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch fresh daily closes
+        run: bash forecast-lab/data/refresh-data.sh
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add forecast-lab/data/*.csv
+          if git diff --cached --quiet; then
+            echo "No data changes — nothing to commit."
+          else
+            git commit -m "forecast-lab: refresh daily close snapshots"
+            git push
+          fi
