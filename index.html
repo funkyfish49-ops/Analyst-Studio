@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- TopicCast Studio · causal-entropic edition (F = T·∇Sτ) + economics dashboard · content-sized tiles · 2026-10-31 -->
+<!-- TopicCast Studio · causal-entropic edition (F = T·∇Sτ) + economics dashboard · paced AV quotes · 2026-11-01 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -716,7 +716,7 @@ body.mode-desk #srctable table{min-width:0}
     </div>
     <div class="card">
       <h2>💹 Market data key <span class="dim" style="font-weight:400;font-size:12px">(optional)</span></h2>
-      <div class="hint">A free <b>Alpha Vantage</b> key powers the <b>Global stocks &amp; commodities</b> tile in the <b>Economics</b> tab — S&amp;P 500, world &amp; emerging equities, gold, silver and oil via ETF quotes. Get a free key at <b>alphavantage.co/support/#api-key</b> (25 requests/day; one dashboard refresh uses 6). Stored only in this browser, sent only to <code>www.alphavantage.co</code>.</div>
+      <div class="hint">A free <b>Alpha Vantage</b> key powers the <b>Global stocks &amp; commodities</b> tile in the <b>Economics</b> tab — S&amp;P 500, world &amp; emerging equities, gold, silver and oil via ETF quotes. Get a free key at <b>alphavantage.co/support/#api-key</b> (25 requests/day; one refresh uses 6, paced a few seconds apart to avoid rate-limiting). Stored only in this browser, sent only to <code>www.alphavantage.co</code>.</div>
       <input type="text" id="avkey" placeholder="Alpha Vantage API key (optional — Economics tab)" style="width:100%;min-width:240px" oninput="saveAVKey()">
     </div>
     <div class="card">
@@ -2994,14 +2994,23 @@ async function econMarkets() {
   var key = avKey();
   if (!key) return null; /* tile shows the optional-setup hint */
   var rows = [];
+  var econWait = function (ms) { return new Promise(function (res) { setTimeout(res, ms); }); };
   for (var i = 0; i < ECON_MARKETS.length; i++) {
     var m = ECON_MARKETS[i];
+    if (i) await econWait(3000); /* AV throttles bursts — pace one quote every 3s */
     var d = await fetch(ECON_AV_URL + m[0] + "&apikey=" + encodeURIComponent(key))
       .then(function (r) { return econFetchOk(r).json(); })
       .catch(function () { return null; });
-    if (!d) continue;
-    var row = econAVRow(d); /* throws on rate limit */
-    rows.push({ symbol: m[0], name: m[1], price: row.price, chg: row.chg, day: row.day });
+    var row = null;
+    try { if (d) row = econAVRow(d); } /* throws on rate limit */
+    catch (e) { /* throttled — wait out the burst window and retry this symbol once */
+      await econWait(8000);
+      d = await fetch(ECON_AV_URL + m[0] + "&apikey=" + encodeURIComponent(key))
+        .then(function (r) { return econFetchOk(r).json(); })
+        .catch(function () { return null; });
+      try { if (d) row = econAVRow(d); } catch (e2) { row = null; }
+    }
+    if (row) rows.push({ symbol: m[0], name: m[1], price: row.price, chg: row.chg, day: row.day });
   }
   if (!rows.length) throw mkErr("http", 0, "Alpha Vantage returned no quotes");
   return { asof: rows[0].day || "", rows: rows };
@@ -3126,7 +3135,7 @@ function renderEcon() {
     if (hasData && !d.markets && !avKey()) {
       msg = '💡 Optional: add a free <a href="' + ECON_AV_KEYPAGE + '" target="_blank" rel="noopener">Alpha Vantage key</a> in the <b>Settings</b> tab to add the 🌐 global stocks &amp; commodities tile (S&amp;P 500, world &amp; emerging equities, gold, silver, oil).';
     } else if (hasData && !d.markets && avKey()) {
-      msg = "⚠️ Global stocks &amp; commodities couldn't load — check the Alpha Vantage key in the <b>Settings</b> tab (free tier: 25 requests/day, one refresh uses 6).";
+      msg = "⚠️ Global stocks &amp; commodities couldn't load — most likely Alpha Vantage rate-limiting (free tier: 25 requests/day; wait a couple of minutes if you refreshed recently) or an invalid key — check it in the <b>Settings</b> tab.";
     } else if (!hasData) {
       msg = "No indicators loaded yet — press <b>⟳ Refresh indicators</b>. If you're in an embedded preview, network calls are blocked: open the live site instead.";
     }
