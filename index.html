@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- TopicCast Studio · causal-entropic edition (F = T·∇Sτ) + economics dashboard · paced AV quotes · 2026-11-01 -->
+<!-- TopicCast Studio · causal-entropic edition (F = T·∇Sτ) + economics dashboard + results ledger · 2026-11-01 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -267,6 +267,23 @@ a{color:var(--acc2)}
 /* ============================== monitor ============================== */
 .opppanel select{margin-top:2px}
 .monlegend{font-size:11.5px;color:var(--dim);margin-top:9px;line-height:1.6}
+/* ---- results tab: one-line opportunity ledger ---- */
+.resrow{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;padding:9px 6px;border-bottom:1px solid var(--line);cursor:pointer;line-height:1.6}
+.resrow:hover{background:rgba(255,255,255,.035)}
+.resrow .restitle{font-weight:700}
+.resrow .resmut{color:var(--dim);font-size:12px}
+.resnum{font-variant-numeric:tabular-nums;white-space:nowrap}
+.respos{color:var(--green)} .resneg{color:var(--red)}
+.reschip{display:inline-block;padding:1px 8px;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
+.reschip.open{background:rgba(0,150,255,.12);color:#7ec3ff;border:1px solid rgba(0,150,255,.35)}
+.reschip.won{background:rgba(61,220,151,.14);color:var(--green);border:1px solid rgba(61,220,151,.4)}
+.reschip.lost{background:rgba(255,107,107,.14);color:var(--red);border:1px solid rgba(255,107,107,.45)}
+.reschip.void{background:rgba(255,255,255,.08);color:var(--mut);border:1px solid rgba(255,255,255,.2)}
+.reschip.expired{background:rgba(255,194,75,.14);color:var(--amber);border:1px solid rgba(255,194,75,.4)}
+.rescat{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.6px;color:var(--mut);border:1px solid var(--line);white-space:nowrap}
+.resdet{padding:10px 8px 12px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.18);line-height:1.7;font-size:12.5px}
+.resdet .indrow{margin:4px -2px 0}
+.resbtns{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
 .monstatus.valid{color:var(--green)} .monstatus.evolved{color:var(--amber)} .monstatus.change{color:var(--red)}
 .monpoint{white-space:pre-wrap;margin-top:10px;font-size:14px;line-height:1.55;color:var(--txt)}
 .monpoint:empty{display:none}
@@ -427,6 +444,7 @@ body.mode-desk #srctable table{min-width:0}
     <button class="tab" id="tab-episode" onclick="showTab('episode')" disabled>Episode</button>
     <button class="tab" id="tab-analysts" onclick="showTab('analysts')">Analysts</button>
     <button class="tab" id="tab-monitor" onclick="showTab('monitor')">Monitor</button>
+    <button class="tab" id="tab-results" onclick="showTab('results')">Results</button>
     <button class="tab" id="tab-economics" onclick="showTab('economics')">Economics</button>
     <button class="tab" id="tab-experts" onclick="showTab('experts')">Experts</button>
     <button class="tab" id="tab-sources" onclick="showTab('sources')" disabled>Sources &amp; Dates</button>
@@ -654,6 +672,45 @@ body.mode-desk #srctable table{min-width:0}
     </div>
   </section>
 
+  <!-- ============ RESULTS ============ -->
+  <section class="view" id="view-results">
+    <div class="card">
+      <h2>🏁 Results</h2>
+      <div class="hint">Every opportunity the desk has ever produced — one line each, with entry, stop, target, the live price and profit / loss. Success is judged the way each category works: <b>stocks &amp; bonds</b> close themselves when the target or stop is crossed, <b>predictions</b> when the contract resolves (price ≈ 100¢ / 0¢), <b>odds &amp; sports</b> are resolved with Won / Lost (no universal price scale), and any position left open past its 10-day horizon completes as <b>expired</b>.</div>
+      <div class="row" style="flex-wrap:wrap;margin-top:10px">
+        <select id="res-cat" onchange="resultsRender()">
+          <option value="">All categories</option>
+          <option value="STOCKS">STOCKS</option>
+          <option value="PREDICTIONS">PREDICTIONS</option>
+          <option value="BONDS">BONDS</option>
+          <option value="OTHER">OTHER</option>
+        </select>
+        <select id="res-status" onchange="resultsRender()">
+          <option value="">All statuses</option>
+          <option value="open">Open</option>
+          <option value="won">Won</option>
+          <option value="lost">Lost</option>
+          <option value="void">Void</option>
+          <option value="expired">Expired</option>
+        </select>
+        <input id="res-q" placeholder="Filter by title or ticker…" oninput="resultsRender()" style="max-width:190px">
+        <select id="res-sort" onchange="resultsRender()">
+          <option value="new">Newest first</option>
+          <option value="old">Oldest first</option>
+          <option value="pnlBest">Best P&amp;L first</option>
+          <option value="pnlWorst">Worst P&amp;L first</option>
+          <option value="conf">Highest confidence</option>
+          <option value="horizon">Horizon end</option>
+        </select>
+        <button class="btn ghost small" onclick="resultsRefresh()"><span id="res-refresh-ic">⟳</span> Refresh</button>
+      </div>
+      <div class="hint" id="res-summary" style="margin-top:10px"></div>
+      <div class="errbox" id="reserr" style="display:none"></div>
+      <div id="reslist"></div>
+      <div class="notice" id="res-empty" style="display:none"></div>
+    </div>
+  </section>
+
   <!-- ============ ECONOMICS ============ -->
   <section class="view" id="view-economics">
     <div class="card">
@@ -770,6 +827,7 @@ body.mode-desk #srctable table{min-width:0}
       <p>The <b>📊 Monitor</b> tab tracks everything your latest episode claimed. Pick an entry from the <b>watchlist dropdown</b> — the <b>trading opportunities</b> from the analyst board (grouped into their trading categories: STOCKS / PREDICTIONS / BONDS / OTHER) alongside <b>Topics</b>, one entry per episode segment listed by its whole topic name; re-checked entries carry a status marker (✓ / ↻ / ✖). The right panel shows, top to bottom: the <b>verdict or point</b> (the call with its action badge and thesis tag, or the segment's point), the <b>quantitative proof</b> (entry, size, risk/reward, confidence — or the dated sources behind a topic), the <b>qualitative proof</b> (the case, for/against arguments, or the segment script), and a <b>still-valid check</b>. Press <b>Re-check with live search</b> and the <b>Monitor Analyst</b> agent searches the live web for what has changed since the episode was produced, then rules the item <b>STILL VALID</b>, <b>SHOULD CHANGE</b>, or <b>EVOLVED</b> — with a severity grade on the change impact: <b>HIGH</b> means the direction flipped (a buy is now a sell — requires immediate attention), <b>MEDIUM</b> means the call stands but entry, size or timing must change, <b>LOW</b> means minor nuance. The Monitor Analyst weighs the evidence with the same <b>advanced analytics toolkit</b> as the desk — causal vs. predictive claims, heterogeneous effects, emergent-behavior simulation, and data-quality checks — before ruling. Re-checks are saved with the episode, and any sources the Monitor Analyst finds are added to the Sources &amp; Dates registry. Producing a new episode starts a fresh watchlist.</p>
 
       <h3>Cloud sync &amp; track record</h3>
+      <p>The <b>🏁 Results</b> tab is the ledger of every opportunity the desk has ever produced — one line per idea, with a category filter, status filter, free-text filter and sort at the top, and a running summary of won / lost / void / expired / open with closed and open P&amp;L. Each line shows the entry price, stop, target, the current price and the position's profit / loss; press a line for the details behind it (decision, size, max loss, confidence, entropic F, the case, and how it closed). Positions are tracked the way their category works: <b>stock and bond</b> positions close themselves when the target or stop is crossed, <b>prediction-market</b> positions when the contract resolves (price ≈ 100¢ / 0¢), and <b>odds &amp; sports</b> positions are resolved with the Won / Lost buttons (odds have no universal price scale). Anything still open past its 10-day horizon completes as <b>expired</b>. Feed prices with the per-line <b>✎ Price</b> (type the quote) or <b>🔎 Live</b> (the desk agent searches the current price) — the same 📈 Position panel lives in the Monitor tab. Signed in, the ledger reads and writes your cloud track record directly; signed out it shows this device's current episode.</p>
       <p>The <b>Settings</b> tab has a <b>☁️ Cloud sync</b> card: sign in with Google and every episode you produce — podcast or analyst call — is saved to your Firebase cloud library, together with one trackable document per board opportunity and per episode topic. The <b>Monitor</b> tab doubles as your track record: each re-check appends to that item's cloud history, and the <b>🏆 Track record</b> row lets you resolve any opportunity as <b>Won</b>, <b>Lost</b> or <b>Void</b> — or reopen it — with the outcome saved with the episode and synced to the cloud. Press <b>Load cloud library</b> in Settings to bring any past episode back onto this device with its full watchlist and track record intact. Everything works offline too: without sign-in (or without a connection) the app runs entirely on this browser's local storage.</p>
 
       <h3>🌀 Entropic second opinion</h3>
@@ -959,12 +1017,13 @@ function countWords(s) { var t = String(s || "").trim(); return t ? t.split(/\s+
 
 /* ============================== tabs ============================== */
 function showTab(name) {
-  ["studio", "episode", "analysts", "monitor", "economics", "experts", "sources", "settings", "help"].forEach(function (t) {
+  ["studio", "episode", "analysts", "monitor", "results", "economics", "experts", "sources", "settings", "help"].forEach(function (t) {
     el("tab-" + t).classList.toggle("on", t === name);
     el("view-" + t).classList.toggle("on", t === name);
   });
   if (name === "analysts") renderAnalysts();
   if (name === "monitor") renderMonitor();
+  if (name === "results") resultsTabShown();
   if (name === "economics") econTabShown();
   if (name === "experts") renderExperts();
   if (name === "settings") renderCloudPanel();
@@ -3375,6 +3434,10 @@ function cloudEpisodeRecord(ep) {
 function cloudOppRecord(ep, x) {
   var mo = (ep.monitor && ep.monitor[x.id]) || null;
   var c = x.call || {};
+  /* position tracking (Results tab): the desk's execution strings parsed into numbers, plus live P&L state */
+  var pos = (mo && mo.pos) || {};
+  var pp = posParseCall(c, x.cat || c.category || "OTHER");
+  var pnl = posPnl(pp.dir, pp.entry, pos.last, pp.maxLoss, pp.stop, pp.sizeUsd);
   return {
     userId: S.cloudUser.uid, episodeId: ep.id, category: x.cat || c.category || "OTHER",
     title: String(x.title || c.asset || "Idea").slice(0, 150),
@@ -3388,6 +3451,15 @@ function cloudOppRecord(ep, x) {
     rationale: String(c.rationale || "").slice(0, 2000),
     forArgs: (c.forArgs || []).slice(0, 10), againstArgs: (c.againstArgs || []).slice(0, 10),
     isManagerPick: !!(ep.analysts && ep.analysts.manager && isManagerPick(c, ep.analysts)),
+    direction: pp.dir || "",
+    entryPrice: pp.entry, targetPrice: pp.target, stopPrice: pp.stop,
+    maxLossUsd: pp.maxLoss, sizeUsd: pp.sizeUsd,
+    horizonEndISO: posHorizon(ep.created),
+    lastPrice: (pos.last != null) ? pos.last : null,
+    lastPriceAsOf: String(pos.lastAsOf || "").slice(0, 10),
+    pnlPct: posRnd(pnl.pct), pnlUsd: posRnd(pnl.usd),
+    closedReason: String(pos.closedReason || "").slice(0, 12),
+    closedISO: String(pos.closedISO || "").slice(0, 10),
     entropic: (c.entropic && isFinite(c.entropic.F)) ? {
       F: Math.round(c.entropic.F * 1e4) / 1e4,
       gradS: Math.round(c.entropic.gradS * 1e4) / 1e4,
@@ -3473,8 +3545,24 @@ async function cloudSetOutcome(id) {
   if (!cloudEnabled() || !S.ep) return;
   var x = monitorById(id);
   if (!x || x.kind !== "opportunity") return;
-  var mo = (S.ep.monitor && S.ep.monitor[id]) || null;
-  var data = { updatedAt: FB.mod.fs.serverTimestamp() };
+  var ep = S.ep;
+  var mo = (ep.monitor && ep.monitor[id]) || null;
+  var pos = (mo && mo.pos) || {};
+  var pp = posParseCall(x.call, x.cat);
+  var pnl = posPnl(pp.dir, pp.entry, pos.last, pp.maxLoss, pp.stop, pp.sizeUsd);
+  var data = {
+    /* the full position-tracking state, so the Results tab reads live P&L straight from the doc */
+    direction: pp.dir || "",
+    entryPrice: pp.entry, targetPrice: pp.target, stopPrice: pp.stop,
+    maxLossUsd: pp.maxLoss, sizeUsd: pp.sizeUsd,
+    horizonEndISO: posHorizon(ep.created),
+    lastPrice: (pos.last != null) ? pos.last : null,
+    lastPriceAsOf: String(pos.lastAsOf || "").slice(0, 10),
+    pnlPct: posRnd(pnl.pct), pnlUsd: posRnd(pnl.usd),
+    closedReason: String(pos.closedReason || "").slice(0, 12),
+    closedISO: String(pos.closedISO || "").slice(0, 10),
+    updatedAt: FB.mod.fs.serverTimestamp()
+  };
   if (mo && mo.outcome) { data.status = mo.outcome; data.outcomeOn = mo.outcomeOn || ""; data.outcomeISO = mo.outcomeISO || ""; }
   else { data.status = "open"; data.outcomeOn = ""; data.outcomeISO = ""; }
   try {
@@ -3681,6 +3769,7 @@ function selectMonitor(id) { S.monitorSel = id; renderMonitor(); }
 function renderMonitor() {
   var board = el("monitor-board"), empty = el("monitor-empty");
   if (!board || !empty) return;
+  posCheckExpiry(); /* open positions past their 10-day horizon complete as expired */
   var items = monitorItems();
   if (!items.length) { board.style.display = "none"; empty.style.display = "block"; return; }
   board.style.display = "block"; empty.style.display = "none";
@@ -3840,6 +3929,29 @@ function renderMonitorItem(x) {
       (cloudEnabled() ? '<div class="hint" style="margin:8px 0 0">Outcomes sync to your cloud track record.</div>'
                       : '<div class="hint" style="margin:8px 0 0">Outcomes are saved with the episode — sign in under Settings → ☁️ Cloud sync to keep them in your cloud track record.</div>') +
       "</div>";
+    /* live position line: entry / stop / target / current price / P&L — tracked in the Results tab */
+    var pp = posParseCall(x.call, x.cat);
+    var pos = (a && a.pos) || {};
+    var pnl = posPnl(pp.dir, pp.entry, pos.last, pp.maxLoss, pp.stop, pp.sizeUsd);
+    var horizon = posHorizon(ep.created);
+    if (pp.dir && pp.decision !== "NO ENTRY") {
+      var pctHtml = (pnl.pct != null)
+        ? '<span class="' + (pnl.pct > 0 ? "respos" : (pnl.pct < 0 ? "resneg" : "")) + '">' + (pnl.pct >= 0 ? "+" : "") + pnl.pct.toFixed(1) + "%" +
+          (pnl.usd != null ? " (" + (pnl.usd >= 0 ? "+" : "") + "$" + Math.round(pnl.usd).toLocaleString() + ")" : "") + "</span>"
+        : "—";
+      html += '<div class="moncheck" style="margin-top:10px"><div class="monhead2"><h3>📈 Position</h3><span class="chips"><span class="chip">' +
+        "entry " + (pp.entry != null ? "<b>" + pp.entry + "</b>" : "—") +
+        " · stop " + (pp.stop != null ? "<b>" + pp.stop + "</b>" : "—") +
+        " · target " + (pp.target != null ? "<b>" + pp.target + "</b>" : "—") +
+        " · now " + (pos.last != null ? "<b>" + pos.last + "</b> (" + esc(pos.lastAsOf || "") + (pos.src ? ", " + esc(pos.src) : "") + ")" : "not priced yet") +
+        " · P&L " + pctHtml +
+        (horizon ? " · horizon ends " + horizon : "") + "</span></span></div>" +
+        '<div class="row" style="margin-top:10px">' +
+        '<button class="btn small" onclick="monPricePrompt(\'' + esc(x.id) + '\')">✎ Update price</button>' +
+        '<button class="btn small ghost" onclick="monLivePrice(\'' + esc(x.id) + '\')">🔎 Live-search price</button>' +
+        "</div>" +
+        '<div class="hint" style="margin:8px 0 0">Prices feed the 🏁 Results ledger — positions close themselves when the target or stop is crossed (stocks &amp; bonds) or the contract resolves (predictions), and expire when the horizon passes.</div></div>';
+    }
   }
   el("monmain").innerHTML = html;
 }
@@ -3971,16 +4083,466 @@ function markOutcome(id, outcome) {
   if (!ep) return;
   if (!ep.monitor) ep.monitor = {};
   var m = ep.monitor[id] || (ep.monitor[id] = {});
+  m.pos = m.pos || {};
   if (outcome === "reopen") {
     delete m.outcome; delete m.outcomeOn; delete m.outcomeISO;
+    delete m.pos.closedReason; delete m.pos.closedISO;
   } else {
     m.outcome = outcome;
     m.outcomeOn = todayHuman();
     m.outcomeISO = todayISO();
+    /* how the position completed: keep an auto-detected reason (target/stop/resolved), overwrite expiry, else manual */
+    if (!m.pos.closedReason || m.pos.closedReason === "expired" || m.pos.closedReason === "manual") {
+      m.pos.closedReason = "manual";
+      m.pos.closedISO = todayISO();
+    }
   }
   saveEpisode();
   renderMonitor();
   if (cloudEnabled()) cloudSetOutcome(id);
+}
+
+/* ============================== results / position tracking ============================== */
+/* One line per opportunity the desk has ever produced. Positions are judged the way their
+   category works: STOCKS/BONDS close on target/stop crossing, PREDICTIONS on contract
+   resolution (price ~1.00 / 0.00), OTHER (odds) resolve manually, everything expires after
+   its 10-day horizon. Pure functions first — they are unit-testable offline. */
+var RES = { items: null, loaded: false, loading: false, err: "", openRow: "", busy: "" };
+var RES_HORIZON_DAYS = 10;
+
+function posDirection(action) {
+  var s = String(action || "").toUpperCase();
+  if (/\b(BUY|LONG|BACK)\b/.test(s) || /BET\s*YES/.test(s)) return "long";
+  if (/\b(SELL|SHORT|FADE)\b/.test(s) || /BET\s*NO/.test(s)) return "short";
+  return "";
+}
+function posDecision(entry) {
+  var m = String(entry || "").toUpperCase().match(/^\s*(ENTER|CONDITIONAL|NO\s*ENTRY)/);
+  return m ? m[1].replace(/\s+/g, " ") : "";
+}
+function posBinary(v) { /* predictions prices live on a 0–100 (cents / %) scale → normalize to 0–1 */
+  if (v == null) return null;
+  return v <= 1 ? v : v / 100;
+}
+/* parse the desk's execution strings (price, entry, size, rr) into numbers — pure */
+function posParseCall(c, cat) {
+  c = c || {};
+  var rr = String(c.rr || ""), isBin = (cat === "PREDICTIONS");
+  var dm = rr.match(/target\s*\$?\s*([0-9][0-9,.]*)/i);
+  var sm = rr.match(/stop(?:\s*-?\s*loss)?\s*\$?\s*([0-9][0-9,.]*)/i);
+  var lm = rr.match(/max(?:imum)?\s*loss\s*\$?\s*([0-9][0-9,.]*)/i);
+  var zm = String(c.size || "").match(/\$\s*([0-9][0-9,.]*)/);
+  var entry = priceNum(c.price);
+  var target = dm ? priceNum(dm[1]) : null;
+  var stop = sm ? priceNum(sm[1]) : null;
+  if (isBin) { entry = posBinary(entry); target = posBinary(target); stop = posBinary(stop); }
+  return {
+    decision: posDecision(c.entry),
+    dir: posDirection(c.action),
+    entry: entry, target: target, stop: stop,
+    maxLoss: lm ? priceNum(lm[1]) : null,
+    sizeUsd: zm ? priceNum(zm[1]) : null
+  };
+}
+/* does a price level look like a real tradeable level for this entry? (guards against
+   rr strings that quote dollar P&L instead of price levels) */
+function posLevelPlausible(entry, level) {
+  if (entry == null || level == null || entry <= 0) return false;
+  var r = level / entry;
+  return r >= 0.05 && r <= 20;
+}
+/* auto-close verdict for a position at price `last` — pure */
+function posEval(cat, dir, entry, target, stop, last) {
+  if (entry == null || last == null || !dir) return { outcome: "", reason: "" };
+  if (cat === "OTHER") return { outcome: "", reason: "" }; /* odds: no universal price scale — resolve manually */
+  if (cat === "PREDICTIONS") {
+    if (last >= 0.985) return { outcome: dir === "long" ? "won" : "lost", reason: "resolved" };
+    if (last <= 0.015) return { outcome: dir === "long" ? "lost" : "won", reason: "resolved" };
+    return { outcome: "", reason: "" };
+  }
+  var tgtOk = posLevelPlausible(entry, target), stpOk = posLevelPlausible(entry, stop);
+  if (dir === "long") {
+    if (tgtOk && last >= target) return { outcome: "won", reason: "target" };
+    if (stpOk && last <= stop) return { outcome: "lost", reason: "stop" };
+  } else {
+    if (tgtOk && last <= target) return { outcome: "won", reason: "target" };
+    if (stpOk && last >= stop) return { outcome: "lost", reason: "stop" };
+  }
+  return { outcome: "", reason: "" };
+}
+/* mark-to-market P&L at price `last` — pure; usd is derived from the desk's own sizing
+   (units = max loss / stop distance for price trades, stake / entry for binary contracts) */
+function posPnl(dir, entry, last, maxLoss, stop, sizeUsd) {
+  if (entry == null || last == null || !dir || entry <= 0) return { pct: null, usd: null };
+  var pct = dir === "long" ? (last - entry) / entry * 100 : (entry - last) / entry * 100;
+  var units = null;
+  if (maxLoss != null && stop != null && Math.abs(entry - stop) > 1e-9) units = maxLoss / Math.abs(entry - stop);
+  else if (sizeUsd != null) units = sizeUsd / entry;
+  var usd = units == null ? null : (dir === "long" ? (last - entry) : (entry - last)) * units;
+  return { pct: pct, usd: usd };
+}
+function posHorizon(createdISO) { /* the desk's 10-day horizon, from the episode date */
+  var d = new Date(String(createdISO || "") + "T00:00:00Z");
+  if (isNaN(d.getTime())) return "";
+  d.setUTCDate(d.getUTCDate() + RES_HORIZON_DAYS);
+  return d.toISOString().slice(0, 10);
+}
+function posRnd(v) { return (v != null && isFinite(v)) ? Math.round(v * 100) / 100 : null; }
+
+/* local position state lives on the monitor assessment: m.pos = { last, lastAsOf, src, closedReason, closedISO } */
+function posSet(id, lastVal, src) { /* record a live price for a current-episode position */
+  var x = monitorById(id);
+  if (!x || x.kind !== "opportunity") return false;
+  if (lastVal == null || !isFinite(lastVal) || lastVal <= 0) return false;
+  var ep = S.ep;
+  if (!ep.monitor) ep.monitor = {};
+  var m = ep.monitor[id] || (ep.monitor[id] = {});
+  m.pos = m.pos || {};
+  m.pos.last = lastVal; m.pos.lastAsOf = todayISO(); m.pos.src = src || "manual";
+  var p = posParseCall(x.call, x.cat);
+  var ev = posEval(x.cat, p.dir, p.entry, p.target, p.stop, lastVal);
+  if (ev.outcome && !m.outcome) {
+    m.pos.closedReason = ev.reason; m.pos.closedISO = todayISO();
+    saveEpisode();
+    markOutcome(id, ev.outcome); /* sets outcome, saves, syncs, re-renders */
+    return true;
+  }
+  saveEpisode();
+  if (cloudEnabled()) cloudSetOutcome(id);
+  return true;
+}
+function posCheckExpiry() { /* open positions past their horizon complete as expired */
+  var ep = S.ep;
+  if (!ep) return;
+  var h = posHorizon(ep.created);
+  if (!h || h >= todayISO()) return;
+  if (!ep.monitor) ep.monitor = {};
+  var items = monitorItems(), changed = false;
+  items.forEach(function (x) {
+    if (x.kind !== "opportunity") return;
+    var m = ep.monitor[x.id] || (ep.monitor[x.id] = {});
+    if (m.outcome) return;
+    m.pos = m.pos || {};
+    if (m.pos.closedReason) return;
+    m.pos.closedReason = "expired"; m.pos.closedISO = todayISO();
+    changed = true;
+    if (cloudEnabled()) cloudSetOutcome(x.id);
+  });
+  if (changed) saveEpisode();
+}
+
+/* Monitor-tab wrappers: feed a price into the position tracker */
+function monPricePrompt(id) {
+  var v = prompt("Current market price for this position (plain number, e.g. 182.10 or 0.72):");
+  if (v == null) return;
+  var n = priceNum(v);
+  if (n == null || n <= 0) { alert("Enter a plain number, e.g. 182.10 or 0.72."); return; }
+  if (posSet(id, n, "manual")) renderMonitor();
+}
+async function monLivePrice(id) {
+  var x = monitorById(id);
+  if (!x) return;
+  if (!lsGet(LSKEY)) { alert("Add your Mistral API key in the Settings tab first."); return; }
+  logLine("🔎 Live-searching the current price of <b>" + esc(x.title) + "</b>…", "hi");
+  try {
+    var r = await agentTurn("You are a live market-data assistant. Search the web for the CURRENT market price of: " +
+      x.title + " (category " + (x.cat || "STOCKS") + ", the desk's call was " + x.action + "). " +
+      "Use a fresh web search and report the number exactly as quoted by the source. " +
+      "Answer in exactly this form on the first line: PRICE: <number> (as of YYYY-MM-DD) — then one short sentence naming the source, then the SOURCES block.", true);
+    var m = String(r.text || "").match(/PRICE:\s*\$?\s*([0-9][0-9,.]*)/i);
+    var n = m ? priceNum(m[1]) : null;
+    if (n == null || n <= 0) throw new Error("no price found in the reply");
+    if (posSet(id, n, "live search")) {
+      renderMonitor();
+      logLine("📈 " + esc(x.title) + " updated to <b>" + n + "</b>.", "ok");
+    }
+  } catch (e) {
+    logLine("Live price lookup failed: " + (e && e.message ? e.message : e), "err");
+  }
+}
+
+/* ---- the Results list: cloud docs first, current-episode fallback ---- */
+function resultsTabShown() {
+  posCheckExpiry();
+  resultsRender();
+  if (cloudEnabled() && !RES.loaded) resultsRefresh();
+}
+async function resultsRefresh() {
+  if (!cloudEnabled()) { resultsRender(); return; }
+  RES.loading = true; RES.err = ""; resultsRender();
+  try {
+    var fs = FB.mod.fs;
+    var q = fs.query(fs.collection(FB.db, "opportunities"), fs.where("userId", "==", S.cloudUser.uid));
+    var snap = await fs.getDocs(q);
+    RES.items = snap.docs.map(function (d) { return resDocItem(d.id, d.data() || {}); });
+    RES.loaded = true;
+  } catch (e) {
+    RES.err = "Cloud results failed to load: " + cloudErrMsg(e);
+  }
+  RES.loading = false;
+  resultsRender();
+}
+function resDocItem(id, v) { /* cloud opportunity doc → one results row (numbers may need re-parsing from the stored strings) */
+  var cat = v.category || "OTHER";
+  var p = posParseCall({ action: v.action, entry: v.entry, size: v.size, rr: v.rr, price: v.price }, cat);
+  var createdISO = (v.createdAt && v.createdAt.seconds) ? new Date(v.createdAt.seconds * 1000).toISOString().slice(0, 10) : "";
+  return {
+    key: id, srcDocId: id, epId: v.episodeId || "", created: createdISO,
+    title: v.title || "Idea", cat: cat, action: v.action || "", conf: v.confidence || "",
+    analyst: v.analyst || "", decision: p.decision, dir: (v.direction || p.dir) || "",
+    entry: (v.entryPrice != null) ? v.entryPrice : p.entry,
+    target: (v.targetPrice != null) ? v.targetPrice : p.target,
+    stop: (v.stopPrice != null) ? v.stopPrice : p.stop,
+    maxLoss: (v.maxLossUsd != null) ? v.maxLossUsd : p.maxLoss,
+    sizeUsd: (v.sizeUsd != null) ? v.sizeUsd : p.sizeUsd,
+    horizon: v.horizonEndISO || posHorizon(createdISO),
+    last: (v.lastPrice != null) ? v.lastPrice : null, lastAsOf: v.lastPriceAsOf || "",
+    pnlPct: (v.pnlPct != null) ? v.pnlPct : null, pnlUsd: (v.pnlUsd != null) ? v.pnlUsd : null,
+    outcome: (v.status === "won" || v.status === "lost" || v.status === "void") ? v.status : "",
+    closedReason: v.closedReason || "", closedISO: v.closedISO || "", outcomeOn: v.outcomeOn || "",
+    entropicF: (v.entropic && isFinite(v.entropic.F)) ? v.entropic.F : null,
+    rationale: v.rationale || "", forN: (v.forArgs || []).length, againstN: (v.againstArgs || []).length,
+    checksN: (v.checks || []).length, isManagerPick: !!v.isManagerPick, src: "cloud"
+  };
+}
+function resultsLocalItems() { /* signed-out / offline fallback: the current episode's opportunities */
+  var ep = S.ep, out = [];
+  if (!ep) return out;
+  monitorItems().forEach(function (x) {
+    if (x.kind !== "opportunity") return;
+    var m = (ep.monitor && ep.monitor[x.id]) || {};
+    var pos = m.pos || {};
+    var p = posParseCall(x.call, x.cat);
+    var pnl = posPnl(p.dir, p.entry, pos.last, p.maxLoss, p.stop, p.sizeUsd);
+    out.push({
+      key: x.id, srcDocId: "", epId: ep.id, created: ep.created || "",
+      title: x.title, cat: x.cat || "OTHER", action: x.action || "", conf: x.conf || "",
+      analyst: x.analyst || "", decision: p.decision, dir: p.dir,
+      entry: p.entry, target: p.target, stop: p.stop, maxLoss: p.maxLoss, sizeUsd: p.sizeUsd,
+      horizon: posHorizon(ep.created),
+      last: (pos.last != null) ? pos.last : null, lastAsOf: pos.lastAsOf || "",
+      pnlPct: pnl.pct, pnlUsd: pnl.usd,
+      outcome: m.outcome || "", closedReason: pos.closedReason || "", closedISO: pos.closedISO || "",
+      outcomeOn: m.outcomeOn || "",
+      entropicF: (x.call && x.call.entropic && isFinite(x.call.entropic.F)) ? x.call.entropic.F : null,
+      rationale: x.rationale || "", forN: (x.forArgs || []).length, againstN: (x.againstArgs || []).length,
+      checksN: 0, isManagerPick: false, src: "local"
+    });
+  });
+  return out;
+}
+function resStatus(it) { return it.outcome || (it.closedReason === "expired" ? "expired" : "open"); }
+function resLocalIdFor(it) { /* map a cloud row back to the loaded episode's monitor item, if any */
+  if (!S.ep || !it.srcDocId) return "";
+  var items = monitorItems();
+  for (var i = 0; i < items.length; i++) {
+    var x = items[i];
+    if (x.kind === "opportunity" && cloudDocIdForItem(S.ep, x) === it.srcDocId) return x.id;
+  }
+  return "";
+}
+function resFind(key) {
+  var items = (RES.items && RES.items.length) ? RES.items : resultsLocalItems();
+  for (var i = 0; i < items.length; i++) if (items[i].key === key) return items[i];
+  return null;
+}
+function resultsRender() {
+  var list = el("reslist");
+  if (!list) return;
+  posCheckExpiry();
+  var useCloud = !!(RES.items && RES.items.length);
+  var items = useCloud ? RES.items : resultsLocalItems();
+  /* merge in the loaded episode's freshest local state (prices/outcomes set since the cloud query) */
+  if (useCloud) {
+    var fresh = resultsLocalItems();
+    fresh.forEach(function (f) {
+      var ep = S.ep;
+      var xm = monitorById(f.key);
+      if (!ep || !xm) return;
+      var m = (ep.monitor && ep.monitor[f.key]) || null;
+      if (!m) return;
+      var docId = cloudDocIdForItem(ep, xm);
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].srcDocId === docId) {
+          items[i].last = f.last; items[i].lastAsOf = f.lastAsOf;
+          items[i].pnlPct = f.pnlPct; items[i].pnlUsd = f.pnlUsd;
+          items[i].outcome = f.outcome; items[i].closedReason = f.closedReason;
+          items[i].closedISO = f.closedISO; items[i].outcomeOn = f.outcomeOn;
+        }
+      }
+    });
+  }
+  var cat = el("res-cat").value, st = el("res-status").value;
+  var q = el("res-q").value.trim().toLowerCase(), sort = el("res-sort").value;
+  var rows = items.filter(function (it) {
+    if (cat && it.cat !== cat) return false;
+    if (st && resStatus(it) !== st) return false;
+    if (q && (it.title + " " + it.action + " " + it.analyst).toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+  rows.sort(function (a, b) {
+    if (sort === "old") return String(a.created).localeCompare(String(b.created));
+    if (sort === "pnlBest") return (b.pnlPct || -1e9) - (a.pnlPct || -1e9);
+    if (sort === "pnlWorst") return (a.pnlPct == null ? 1e9 : a.pnlPct) - (b.pnlPct == null ? 1e9 : b.pnlPct);
+    if (sort === "conf") return (parseFloat(b.conf) || 0) - (parseFloat(a.conf) || 0);
+    if (sort === "horizon") return String(a.horizon || "9999").localeCompare(String(b.horizon || "9999"));
+    return String(b.created).localeCompare(String(a.created));
+  });
+  /* summary line */
+  var won = 0, lost = 0, voided = 0, expired = 0, open = 0, closedUsd = 0, openUsd = 0;
+  items.forEach(function (it) {
+    var s = resStatus(it);
+    if (s === "won") { won++; if (it.pnlUsd != null) closedUsd += it.pnlUsd; }
+    else if (s === "lost") { lost++; if (it.pnlUsd != null) closedUsd += it.pnlUsd; }
+    else if (s === "void") voided++;
+    else if (s === "expired") expired++;
+    else { open++; if (it.pnlUsd != null) openUsd += it.pnlUsd; }
+  });
+  var sum = el("res-summary");
+  sum.innerHTML = items.length
+    ? "<b>" + items.length + "</b> opportunities · <span class='respos'>" + won + " won</span> · <span class='resneg'>" + lost + " lost</span> · " + voided + " void · " + expired + " expired · " + open + " open" +
+      " · closed P&L <b class='" + (closedUsd >= 0 ? "respos" : "resneg") + "'>" + (closedUsd >= 0 ? "+" : "") + "$" + Math.round(closedUsd).toLocaleString() + "</b>" +
+      (open ? " · open mark-to-market <b class='" + (openUsd >= 0 ? "respos" : "resneg") + "'>" + (openUsd >= 0 ? "+" : "") + "$" + Math.round(openUsd).toLocaleString() + "</b>" : "") +
+      (useCloud ? " · cloud library" : " · this device")
+    : "";
+  var errBox = el("reserr");
+  if (RES.err) { errBox.style.display = "block"; errBox.textContent = RES.err; }
+  else errBox.style.display = "none";
+  var empty = el("res-empty");
+  if (!rows.length) {
+    list.innerHTML = "";
+    empty.style.display = "block";
+    empty.innerHTML = items.length
+      ? "No opportunities match the current filter."
+      : "No opportunities yet — run the desk in the <b>Analysts</b> tab, or sign in and press <b>⟳ Refresh</b> to load your cloud track record.";
+    return;
+  }
+  empty.style.display = "none";
+  var html = "";
+  rows.forEach(function (it) { html += resRowHtml(it); });
+  list.innerHTML = html;
+  var ic = el("res-refresh-ic");
+  if (ic) ic.textContent = RES.loading ? "⏳" : "⟳";
+}
+function resPctHtml(it) {
+  if (it.pnlPct == null) return "";
+  var cls = it.pnlPct > 0 ? "respos" : (it.pnlPct < 0 ? "resneg" : "");
+  var usd = (it.pnlUsd != null) ? " (" + (it.pnlUsd >= 0 ? "+" : "") + "$" + Math.round(it.pnlUsd).toLocaleString() + ")" : "";
+  return '<span class="resnum ' + cls + '">' + (it.pnlPct >= 0 ? "+" : "") + it.pnlPct.toFixed(1) + "%" + usd + "</span>";
+}
+function resNum(v, dec) { return (v == null) ? "—" : (+v).toFixed(dec == null ? 2 : dec); }
+function resRowHtml(it) {
+  var s = resStatus(it);
+  var line = '<div class="resrow" onclick="resToggle(\'' + esc(it.key) + '\')">' +
+    '<span class="rescat">' + esc(it.cat) + "</span>" +
+    '<span class="resmut resnum">' + esc(it.created || "—") + "</span>" +
+    '<span class="restitle">' + esc(it.title) + "</span>" +
+    '<span class="resmut">' + esc(it.action || "") + (it.decision ? " · " + esc(it.decision) : "") + "</span>" +
+    '<span class="resmut">entry <b class="resnum">' + resNum(it.entry) + "</b></span>" +
+    '<span class="resmut">now <b class="resnum">' + (it.last != null ? resNum(it.last) : "—") + (it.lastAsOf ? " <span style='font-weight:400'>(" + esc(it.lastAsOf) + ")</span>" : "") + "</b></span>" +
+    '<span class="resmut">stop <b class="resnum">' + resNum(it.stop) + "</b></span>" +
+    '<span class="resmut">target <b class="resnum">' + resNum(it.target) + "</b></span>" +
+    resPctHtml(it) +
+    '<span class="reschip ' + s + '">' + s + "</span>" +
+    '<span class="resbtns">';
+  if (s === "open" && it.decision !== "NO ENTRY" && it.dir) {
+    line += '<button class="btn small ghost" onclick="event.stopPropagation();resPricePrompt(\'' + esc(it.key) + '\')">✎ Price</button>' +
+      '<button class="btn small ghost" onclick="event.stopPropagation();resLivePrice(\'' + esc(it.key) + '\')">' + (RES.busy === it.key ? "⏳" : "🔎 Live") + "</button>";
+  }
+  if (it.outcome) line += '<button class="btn small ghost" onclick="event.stopPropagation();resResolve(\'' + esc(it.key) + '\',\'reopen\')">↩</button>';
+  else if (it.decision !== "NO ENTRY") line += '<button class="btn small ghost" title="Won" onclick="event.stopPropagation();resResolve(\'' + esc(it.key) + '\',\'won\')">✅</button>' +
+    '<button class="btn small ghost" title="Lost" onclick="event.stopPropagation();resResolve(\'' + esc(it.key) + '\',\'lost\')">❌</button>' +
+    '<button class="btn small ghost" title="Void" onclick="event.stopPropagation();resResolve(\'' + esc(it.key) + '\',\'void\')">⊘</button>';
+  line += "</span></div>";
+  if (RES.openRow === it.key) {
+    var how = it.closedReason ? ({ target: "target hit", stop: "stop hit", resolved: "contract resolved", expired: "horizon passed — expired unresolved", manual: "resolved manually" }[it.closedReason] || it.closedReason) : "";
+    line += '<div class="resdet"><div class="indrow"><span class="lbl">Call</span><span class="val">' + esc(it.action || "—") + " · " + esc(it.conf || "—") + " confidence · " + esc(it.analyst || "desk") + (it.isManagerPick ? " · manager pick" : "") + "</span></div>" +
+      '<div class="indrow"><span class="lbl">Decision</span><span class="val">' + esc(it.decision || "—") + " · size " + (it.sizeUsd != null ? "$" + Math.round(it.sizeUsd).toLocaleString() : "—") + " · max loss " + (it.maxLoss != null ? "$" + Math.round(it.maxLoss).toLocaleString() : "—") + "</span></div>" +
+      '<div class="indrow"><span class="lbl">Horizon</span><span class="val">' + esc(it.horizon || "—") + (how ? " · <b>" + esc(how) + (it.closedISO ? " on " + esc(it.closedISO) : (it.outcomeOn ? " on " + esc(it.outcomeOn) : "")) + "</b>" : "") + "</span></div>" +
+      '<div class="indrow"><span class="lbl">Score</span><span class="val">' + (it.entropicF != null ? "🌀 F " + it.entropicF.toFixed(2) + (it.entropicF >= 0 ? " (options kept open)" : " (options foreclosed)") : "not scored") + " · " + it.checksN + " re-check" + (it.checksN === 1 ? "" : "s") + "</span></div>" +
+      (it.rationale ? '<div class="indrow"><span class="lbl">Case</span><span class="val">' + esc(String(it.rationale).slice(0, 400)) + "</span></div>" : "") +
+      '<div class="indrow"><span class="lbl">Args</span><span class="val">for ' + it.forN + " · against " + it.againstN + "</span></div></div>";
+  }
+  return line;
+}
+function resToggle(key) { RES.openRow = (RES.openRow === key) ? "" : key; resultsRender(); }
+function resPricePrompt(key) {
+  var v = prompt("Current market price for this position (plain number, e.g. 182.10 or 0.72):");
+  if (v == null) return;
+  var n = priceNum(v);
+  if (n == null || n <= 0) { alert("Enter a plain number, e.g. 182.10 or 0.72."); return; }
+  resPriceUpdate(key, n, "manual");
+}
+async function resPriceUpdate(key, n, src) {
+  var it = resFind(key);
+  if (!it) return;
+  var pnl = posPnl(it.dir, it.entry, n, it.maxLoss, it.stop, it.sizeUsd);
+  var ev = posEval(it.cat, it.dir, it.entry, it.target, it.stop, n);
+  it.last = n; it.lastAsOf = todayISO(); it.pnlPct = posRnd(pnl.pct); it.pnlUsd = posRnd(pnl.usd);
+  if (ev.outcome && !it.outcome) { it.outcome = ev.outcome; it.closedReason = ev.reason; it.closedISO = todayISO(); }
+  /* persist first (episode state + cloud doc), then re-render so the list shows the fresh state */
+  var localId = resLocalIdFor(it);
+  if (localId) { posSet(localId, n, src); resultsRender(); return; }
+  if (it.src === "local") { posSet(it.key, n, src); resultsRender(); return; }
+  if (cloudEnabled() && it.srcDocId) {
+    var data = {
+      lastPrice: n, lastPriceAsOf: todayISO(),
+      pnlPct: it.pnlPct, pnlUsd: it.pnlUsd,
+      closedReason: it.closedReason || "", closedISO: it.closedISO || "",
+      updatedAt: FB.mod.fs.serverTimestamp()
+    };
+    if (it.outcome) { data.status = it.outcome; data.outcomeOn = it.outcomeOn || todayHuman(); data.outcomeISO = todayISO(); }
+    try {
+      await FB.mod.fs.updateDoc(FB.mod.fs.doc(FB.db, "opportunities", it.srcDocId), data);
+    } catch (e) {
+      RES.err = "Cloud position update failed: " + cloudErrMsg(e);
+    }
+  }
+  resultsRender();
+}
+async function resResolve(key, oc) {
+  var it = resFind(key);
+  if (!it) return;
+  if (oc === "reopen") { it.outcome = ""; it.closedReason = ""; it.closedISO = ""; }
+  else { it.outcome = oc; it.closedReason = (it.closedReason && it.closedReason !== "expired") ? it.closedReason : "manual"; it.closedISO = todayISO(); }
+  var localId = resLocalIdFor(it);
+  if (localId) { markOutcome(localId, oc); resultsRender(); return; }
+  if (it.src === "local") { markOutcome(it.key, oc); resultsRender(); return; }
+  if (cloudEnabled() && it.srcDocId) {
+    var data = {
+      status: (oc === "reopen") ? "open" : oc,
+      outcomeOn: (oc === "reopen") ? "" : todayHuman(),
+      outcomeISO: (oc === "reopen") ? "" : todayISO(),
+      closedReason: it.closedReason || "", closedISO: it.closedISO || "",
+      updatedAt: FB.mod.fs.serverTimestamp()
+    };
+    try {
+      await FB.mod.fs.updateDoc(FB.mod.fs.doc(FB.db, "opportunities", it.srcDocId), data);
+    } catch (e) {
+      RES.err = "Cloud outcome update failed: " + cloudErrMsg(e);
+    }
+  }
+  resultsRender();
+}
+async function resLivePrice(key) {
+  var it = resFind(key);
+  if (!it) return;
+  if (!lsGet(LSKEY)) { alert("Add your Mistral API key in the Settings tab first."); return; }
+  RES.busy = key; resultsRender();
+  try {
+    var prompt = "You are a live market-data assistant. Search the web for the CURRENT market price of: " +
+      it.title + " (category " + it.cat + ", the desk's call was " + it.action + ", entry decision " + (it.decision || "n/a") + "). " +
+      "Use a fresh web search and report the number exactly as quoted by the source. " +
+      "Answer in exactly this form on the first line: PRICE: <number> (as of YYYY-MM-DD) — then one short sentence naming the source, then the SOURCES block.";
+    var r = await agentTurn(prompt, true);
+    var m = String(r.text || "").match(/PRICE:\s*\$?\s*([0-9][0-9,.]*)/i);
+    var n = m ? priceNum(m[1]) : null;
+    if (n == null || n <= 0) throw new Error("no price found in the reply");
+    await resPriceUpdate(key, n, "live search");
+  } catch (e) {
+    alert("Live price lookup failed: " + (e && e.message ? e.message : e));
+  }
+  RES.busy = ""; resultsRender();
 }
 
 /* ============================== episode rendering ============================== */
