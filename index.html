@@ -1,3 +1,4 @@
+
 <!doctype html>
 <!-- TopicCast Studio · causal-entropic edition (F = T·∇Sτ) + economics dashboard + results ledger + country context · 2026-11-02 -->
 <html lang="en">
@@ -58,6 +59,10 @@ input[type=text]:focus,select:focus,textarea:focus{border-color:var(--acc2)}
 .btn.fail{background:var(--panel2);border:1px solid var(--red);color:var(--red);box-shadow:none}
 .btn.fail:hover{transform:translateY(-1px)}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+/* Results filter row: content-sized controls sharing ONE line on desktop;
+   the 760px breakpoint and body.mode-phone restore the stacked full-width look */
+.resfilters select{width:auto;min-width:0}
+.resfilters input[type=text]{width:190px;max-width:190px}
 .agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:12px;margin-top:8px}
 .agent{background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:13px 14px}
 .agent .ahead{display:flex;align-items:center;gap:9px}
@@ -337,6 +342,7 @@ body{-webkit-tap-highlight-color:transparent}
   .card .hint{font-size:12.5px}
   /* 16px inputs stop iOS Safari auto-zoom on focus */
   input[type=text],input[type=number],select,textarea{font-size:16px}
+  .resfilters select,.resfilters input[type=text]{width:100%;max-width:100%}
   .agents{grid-template-columns:1fr}
   .voicegrid{grid-template-columns:1fr}
   .player{gap:10px}
@@ -399,6 +405,7 @@ body.mode-phone .callnote,body.mode-phone .callchart,body.mode-phone .impanel{fl
 body.mode-phone .indgrid .indcard{max-width:none}
 body.mode-phone #srctable{overflow-x:auto;-webkit-overflow-scrolling:touch}
 body.mode-phone #srctable table{min-width:640px}
+body.mode-phone .resfilters select,body.mode-phone .resfilters input[type=text]{width:100%;max-width:100%}
 body.mode-desk .analystlayout{display:flex;gap:0;align-items:stretch;flex-wrap:wrap}
 body.mode-desk .opppanel{position:sticky;top:96px;flex:0 1 280px;min-width:240px;max-width:340px;border-right:4px solid var(--line2);border-bottom:1px solid var(--line);margin-bottom:0}
 body.mode-desk .anamain{padding-left:16px;min-width:280px}
@@ -692,7 +699,7 @@ body.mode-desk #srctable table{min-width:0}
   <section class="view" id="view-results">
     <div class="card">
       <h2>🏁 Results</h2>
-      <div class="row" style="flex-wrap:wrap;margin-top:10px">
+      <div class="row resfilters" style="margin-top:10px">
         <select id="res-cat" onchange="resultsRender()">
           <option value="">All categories</option>
           <option value="STOCKS">STOCKS</option>
@@ -708,7 +715,7 @@ body.mode-desk #srctable table{min-width:0}
           <option value="void">Void</option>
           <option value="expired">Expired</option>
         </select>
-        <input id="res-q" placeholder="Filter by title or ticker…" oninput="resultsRender()" style="max-width:190px">
+        <input id="res-q" placeholder="Filter by title or ticker…" oninput="resultsRender()">
         <select id="res-sort" onchange="resultsRender()">
           <option value="new">Newest first</option>
           <option value="old">Oldest first</option>
