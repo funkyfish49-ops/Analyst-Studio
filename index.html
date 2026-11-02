@@ -782,8 +782,7 @@ body.mode-desk #srctable table{min-width:0}
         <input type="text" id="key" placeholder="Mistral API key" style="flex:1;min-width:240px" oninput="saveKey()">
         <select id="model" style="width:auto" onchange="saveModel()">
           <option value="mistral-small-latest" selected>mistral-small-latest — Small 4 (fast)</option>
-          <option value="mistral-large-4">mistral-large-4 — Large 4 (best)</option>
-          <option value="mistral-medium-latest">mistral-medium-latest — Medium 3.5 (legacy)</option>
+          <option value="mistral-medium-latest">mistral-medium-latest — Medium 3.5 (best with web search, legacy)</option>
         </select>
       </div>
     </div>
@@ -1051,15 +1050,17 @@ function showTab(name) {
 function saveKey() { lsSet(LSKEY, el("key").value.trim()); }
 function saveModel() { lsSet(LSMODEL, el("model").value); }
 
-/* Mistral retired Large 3 (mistral-large-2512) on 2026-10-31 and the mistral-large-latest alias still points at the dead snapshot,
-   so a stored model may no longer exist at the API. Map what we can, reset the rest, and say so in the log. */
+/* A stored model may be dead at the API (Mistral retired Large 3 / mistral-large-2512 on 2026-10-31 and the
+   mistral-large-latest alias still points at the corpse) or unusable for this app (mistral-large-4 exists but
+   does not support builtin connectors — error 3004 — so the research agents' web_search fails). Map it to a
+   model that can run the research agents, reset the rest, and say so in the log. */
 function modelMigrate() {
   var model = lsGet(LSMODEL), msel = el("model");
   if (!model) return;
   for (var mi = 0; mi < msel.options.length; mi++) if (msel.options[mi].value === model) { msel.value = model; return; }
-  var mapped = model.indexOf("mistral-large") === 0 ? "mistral-large-4" : msel.options[0].value;
+  var mapped = model.indexOf("mistral-large") === 0 ? "mistral-medium-latest" : msel.options[0].value;
   msel.value = mapped; lsSet(LSMODEL, mapped);
-  logLine("Model " + model + " no longer exists at Mistral — switched to " + mapped + " (pick a different one in the Settings tab).", "err");
+  logLine("Model " + model + " can't run the research agents (retired at Mistral, or no built-in web search) — switched to " + mapped + ". Pick a different one in the Settings tab.", "err");
 }
 function deskMinsSetting() { var v = parseFloat(el("analysts-mins") ? el("analysts-mins").value : ""); return v > 0 ? v : 5; }
 function saveDeskMins() { var v = deskMinsSetting(); if (v > 0) lsSet(LSDESK, String(v)); }
@@ -1116,7 +1117,7 @@ async function apiCall(inputs, tools) {
         var t = ""; try { t = await r.text(); } catch (e2) {}
         if (r.status === 401 || r.status === 403) throw mkErr("auth", r.status, t || "Invalid API key");
         var pj = null; try { pj = JSON.parse(t); } catch (e3) {}
-        if (pj && pj.message && (pj.code === 3040 || /does not exist/i.test(pj.message))) throw mkErr("model", pj.code || 3040, pj.message);
+        if (pj && pj.message && (pj.code === 3040 || pj.code === 3004 || /does not exist/i.test(pj.message) || /builtin connectors/i.test(pj.message))) throw mkErr("model", pj.code || 3040, pj.message);
         throw mkErr("http", r.status, t || ("HTTP " + r.status));
       }
       return await r.json();
@@ -2643,7 +2644,7 @@ async function analyzeOpportunity() {
       analyzeFailShow("Analysis failed \u2014 API key rejected (" + (e.message || "") + "). Check your Mistral key in the Settings tab.");
     } else if (e && e.kind === "model") {
       showGenError("Mistral rejected the selected model: " + (e.message || "") + " — open the Settings tab and pick a current model.");
-      analyzeFailShow("Analysis failed \u2014 Mistral rejected the selected model: " + (e.message || "") + " Open the <b>Settings</b> tab and pick a current model (mistral-small-latest or mistral-large-4).");
+      analyzeFailShow("Analysis failed \u2014 Mistral rejected the selected model: " + (e.message || "") + " Open the <b>Settings</b> tab and pick a model that supports web search (mistral-small-latest or mistral-medium-latest).");
     } else if (e && e.kind === "empty") {
       showGenError(e.message || "Empty response from the model.");
       analyzeFailShow("Analysis failed \u2014 " + (e.message || "Empty response from the model."));
