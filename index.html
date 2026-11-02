@@ -628,6 +628,7 @@ body.mode-desk #srctable table{min-width:0}
         </div>
         <div class="mut" id="analysts-ctxhint" style="font-size:12.5px;margin-top:8px">Auto-detect — the desk infers the country from the symbol (exchange suffix or market keywords); plain US tickers default to the United States.</div>
       </div>
+      <div class="errbox" id="analysts-err" style="display:none;margin-top:12px"></div>
       <div class="notice" id="analysts-empty" style="display:none;margin-top:12px">No analyst board yet — press <b>Analysts Call</b> above (or <b>Produce today's call</b> in the <b>Settings</b> tab) to run today's Trading Analyst Pipeline, or type a single opportunity above, pick its category, set its country context with <b>🌍 Context</b> if it trades outside the US, and press <b>Analyze</b> for a one-idea research, debate and verdict.</div>
 
       <div id="analysts-board" style="display:none">
@@ -2331,6 +2332,13 @@ function analystsCtxHint() {
 function analyzeIdle() { var b = el("analysts-analyze"); b.disabled = false; b.className = "btn"; b.innerHTML = "\uD83D\uDD0D Analyze"; b.title = "Run the desk on this opportunity"; }
 function analyzeWait() { var b = el("analysts-analyze"); b.disabled = true; b.className = "btn wait"; b.innerHTML = '<span class="bspin"></span> Analyzing\u2026'; b.title = "Analysis in progress \u2014 desk research \u2192 debate \u2192 verdict"; }
 function analyzeFail() { var b = el("analysts-analyze"); b.disabled = false; b.className = "btn fail"; b.innerHTML = "\u2757 Failed \u2014 retry"; b.title = "The last analysis failed \u2014 press to run it again"; }
+/* analysis failures print HERE on the Analysts tab — the red error box and the production log live on the Studio tab,
+   so without this a failed run is silent to whoever is looking at the Analyze form */
+function analyzeFailShow(msg) {
+  logLine(msg, "err");
+  var b = el("analysts-err");
+  if (b) { b.style.display = "block"; b.innerHTML = esc(msg) + ' <span style="opacity:.65">\u2014 the full production log sits at the bottom of the <b>Studio</b> tab.</span>'; }
+}
 /* fallback when the manager delivers a verdict but NO CALL DATA entry — typical for a symbol that cannot be identified (e.g. bare "mp1"): render the verdict as a NO ENTRY idea instead of failing the run */
 function mgrFallbackCall(opp, cat, reason) {
   var c = (cat === "PREDICTIONS" || cat === "BONDS" || cat === "OTHER") ? cat : "STOCKS";
@@ -2451,6 +2459,7 @@ async function analyzeOpportunity() {
     return;
   }
   analyzeWait();
+  var aerr = el("analysts-err"); if (aerr) { aerr.style.display = "none"; aerr.innerHTML = ""; }
   el("analysts-call").disabled = true;
   el("analysts-go").disabled = true;
   var ep = {
@@ -2591,11 +2600,14 @@ async function analyzeOpportunity() {
       agentsOf(ep).forEach(function (a) { if (ep.agents[a.id] && ep.agents[a.id].status === "run") setAgent(ep, a.id, "off", "stopped"); });
     } else if (e && e.kind === "auth") {
       showGenError("API key rejected (" + (e.message || "") + "). Check your Mistral key and try again.");
+      analyzeFailShow("Analysis failed \u2014 API key rejected (" + (e.message || "") + "). Check your Mistral key in the Settings tab.");
     } else if (e && e.kind === "empty") {
       showGenError(e.message || "Empty response from the model.");
+      analyzeFailShow("Analysis failed \u2014 " + (e.message || "Empty response from the model."));
     } else {
       var msg = e && e.message ? e.message : String(e);
       showGenError("Analysis failed: " + msg, !!(e && (e.kind === "network" || e.kind === "retry")));
+      analyzeFailShow("Analysis failed \u2014 " + msg);
       agentsOf(ep).forEach(function (a) { if (ep.agents[a.id] && ep.agents[a.id].status === "run") setAgent(ep, a.id, "error", "failed"); });
     }
     /* waiting indicator resolves: ❗ on failure, back to 🔍 when the user stopped the run */
