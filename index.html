@@ -834,7 +834,7 @@ body.mode-desk #srctable table{min-width:0}
       </ul>
 
       <h3>The Analysts tab</h3>
-      <p>The <b>📈 Analysts</b> tab runs the <b>Trading Analyst Pipeline</b> for today's date: the <b>Market Scanner</b> pulls the day's analyst calls, the <b>CFA Analyst Desk</b> turns them into trade recommendations (market-native action verbs, ENTER / NO ENTRY decisions, confidence, position size and risk/reward in dollars on a $100k book), the <b>Debating Researchers</b> argue every idea for and against, and the <b>Investment Manager</b> makes her trade choice. The board shows her choice and her point-form <b>Research Report</b> — concise bullets of statistical indicators and precise qualitative statements, with key figures bolded and important dates and trading terms highlighted — press <b>Hear her take</b> to hear it spoken in her voice — tap it again to pause the take (the badge flips to a pause button while it plays), and once more to resume where it left off — plus a tile per CFA recommendation; pressing a tile loads that idea's for/against arguments. At the top of the tab there are two ways to run the desk: <b>Analysts Call</b> produces today's full call, and next to it the <b>Analyze</b> form runs the same research machinery on a single opportunity of your choosing — type the opportunity (e.g. <b>NVDA into earnings</b>), pick its scan category from the dropdown, and use the <b>🌍 Context</b> button next to it to select the country the symbol trades in — the desk then researches, argues and judges the idea in that country's market context: native exchange and currency, regulator and central bank, national data sources and macro drivers. On <b>Auto</b> it infers the country from the exchange suffix (<b>.TO</b>, <b>.L</b>, <b>.T</b>…) or market keywords (TSX, FTSE, Nikkei…), defaulting to the United States; press <b>Analyze</b>, and the CFA desk researches it, the Debating Researchers argue it for and against, the Investment Manager delivers her verdict (with the same price validation as the daily call), and the result is displayed in the same call-panel format — execution strip, choice badge, research report, expert verdict and chart. While the desk is working, the <b>Analyze</b> button shows a spinner; if the run fails it turns into an <b>exclamation mark</b> — press it to retry. Every call panel opens with that idea's <b>exact trade execution details</b> at the top — entry decision, position size, risk/reward (target, stop, max loss, reward:risk) and confidence. Prices are validated end to end: every idea must carry a <b>freshly verified as-of price</b> (the desk is forbidden from quoting prices from analyst notes, price targets or older research as current), the manager re-verifies each price before deciding, and a built-in <b>price check</b> flags any idea that ships without a verified quote, whose as-of price is dated, or whose target or stop sits on the wrong side of the live price — flagged prices show an amber warning in the call panel and the production log. The Showrunner then turns the meeting into a playable episode, with the MANAGER speaking in her own distinct voice. When your <b>Experts</b> roster holds an expert whose domain fits the day's board, an <b>interactive guest</b> joins the show: the pipeline picks the best-matched roster expert, and in the show's outlook the <b>EXPERT</b> weighs the manager's call in first person — stating their position (agree, disagree, or agree with reservations) with dated, proven reasons drawn from their recorded knowledge and fresh searches, pushing back on the weakest link, and putting one sharp question to the desk, which the manager answers live. The Analysts board shows their verdict as a point right beside her call — <b>AGREE</b>, <b>DISAGREE</b> or <b>AGREE WITH RESERVATIONS</b>, with their stated reason. The guest speaks in their own distinct voice — pick it under <b>Expert guest voice</b> in Settings (Studio voices), or it auto-pairs; with browser voices it gets its own pitch. The <b>Investment Manager keeps asking the CFA desk for more ideas until her book holds 5 recommendations at 80%+ confidence in each of the four daily-scan categories</b> — STOCKS, PREDICTIONS, BONDS, OTHER — so expect several desk rounds before the show is written. Her re-asks are capped by a <b>desk clock</b>, a time limit you can configure in the <b>Settings</b> tab (default 5 minutes): when the clock runs out she produces the show with whatever high-conviction ideas the desk has delivered so far, and the log keeps her running tally per category. Stock ideas show a live daily candle chart (with technicals) sourced from <b>Finviz</b> beside the desk write-up — press a tile to see it, and pressing the chart opens its live data-source page in a new tab (the Finviz quote page for stocks, the FRED series page for bond yields). Every category has its own contextual data panel: bond ideas map to the matching yield series on <b>FRED</b> (the St. Louis Fed) — treasuries, TIPS real yields, high-yield credit spreads; prediction-market ideas link to the live contract on <b>Polymarket</b> and <b>Kalshi</b>; sports and odds ideas link to current lines across books. If an image is blocked (e.g. in an embedded preview), the panel links straight to the source. In the Episode tab, the daily call displays as a <b>live indicator board</b> instead of the raw script: one minimal card per idea, grouped by the four categories, showing the quantitative indicators (entry decision, position size, risk/reward, confidence) and the qualitative ones (the desk's case, the researchers' best for and against arguments). As the manager reads the script and discusses each opportunity, that idea's card lights up and the indicators she is talking about highlight; toggle back to the raw script with the <b>Show script</b> button — the script is always saved with the episode. From research to verdict, the desk agents apply an <b>advanced analytics toolkit</b>: separating prediction from causation, Double/Debiased-ML-style confounder reasoning, causal-forest thinking about which sub-groups an effect concentrates in, agent-based simulation of emergent system behavior (bank runs, market failures, supply-chain disruptions beyond DSGE-style equilibrium), market-design analysis for pricing claims, and data-harmonization checks on messy or digitized series.</p>
+      <p>The <b>📈 Analysts</b> tab runs the <b>Trading Analyst Pipeline</b> for today's date: the <b>Market Scanner</b> pulls the day's analyst calls, the <b>CFA Analyst Desk</b> turns them into trade recommendations (market-native action verbs, ENTER / NO ENTRY decisions, confidence, position size and risk/reward in dollars on a $100k book), the <b>Debating Researchers</b> argue every idea for and against, and the <b>Investment Manager</b> makes her trade choice. The board shows her choice and her point-form <b>Research Report</b> — concise bullets of statistical indicators and precise qualitative statements, with key figures bolded and important dates and trading terms highlighted — press <b>Hear her take</b> to hear it spoken in her voice — tap it again to pause the take (the badge flips to a pause button while it plays), and once more to resume where it left off — plus a tile per CFA recommendation; pressing a tile loads that idea's for/against arguments. At the top of the tab there are two ways to run the desk: <b>Analysts Call</b> produces today's full call, and next to it the <b>Analyze</b> form runs the same research machinery on a single opportunity of your choosing — type the opportunity (e.g. <b>NVDA into earnings</b>), pick its scan category from the dropdown, and use the <b>🌍 Context</b> button next to it to select the country the symbol trades in — the desk then researches, argues and judges the idea in that country's market context: native exchange and currency, regulator and central bank, national data sources and macro drivers. Before the desk runs, the submitted symbol is also resolved against a live market-data feed (Yahoo Finance quotes through a public reader proxy — international exchange suffixes like <b>.AX</b>, <b>.TO</b>, <b>.L</b>, <b>.T</b> supported): the resolved live quote is handed to the desk as the verified price, and an UNCONFIRMED price on the final call is replaced with the live quote (an unresolvable symbol simply skips the quote — the run is unaffected). On <b>Auto</b> it infers the country from the exchange suffix (<b>.TO</b>, <b>.L</b>, <b>.T</b>…) or market keywords (TSX, FTSE, Nikkei…), defaulting to the United States; press <b>Analyze</b>, and the CFA desk researches it, the Debating Researchers argue it for and against, the Investment Manager delivers her verdict (with the same price validation as the daily call), and the result is displayed in the same call-panel format — execution strip, choice badge, research report, expert verdict and chart. While the desk is working, the <b>Analyze</b> button shows a spinner; if the run fails it turns into an <b>exclamation mark</b> — press it to retry. Every call panel opens with that idea's <b>exact trade execution details</b> at the top — entry decision, position size, risk/reward (target, stop, max loss, reward:risk) and confidence. Prices are validated end to end: every idea must carry a <b>freshly verified as-of price</b> (the desk is forbidden from quoting prices from analyst notes, price targets or older research as current), the manager re-verifies each price before deciding, and a built-in <b>price check</b> flags any idea that ships without a verified quote, whose as-of price is dated, or whose target or stop sits on the wrong side of the live price — flagged prices show an amber warning in the call panel and the production log. The Showrunner then turns the meeting into a playable episode, with the MANAGER speaking in her own distinct voice. When your <b>Experts</b> roster holds an expert whose domain fits the day's board, an <b>interactive guest</b> joins the show: the pipeline picks the best-matched roster expert, and in the show's outlook the <b>EXPERT</b> weighs the manager's call in first person — stating their position (agree, disagree, or agree with reservations) with dated, proven reasons drawn from their recorded knowledge and fresh searches, pushing back on the weakest link, and putting one sharp question to the desk, which the manager answers live. The Analysts board shows their verdict as a point right beside her call — <b>AGREE</b>, <b>DISAGREE</b> or <b>AGREE WITH RESERVATIONS</b>, with their stated reason. The guest speaks in their own distinct voice — pick it under <b>Expert guest voice</b> in Settings (Studio voices), or it auto-pairs; with browser voices it gets its own pitch. The <b>Investment Manager keeps asking the CFA desk for more ideas until her book holds 5 recommendations at 80%+ confidence in each of the four daily-scan categories</b> — STOCKS, PREDICTIONS, BONDS, OTHER — so expect several desk rounds before the show is written. Her re-asks are capped by a <b>desk clock</b>, a time limit you can configure in the <b>Settings</b> tab (default 5 minutes): when the clock runs out she produces the show with whatever high-conviction ideas the desk has delivered so far, and the log keeps her running tally per category. Stock ideas show a live daily candle chart (with technicals) sourced from <b>Finviz</b> beside the desk write-up — press a tile to see it, and pressing the chart opens its live data-source page in a new tab (the Finviz quote page for stocks, the FRED series page for bond yields). Every category has its own contextual data panel: bond ideas map to the matching yield series on <b>FRED</b> (the St. Louis Fed) — treasuries, TIPS real yields, high-yield credit spreads; prediction-market ideas link to the live contract on <b>Polymarket</b> and <b>Kalshi</b>; sports and odds ideas link to current lines across books. If an image is blocked (e.g. in an embedded preview), the panel links straight to the source. In the Episode tab, the daily call displays as a <b>live indicator board</b> instead of the raw script: one minimal card per idea, grouped by the four categories, showing the quantitative indicators (entry decision, position size, risk/reward, confidence) and the qualitative ones (the desk's case, the researchers' best for and against arguments). As the manager reads the script and discusses each opportunity, that idea's card lights up and the indicators she is talking about highlight; toggle back to the raw script with the <b>Show script</b> button — the script is always saved with the episode. From research to verdict, the desk agents apply an <b>advanced analytics toolkit</b>: separating prediction from causation, Double/Debiased-ML-style confounder reasoning, causal-forest thinking about which sub-groups an effect concentrates in, agent-based simulation of emergent system behavior (bank runs, market failures, supply-chain disruptions beyond DSGE-style equilibrium), market-design analysis for pricing claims, and data-harmonization checks on messy or digitized series.</p>
 
       <h3>The Monitor tab</h3>
       <p>The <b>📊 Monitor</b> tab tracks everything your latest episode claimed. Pick an entry from the <b>watchlist dropdown</b> — the <b>trading opportunities</b> from the analyst board (grouped into their trading categories: STOCKS / PREDICTIONS / BONDS / OTHER) alongside <b>Topics</b>, one entry per episode segment listed by its whole topic name; re-checked entries carry a status marker (✓ / ↻ / ✖). The right panel shows, top to bottom: the <b>verdict or point</b> (the call with its action badge and thesis tag, or the segment's point), the <b>quantitative proof</b> (entry, size, risk/reward, confidence — or the dated sources behind a topic), the <b>qualitative proof</b> (the case, for/against arguments, or the segment script), and a <b>still-valid check</b>. Press <b>Re-check with live search</b> and the <b>Monitor Analyst</b> agent searches the live web for what has changed since the episode was produced, then rules the item <b>STILL VALID</b>, <b>SHOULD CHANGE</b>, or <b>EVOLVED</b> — with a severity grade on the change impact: <b>HIGH</b> means the direction flipped (a buy is now a sell — requires immediate attention), <b>MEDIUM</b> means the call stands but entry, size or timing must change, <b>LOW</b> means minor nuance. The Monitor Analyst weighs the evidence with the same <b>advanced analytics toolkit</b> as the desk — causal vs. predictive claims, heterogeneous effects, emergent-behavior simulation, and data-quality checks — before ruling. Re-checks are saved with the episode, and any sources the Monitor Analyst finds are added to the Sources &amp; Dates registry. Producing a new episode starts a fresh watchlist.</p>
@@ -2343,6 +2343,95 @@ function mgrFallbackCall(opp, cat, reason) {
   };
 }
 
+/* ============================== live quotes (international symbols) ==============================
+   Yahoo Finance's chart API carries every exchange the country context supports (.AX, .TO, .L, .T, …), but the browser
+   cannot call it directly (no Access-Control-Allow-Origin). The Jina reader proxy (r.jina.ai) fetches it AND echoes our
+   origin (CORS verified), keyless, ~20 requests/min, ~1.4KB payloads. All failures degrade to null — the analysis then
+   proceeds exactly as before (research-driven prices), so this can only add data, never break a run. */
+var YQ_PROXY = "https://r.jina.ai/https://query1.finance.yahoo.com/v8/finance/chart/";
+var YQ_SUFFIX = { AU:[".AX"], CA:[".TO",".CN"], GB:[".L"], DE:[".DE",".F"], FR:[".PA"], NL:[".AS"], CH:[".SW"], JP:[".T"], CN:[".SS",".SZ"], HK:[".HK"], TW:[".TW"], KR:[".KS",".KQ"], IN:[".NS",".BO"], SG:[".SI"], BR:[".SA"], MX:[".MX"], ES:[".MC"], IT:[".MI"], SE:[".ST"], ZA:[".JO"] };
+var YQ_CCY = { USD:"$", AUD:"A$", CAD:"C$", GBP:"\u00a3", EUR:"\u20ac", JPY:"\u00a5", CNY:"CN\u00a5", CHF:"CHF ", SEK:"kr ", INR:"\u20b9", KRW:"\u20a9", SGD:"S$", HKD:"HK$", TWD:"NT$", BRL:"R$", MXN:"MX$", ZAR:"R" };
+var YQ_STOP = /^(THE|AND|FOR|WITH|FROM|INTO|AFTER|BEFORE|BUY|SELL|HOLD|PASS|LONG|SHORT|BET|BACK|FADE|RBA|BOE|BOJ|FOMC|FED|ASX|TSX|LSE|NSE|BSE|NYSE|NASDAQ|S&P|QQQ|SPY|ETF|IPO|USD|AUD|CAD|GBP|EUR|JPY|CNY|CHF|SEK|NZD|VS|ON|TO|AT|BY|OF|IN|IT|IS|BE|DO|GO|NO|UP|OR|AS|ALL|NOW|NEW|OLD|LOW|BIG|TOP|WIN|LOSS|RISK|FREE|BEST|NEXT|THIS|THAT|WILL|GOLD|OIL|GAS|BOND|BILL|YIELD|PRICE|TARGET|STOP|SHARES|STOCK|MARKET|INDEX|CEO|CFO|USA|Q1|Q2|Q3|Q4|H1|H2|FY|EOD|OTC|FX|AI|EV|TECH|BANK|ENERGY|MINING|HEALTH|CAPITAL|GROUP|SALES|DIP|DIPS|RALLY|CRASH|RATE|RATES|TODAY|TRADE|TRADES|SPLIT|BEAT|BEATS|CALL|CALLS|PUT|PUTS|DIV|DIVS|JUNE|JULY)$/;
+function yqCcySym(code) { return YQ_CCY[String(code || "").toUpperCase()] || ((code || "") + " "); }
+/* candidate Yahoo symbols from a piece of text, suffixed candidates strictly first: exchange-suffixed tickers
+   verbatim (MP1.AX), "ASX: WOW" pairs + the country's suffix, then bare ticker-ish words + suffix (mp1 + Australia → MP1.AX);
+   for US / unknown countries the bare ticker is a last resort */
+function yqCandidates(text, countryKey) {
+  var t = String(text || "");
+  var sufs = YQ_SUFFIX[countryKey || ""] || [];
+  var suffixed = [], bare = [], seen = {};
+  var total = function () { return suffixed.length + bare.length; };
+  var push = function (arr, s) {
+    s = String(s || "").toUpperCase().replace(/[^A-Z0-9.\-]/g, "");
+    if (!s || s.length > 8 || seen[s] || total() >= 4) return;
+    seen[s] = 1; arr.push(s);
+  };
+  var SUF = /\b([A-Z][A-Z0-9]{0,5})\.(AX|TO|CN|TR|V|NEO|L|LN|DE|F|S|BE|PA|AS|AMS|SW|T|TYO|JP|SS|SZ|SH|HK|TW|TWO|KS|KQ|NS|BO|SI|SA|MX|MC|MI|ST|JO)\b/gi;
+  var m;
+  while ((m = SUF.exec(t)) && total() < 4) push(suffixed, m[1] + "." + m[2].toUpperCase());
+  var EX = /\b(?:ASX|TSX|LSE|NSE|BSE|HKEX|SIX|OMX|JSE|BMV|B3|NYSE|NASDAQ)\s*:\s*([A-Z0-9][A-Z0-9.\-]{0,6})/gi;
+  while ((m = EX.exec(t)) && total() < 4) {
+    for (var k = 0; k < sufs.length; k++) push(suffixed, m[1] + sufs[k]);
+    if (!sufs.length) push(bare, m[1]);
+  }
+  var words = t.split(/[^A-Za-z0-9.\-]+/);
+  for (var i = 0; i < words.length && total() < 4; i++) {
+    var w = String(words[i] || "").toUpperCase();
+    if (w.length < 2 || !/^[A-Z][A-Z0-9]{0,5}$/.test(w) || YQ_STOP.test(w)) continue;
+    if (w.length > 5 && !/[0-9]/.test(w)) continue; /* 6-char words need a digit to look like a ticker */
+    for (var j = 0; j < sufs.length; j++) push(suffixed, w + sufs[j]);
+    if (!sufs.length) push(bare, w);
+  }
+  return suffixed.concat(bare).slice(0, 3);
+}
+/* the proxy returns "Title/URL Source/Markdown Content: {chart json}" — pull the chart meta */
+function yqParse(text) {
+  var t = String(text || "");
+  var idx = t.indexOf("Markdown Content:");
+  if (idx < 0) idx = 0;
+  var s = t.indexOf("{", idx), e = t.lastIndexOf("}");
+  if (s < 0 || e <= s) return null;
+  var d = null; try { d = JSON.parse(t.slice(s, e + 1)); } catch (err) { d = null; }
+  if (!d || !d.chart || !d.chart.result || !d.chart.result.length) return null;
+  var mt = d.chart.result[0].meta || {};
+  if (typeof mt.regularMarketPrice !== "number") return null;
+  return mt;
+}
+/* fetch a live quote for the first candidate that resolves — null when nothing resolves */
+async function yqQuote(text, country) {
+  var cands = yqCandidates(text, country && country.key);
+  for (var i = 0; i < cands.length; i++) {
+    var mt = null;
+    try {
+      var ctl = new AbortController();
+      var tm = setTimeout(function () { ctl.abort(); }, 9000);
+      var r = await fetch(YQ_PROXY + encodeURIComponent(cands[i]) + "?interval=1d&range=1d", { signal: ctl.signal });
+      clearTimeout(tm);
+      if (r.ok) mt = yqParse(await r.text());
+    } catch (e) { mt = null; }
+    if (mt) return {
+      sym: mt.symbol || cands[i], name: mt.longName || mt.shortName || mt.symbol || cands[i],
+      price: mt.regularMarketPrice, prev: (typeof mt.chartPreviousClose === "number") ? mt.chartPreviousClose : null,
+      dayHigh: (typeof mt.regularMarketDayHigh === "number") ? mt.regularMarketDayHigh : null,
+      dayLow: (typeof mt.regularMarketDayLow === "number") ? mt.regularMarketDayLow : null,
+      ccy: mt.currency || "", exch: mt.fullExchangeName || mt.exchangeName || "",
+      asOfISO: new Date((mt.regularMarketTime || Math.floor(Date.now() / 1000)) * 1000).toISOString().slice(0, 10),
+      ccySym: yqCcySym(mt.currency || "")
+    };
+  }
+  return null;
+}
+/* the prompt fragment handed to the desk as price ground truth */
+function yqPromptLine(live) {
+  if (!live) return "";
+  return "LIVE MARKET DATA \u2014 fetched from a market-data feed just now, use it as the verified CURRENT price: " +
+    live.name + " (" + live.sym + ") \u00b7 " + live.exch + " \u00b7 currency " + live.ccy +
+    " \u2014 last " + live.ccySym + live.price +
+    (live.prev != null ? ", prev close " + live.ccySym + live.prev : "") +
+    (live.dayHigh != null ? ", day range " + live.ccySym + live.dayLow + "\u2013" + live.ccySym + live.dayHigh : "") +
+    ", as of " + live.asOfISO + ". The submitted opportunity appears to be this security \u2014 if the name clearly does not match the opportunity, ignore this data and proceed normally; otherwise quote THIS price (with its currency symbol, e.g. " + live.ccySym + live.price + ") as the CURRENT as-of price instead of UNCONFIRMED, and say the price is verified from a live feed.\n\n";
+}
+
 /* ============================== single-opportunity analysis ============================== */
 /* Analyze one user-submitted opportunity: desk research → researchers' debate → manager's verdict → optional expert guest.
    No scanner, no showrunner, no script — the verdict lands on the analyst board in the same call-panel format as the daily call. */
@@ -2380,6 +2469,12 @@ async function analyzeOpportunity() {
   setAgent(ep, "showrunner", "off", "skipped \u2014 analysis only, no show script");
   logLine("Analyzing \u201c<b>" + esc(opp) + "</b>\u201d \u00b7 " + esc(cat) + " \u00b7 desk research \u2192 debate \u2192 verdict \u00b7 today is " + todayHuman(), "hi");
   logLine("Country context \u2014 " + country.flag + " <b>" + esc(country.name) + "</b> \u00b7 " + esc(country.exch) + " \u00b7 " + esc(country.ccy) + " \u00b7 " + esc(country.cb), "hi");
+  /* resolve the submitted text against a live market-data feed (Yahoo chart via the Jina reader proxy) —
+     mp1 + Australia → MP1.AX Megaport Ltd; null on any failure, the run then proceeds research-driven */
+  var live = null;
+  try { live = await yqQuote(opp, country); } catch (e) { live = null; }
+  var yqLine = yqPromptLine(live);
+  if (live) logLine("\uD83D\uDCC8 Live quote \u2014 <b>" + esc(live.name) + "</b> (" + esc(live.sym) + ") <b>" + esc(live.ccySym + live.price) + "</b> \u00b7 " + esc(live.exch) + (live.prev != null ? " \u00b7 prev close " + esc(live.ccySym + live.prev) : "") + " \u2014 handed to the desk as the verified price", "hi");
   try {
     /* ---- 1 · CFA DESK — research the submitted opportunity and build the trade idea ---- */
     var cfa = await researchStep(ep, "cfa", "researching the opportunity\u2026",
@@ -2387,6 +2482,7 @@ async function analyzeOpportunity() {
       "A single trading opportunity has been submitted to the desk for analysis.\n\n" +
       "OPPORTUNITY: \u201c" + opp + "\u201d\nSCAN CATEGORY: " + cat + "\n\n" +
       ctxDeskBlock(country) +
+      yqLine +
       "SYMBOL IDENTIFICATION: the submitted opportunity may be a bare or ambiguous ticker. First establish WHAT security it is \u2014 with the country context above, resolve it against that country\u2019s primary exchange listing (full company name + native ticker). If you cannot identify it with high confidence after searching, do NOT invent or guess a company: say plainly that the symbol could not be identified and output the idea with ENTRY DECISION: NO ENTRY, AS-OF PRICE: UNCONFIRMED, and the reason in the rationale.\n\n" +
       "Research it with web search: verify its CURRENT market price fresh, the analyst or market activity behind it, its key catalysts with exact dates, and its risks.\n" +
       "Then build the desk\u2019s trade recommendation and output it in the exact IDEA format below.\n\n" +
@@ -2398,6 +2494,7 @@ async function analyzeOpportunity() {
       "For the single idea in the CFA desk\u2019s analysis below, use web search to build both cases:\n" +
       "First pin the idea\u2019s CURRENT market price with a fresh search and argue from the live quote \u2014 if the desk\u2019s AS-OF PRICE is stale or missing, correct it in your arguments and say so.\n" +
       ctxResearchLine(country) +
+      yqLine +
       "FOR: 3-4 dated arguments for executing the trade (evidence, catalysts, positioning).\n" +
       "AGAINST: 3-4 dated arguments for NOT executing the trade (risk, valuation, macro, timing).\n" +
       "Every argument starts with its date or \u201cas of today\u201d.\n\n" +
@@ -2411,6 +2508,7 @@ async function analyzeOpportunity() {
       "You are the INVESTMENT MANAGER on a trading podcast research team. You run the book. Today\u2019s date is " + todayHuman() + ".\n" +
       "Read the desk analysis and the researchers\u2019 debate below and decide whether the book trades this opportunity.\n\n" +
       ctxManagerLine(country) +
+      yqLine +
       "== CFA DESK ANALYSIS ==\n" + cfa.text + "\n\n== RESEARCHERS\u2019 DEBATE ==\n" + res.text + "\n\n" +
       "Output, in this exact order:\n" +
       "1) MY TRADE CHOICE: the call on this idea with its native verb (BUY / SELL / LONG / SHORT / BET YES / BET NO / BACK / FADE) \u2014 or PASS, with one line saying why.\n" +
@@ -2443,6 +2541,21 @@ async function analyzeOpportunity() {
     }
     if (!data || !data.calls || !data.calls.length) throw mkErr("empty", 0, "The Investment Manager returned no usable CALL DATA for this opportunity. Try again, or make the symbol easier to identify \u2014 the full company name (e.g. \u201cWoolworths Group (ASX: WOW)\u201d) or the exchange-suffixed ticker (e.g. \u201cMP1.AX\u201d) helps the desk resolve obscure tickers.");
     data = validateCallPrices(data);
+    /* any UNCONFIRMED price (unidentified-symbol fallback, unverifiable quote) is replaced by the live feed's quote */
+    if (live && data && data.calls && data.calls.length) {
+      var fed = 0;
+      data.calls.forEach(function (c) {
+        if (!c.price || /^UNCONFIRMED/i.test(String(c.price))) {
+          c.price = live.ccySym + live.price + " (" + live.exch + ", live feed)";
+          c.priceAsOf = live.asOfISO;
+          fed++;
+        }
+      });
+      if (fed) {
+        logLine("Price check \u2014 " + fed + " UNCONFIRMED price" + (fed > 1 ? "s" : "") + " replaced with the live feed quote (" + live.sym + " " + live.ccySym + live.price + ").", "ok");
+        data = validateCallPrices(data);
+      }
+    }
     var flagged = data.calls.filter(function (c) { return c.priceCheck && c.priceCheck.status === "flagged"; });
     if (flagged.length) logLine("Price check \u2014 flagged " + flagged.length + " idea" + (flagged.length > 1 ? "s" : "") + ": " + flagged.map(function (c) { return c.asset + " (" + c.priceCheck.issues[0] + ")"; }).join(" \u00b7 "), "err");
     else logLine("Price check \u2014 the idea carries a verified as-of price.", "ok");
@@ -4437,6 +4550,14 @@ async function monLivePrice(id) {
   if (!lsGet(LSKEY)) { alert("Add your Mistral API key in the Settings tab first."); return; }
   logLine("🔎 Live-searching the current price of <b>" + esc(x.title) + "</b>…", "hi");
   try {
+    var q = null; try { q = await yqQuote(x.title, null); } catch (e2) { q = null; }
+    if (q && typeof q.price === "number" && q.price > 0) {
+      if (posSet(id, q.price, "live feed (" + q.sym + ")")) {
+        renderMonitor();
+        logLine("📈 " + esc(x.title) + " updated to <b>" + esc(q.ccySym + q.price) + "</b> \u00b7 " + esc(q.sym) + " \u00b7 live feed.", "ok");
+      }
+      return;
+    }
     var r = await agentTurn("You are a live market-data assistant. Search the web for the CURRENT market price of: " +
       x.title + " (category " + (x.cat || "STOCKS") + ", the desk's call was " + x.action + "). " +
       "Use a fresh web search and report the number exactly as quoted by the source. " +
@@ -4722,6 +4843,12 @@ async function resLivePrice(key) {
   if (!lsGet(LSKEY)) { alert("Add your Mistral API key in the Settings tab first."); return; }
   RES.busy = key; resultsRender();
   try {
+    var q = null; try { q = await yqQuote(it.title, null); } catch (e2) { q = null; }
+    if (q && typeof q.price === "number" && q.price > 0) {
+      await resPriceUpdate(key, q.price, "live feed (" + q.sym + ")");
+      RES.busy = ""; resultsRender();
+      return;
+    }
     var prompt = "You are a live market-data assistant. Search the web for the CURRENT market price of: " +
       it.title + " (category " + it.cat + ", the desk's call was " + it.action + ", entry decision " + (it.decision || "n/a") + "). " +
       "Use a fresh web search and report the number exactly as quoted by the source. " +

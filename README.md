@@ -19,7 +19,14 @@ delivers her verdict. The **🌍 Context** button sets the country the symbol tr
 or Auto: the country is inferred from the exchange suffix — `.TO`, `.L`, `.T` — or market
 keywords like TSX, FTSE or Nikkei, defaulting to the US), and the whole desk then works in that
 country's market context: native exchange and currency, regulator and central bank, national
-data sources and macro drivers.
+data sources and macro drivers. Before the desk runs, the submitted symbol is also resolved against
+a live market-data feed: Yahoo Finance quotes fetched through the Jina reader proxy (r.jina.ai),
+which is keyless and browser-callable (CORS-verified). International exchange suffixes (`.AX`,
+`.TO`, `.L`, `.T`…) resolve verbatim, bare tickers get the country's suffix (`mp1` + Australia →
+**MP1.AX — Megaport Ltd**), and the desk receives the resolved quote as the verified price; any
+UNCONFIRMED price on the final call is replaced with the live quote. An unresolvable symbol simply
+skips the quote — the run proceeds research-driven. The 🔎 Live price buttons (Monitor and Results)
+try the same feed first and fall back to the agent's web search.
 
 ## Economics dashboard & world markets
 
@@ -33,9 +40,9 @@ Press **▶ Analysts Call** and a business journalist delivers a spoken one-minu
 most recent business and economic headlines — each headline a named link that opens its source
 website. Global equities and commodities (S&P 500, developed-world and emerging equities, gold,
 silver, oil via ETF quotes) are optional: add a free Alpha Vantage key in the Settings tab.
-No free, browser-callable source exists for live equity/commodity prices (Trading Economics has
-no free API; Yahoo, Stooq and the FRED API all block browser requests), which is why the app uses
-open official sources everywhere else.
+Live equity quotes for the analysis desk come through the Jina reader proxy (see the analysis
+section above); direct Yahoo, Stooq and FRED API calls all block browser requests (no CORS), and
+Trading Economics has no free API, which is why the dashboard uses open official sources everywhere else.
 
 ## Run it
 
