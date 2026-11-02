@@ -2346,6 +2346,7 @@ async function analyzeOpportunity() {
       "A single trading opportunity has been submitted to the desk for analysis.\n\n" +
       "OPPORTUNITY: \u201c" + opp + "\u201d\nSCAN CATEGORY: " + cat + "\n\n" +
       ctxDeskBlock(country) +
+      "SYMBOL IDENTIFICATION: the submitted opportunity may be a bare or ambiguous ticker. First establish WHAT security it is \u2014 with the country context above, resolve it against that country\u2019s primary exchange listing (full company name + native ticker). If you cannot identify it with high confidence after searching, do NOT invent or guess a company: say plainly that the symbol could not be identified and output the idea with ENTRY DECISION: NO ENTRY, AS-OF PRICE: UNCONFIRMED, and the reason in the rationale.\n\n" +
       "Research it with web search: verify its CURRENT market price fresh, the analyst or market activity behind it, its key catalysts with exact dates, and its risks.\n" +
       "Then build the desk\u2019s trade recommendation and output it in the exact IDEA format below.\n\n" +
       analystHouseStyle(),
@@ -2365,7 +2366,7 @@ async function analyzeOpportunity() {
       sourcePromptSuffix(),
       "Debating Researchers", "researchers");
     /* ---- 3 · MANAGER — make the call on this opportunity ---- */
-    var mgr = await researchStep(ep, "manager", "making the call\u2026",
+    var mgrPrompt =
       "You are the INVESTMENT MANAGER on a trading podcast research team. You run the book. Today\u2019s date is " + todayHuman() + ".\n" +
       "Read the desk analysis and the researchers\u2019 debate below and decide whether the book trades this opportunity.\n\n" +
       ctxManagerLine(country) +
@@ -2374,14 +2375,23 @@ async function analyzeOpportunity() {
       "1) MY TRADE CHOICE: the call on this idea with its native verb (BUY / SELL / LONG / SHORT / BET YES / BET NO / BACK / FADE) \u2014 or PASS, with one line saying why.\n" +
       "2) RESEARCH REPORT: 6-8 crisp bullet points, one per line, each starting with \u201c\u2022 \u201d \u2014 no prose, no transitions, no filler. Every bullet is either a concise statistical indicator (entry level, position size in % and dollars on the $100k book, target/stop, reward:risk, confidence %, key prices, dated catalysts) or one precise qualitative statement (the single-line case for or against executing, or one named risk). Lead with entry, size and risk/reward. In each point, wrap its single most important figure or term in **double asterisks** so it renders bold (e.g. **$180**, **1.5% \u2014 $1,500**, **88%**, **Oct 20 2026**, **1:2**).\n" +
       "3) THE BOOK: one line \u2014 \u201cASSET (CATEGORY, CONFIDENCE): EXECUTE / WATCH / PASS \u2014 one short reason\u201d.\n" +
-      "4) CALL DATA: a fenced ```json code block \u2014 valid JSON, no comments, exactly ONE entry, for THIS idea only \u2014 carry its ENTRY DECISION, POSITION SIZE and RISK/REWARD from the desk write-up into the entry / size / rr fields \u2014 and re-verify its CURRENT market price with a fresh web search (never carry the desk\u2019s price over unverified): put the live quote you verified into price and the date you verified it (YYYY-MM-DD) into priceAsOf; if you cannot verify a price, write UNCONFIRMED \u2014 exactly this shape:\n" +
+      "4) CALL DATA: a fenced ```json code block \u2014 valid JSON, no comments, exactly ONE entry, for THIS idea only, even if the verdict is PASS or the symbol could not be identified (then asset = the submitted symbol and entry = \u201cNO ENTRY \u2014 <reason>\u201d) \u2014 carry its ENTRY DECISION, POSITION SIZE and RISK/REWARD from the desk write-up into the entry / size / rr fields \u2014 and re-verify its CURRENT market price with a fresh web search (never carry the desk\u2019s price over unverified): put the live quote you verified into price and the date you verified it (YYYY-MM-DD) into priceAsOf; if you cannot verify a price, write UNCONFIRMED \u2014 exactly this shape:\n" +
       '{"manager":{"name":"<your full name>","choice":"<your call on the idea, e.g. BUY NVDA \u2014 or PASS>","tag":"<1-2 words describing the call thesis, e.g. Undervalued / Momentum / Contrarian / Overbought>","opinion":"<your RESEARCH REPORT bullets from section 2, one bullet per line, each starting with a bullet marker>"},"calls":[{"analyst":"<analyst or firm>","asset":"<TICKER or contract>","category":"<STOCKS|PREDICTIONS|BONDS|OTHER>","action":"<ANALYST CALL verb>","tag":"<1-2 word thesis descriptor>","confidence":"<NN%>","entry":"<ENTER / NO ENTRY / CONDITIONAL + trigger>","size":"<position size \u2014 % and dollars on the $100k book>","rr":"<target \u00b7 stop \u00b7 max loss \u00b7 reward:risk>","price":"<current market price you verified \u2014 live quote>","priceAsOf":"<YYYY-MM-DD you verified it>","rationale":"<1-2 sentence case>","forArgs":["<dated argument>","<dated argument>"],"againstArgs":["<dated argument>","<dated argument>"]}]}\n' +
       "\nWeigh the evidence with the advanced analytics toolkit before you decide \u2014 your verdict must survive causal scrutiny, not just fit the tape:\n" +
       analyticsToolkit() +
-      sourcePromptSuffix(),
-      "Investment Manager", "manager");
+      sourcePromptSuffix();
+    var mgr = await researchStep(ep, "manager", "making the call\u2026", mgrPrompt, "Investment Manager", "manager");
     var data = parseCallData(mgr.text);
-    if (!data || !data.calls || !data.calls.length) throw mkErr("empty", 0, "The Investment Manager returned no usable CALL DATA for this opportunity. Try again or rephrase the opportunity.");
+    if (!data || !data.calls || !data.calls.length) {
+      /* obscure bare tickers (e.g. "mp1") can make the manager hedge in prose instead of emitting the CALL DATA block — one strict retry */
+      logLine("No usable CALL DATA in the manager\u2019s reply \u2014 asking once more for the strict format\u2026", "err");
+      var mgr2 = await researchStep(ep, "manager", "re-requesting the call data\u2026",
+        "IMPORTANT \u2014 your previous reply for this opportunity contained no usable CALL DATA: the fenced ```json block was missing or not valid JSON. Re-issue your full verdict in the same sections and exact formats, and this time END with the fenced ```json CALL DATA block \u2014 valid JSON, exactly ONE entry, even if the verdict is PASS or the symbol could not be identified (then asset = the submitted symbol and entry = \u201cNO ENTRY \u2014 <reason>\u201d).\n\n" +
+        mgrPrompt,
+        "Investment Manager", "manager");
+      data = parseCallData(mgr2.text);
+    }
+    if (!data || !data.calls || !data.calls.length) throw mkErr("empty", 0, "The Investment Manager returned no usable CALL DATA for this opportunity. Try again, or make the symbol easier to identify \u2014 the full company name (e.g. \u201cWoolworths Group (ASX: WOW)\u201d) or the exchange-suffixed ticker (e.g. \u201cMP1.AX\u201d) helps the desk resolve obscure tickers.");
     data = validateCallPrices(data);
     var flagged = data.calls.filter(function (c) { return c.priceCheck && c.priceCheck.status === "flagged"; });
     if (flagged.length) logLine("Price check \u2014 flagged " + flagged.length + " idea" + (flagged.length > 1 ? "s" : "") + ": " + flagged.map(function (c) { return c.asset + " (" + c.priceCheck.issues[0] + ")"; }).join(" \u00b7 "), "err");
