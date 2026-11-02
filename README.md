@@ -2,7 +2,7 @@
 
 A single-file HTML app: AI research agents produce fully narrated, source-cited podcast episodes,
 run the Trading Analyst Pipeline (market scanner, CFA desk, debating researchers, investment manager,
-expert guest), monitor opportunities, and play the show with studio voices.
+expert guest), track every opportunity through a Results ledger with live position P&L, and play the show with studio voices.
 
 Every BUY/SELL opportunity on the board is auto-scored by an embedded causal-entropic engine
 (F = T·∇Sτ): a second opinion on whether committing to the trade preserves more of the desk's
@@ -10,6 +10,16 @@ future freedom of action than staying in cash — shown as 🌀 F chips, with a 
 deep-dive (editable priors, re-score) and the score synced to the cloud track record. Treat it
 as a second opinion beside expected value, not a verdict: entropic scores can be anti-predictive,
 and the app shows the raw number rather than hiding it.
+
+## Single-opportunity analysis & country context
+
+Next to the daily call, the **Analysts** tab analyzes one opportunity you type in — the CFA desk
+researches it, the debating researchers argue it for and against, and the investment manager
+delivers her verdict. The **🌍 Context** button sets the country the symbol trades in (21 markets,
+or Auto: the country is inferred from the exchange suffix — `.TO`, `.L`, `.T` — or market
+keywords like TSX, FTSE or Nikkei, defaulting to the US), and the whole desk then works in that
+country's market context: native exchange and currency, regulator and central bank, national
+data sources and macro drivers.
 
 ## Economics dashboard & world markets
 
@@ -35,6 +45,16 @@ Open the GitHub Pages URL below, then add your Mistral API key in the **Settings
 Live app: https://funkyfish49-ops.github.io/Analyst-Studio/
 
 Everything runs client-side in the browser — there is no server component.
+
+## Results ledger
+
+The **Results** tab is the ledger of every analyzed opportunity: one-line rows with entry, stop,
+target, current price and P&L (percent and dollars), filters by category and status, and sorting
+by recency, P&L, confidence or horizon. Positions close themselves by category-distinct rules —
+stocks and bonds auto-close when the target or stop level is crossed, prediction contracts close
+at effective resolution (>=98.5¢ / <=1.5¢), sports odds resolve manually, and anything still
+open past its 10-day horizon completes as expired. Closed positions never flip on later prices,
+and the whole ledger syncs to the cloud track record when signed in.
 
 ## Forecast Lab
 

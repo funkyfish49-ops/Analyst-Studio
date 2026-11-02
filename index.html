@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- TopicCast Studio · causal-entropic edition (F = T·∇Sτ) + economics dashboard + results ledger · 2026-11-01 -->
+<!-- TopicCast Studio · causal-entropic edition (F = T·∇Sτ) + economics dashboard + results ledger + country context · 2026-11-02 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -606,7 +606,7 @@ body.mode-desk #srctable table{min-width:0}
     <div class="card">
       <div class="row" id="analysts-ctl" style="margin-top:14px">
         <button class="btn" id="analysts-call" onclick="produceAnalystsCall()">📈 Analysts Call</button>
-        <input type="text" id="analysts-opp" placeholder="enter opportunity" style="flex:1;min-width:160px" onkeydown="if(event.key==='Enter')analyzeOpportunity()">
+        <input type="text" id="analysts-opp" placeholder="enter opportunity" style="flex:1;min-width:160px" oninput="analystsCtxHint()" onkeydown="if(event.key==='Enter')analyzeOpportunity()">
         <select id="analysts-cat" style="width:auto">
           <option value="STOCKS">STOCKS</option>
           <option value="PREDICTIONS">PREDICTIONS</option>
@@ -614,8 +614,16 @@ body.mode-desk #srctable table{min-width:0}
           <option value="OTHER">OTHER</option>
         </select>
         <button class="btn" id="analysts-analyze" onclick="analyzeOpportunity()">🔍 Analyze</button>
+        <button class="btn" id="analysts-ctx" onclick="analystsCtxToggle()" title="Country context for this analysis">🌍 Context</button>
       </div>
-      <div class="notice" id="analysts-empty" style="display:none;margin-top:12px">No analyst board yet — press <b>Analysts Call</b> above (or <b>Produce today's call</b> in the <b>Settings</b> tab) to run today's Trading Analyst Pipeline, or type a single opportunity above, pick its category and press <b>Analyze</b> for a one-idea research, debate and verdict.</div>
+      <div id="analysts-ctxbox" style="display:none;margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:11px 14px">
+        <div class="row" style="margin-top:0">
+          <label class="f" style="margin:0;white-space:nowrap">🌍 Country context</label>
+          <select id="analysts-country" style="flex:1;min-width:170px" onchange="saveAnalystsCountry()"></select>
+        </div>
+        <div class="mut" id="analysts-ctxhint" style="font-size:12.5px;margin-top:8px">Auto-detect — the desk infers the country from the symbol (exchange suffix or market keywords); plain US tickers default to the United States.</div>
+      </div>
+      <div class="notice" id="analysts-empty" style="display:none;margin-top:12px">No analyst board yet — press <b>Analysts Call</b> above (or <b>Produce today's call</b> in the <b>Settings</b> tab) to run today's Trading Analyst Pipeline, or type a single opportunity above, pick its category, set its country context with <b>🌍 Context</b> if it trades outside the US, and press <b>Analyze</b> for a one-idea research, debate and verdict.</div>
 
       <div id="analysts-board" style="display:none">
         <div class="analystlayout">
@@ -821,7 +829,7 @@ body.mode-desk #srctable table{min-width:0}
       </ul>
 
       <h3>The Analysts tab</h3>
-      <p>The <b>📈 Analysts</b> tab runs the <b>Trading Analyst Pipeline</b> for today's date: the <b>Market Scanner</b> pulls the day's analyst calls, the <b>CFA Analyst Desk</b> turns them into trade recommendations (market-native action verbs, ENTER / NO ENTRY decisions, confidence, position size and risk/reward in dollars on a $100k book), the <b>Debating Researchers</b> argue every idea for and against, and the <b>Investment Manager</b> makes her trade choice. The board shows her choice and her point-form <b>Research Report</b> — concise bullets of statistical indicators and precise qualitative statements, with key figures bolded and important dates and trading terms highlighted — press <b>Hear her take</b> to hear it spoken in her voice — tap it again to pause the take (the badge flips to a pause button while it plays), and once more to resume where it left off — plus a tile per CFA recommendation; pressing a tile loads that idea's for/against arguments. At the top of the tab there are two ways to run the desk: <b>Analysts Call</b> produces today's full call, and next to it the <b>Analyze</b> form runs the same research machinery on a single opportunity of your choosing — type the opportunity (e.g. <b>NVDA into earnings</b>), pick its scan category from the dropdown, press <b>Analyze</b>, and the CFA desk researches it, the Debating Researchers argue it for and against, the Investment Manager delivers her verdict (with the same price validation as the daily call), and the result is displayed in the same call-panel format — execution strip, choice badge, research report, expert verdict and chart. Every call panel opens with that idea's <b>exact trade execution details</b> at the top — entry decision, position size, risk/reward (target, stop, max loss, reward:risk) and confidence. Prices are validated end to end: every idea must carry a <b>freshly verified as-of price</b> (the desk is forbidden from quoting prices from analyst notes, price targets or older research as current), the manager re-verifies each price before deciding, and a built-in <b>price check</b> flags any idea that ships without a verified quote, whose as-of price is dated, or whose target or stop sits on the wrong side of the live price — flagged prices show an amber warning in the call panel and the production log. The Showrunner then turns the meeting into a playable episode, with the MANAGER speaking in her own distinct voice. When your <b>Experts</b> roster holds an expert whose domain fits the day's board, an <b>interactive guest</b> joins the show: the pipeline picks the best-matched roster expert, and in the show's outlook the <b>EXPERT</b> weighs the manager's call in first person — stating their position (agree, disagree, or agree with reservations) with dated, proven reasons drawn from their recorded knowledge and fresh searches, pushing back on the weakest link, and putting one sharp question to the desk, which the manager answers live. The Analysts board shows their verdict as a point right beside her call — <b>AGREE</b>, <b>DISAGREE</b> or <b>AGREE WITH RESERVATIONS</b>, with their stated reason. The guest speaks in their own distinct voice — pick it under <b>Expert guest voice</b> in Settings (Studio voices), or it auto-pairs; with browser voices it gets its own pitch. The <b>Investment Manager keeps asking the CFA desk for more ideas until her book holds 5 recommendations at 80%+ confidence in each of the four daily-scan categories</b> — STOCKS, PREDICTIONS, BONDS, OTHER — so expect several desk rounds before the show is written. Her re-asks are capped by a <b>desk clock</b>, a time limit you can configure in the <b>Settings</b> tab (default 5 minutes): when the clock runs out she produces the show with whatever high-conviction ideas the desk has delivered so far, and the log keeps her running tally per category. Stock ideas show a live daily candle chart (with technicals) sourced from <b>Finviz</b> beside the desk write-up — press a tile to see it, and pressing the chart opens its live data-source page in a new tab (the Finviz quote page for stocks, the FRED series page for bond yields). Every category has its own contextual data panel: bond ideas map to the matching yield series on <b>FRED</b> (the St. Louis Fed) — treasuries, TIPS real yields, high-yield credit spreads; prediction-market ideas link to the live contract on <b>Polymarket</b> and <b>Kalshi</b>; sports and odds ideas link to current lines across books. If an image is blocked (e.g. in an embedded preview), the panel links straight to the source. In the Episode tab, the daily call displays as a <b>live indicator board</b> instead of the raw script: one minimal card per idea, grouped by the four categories, showing the quantitative indicators (entry decision, position size, risk/reward, confidence) and the qualitative ones (the desk's case, the researchers' best for and against arguments). As the manager reads the script and discusses each opportunity, that idea's card lights up and the indicators she is talking about highlight; toggle back to the raw script with the <b>Show script</b> button — the script is always saved with the episode. From research to verdict, the desk agents apply an <b>advanced analytics toolkit</b>: separating prediction from causation, Double/Debiased-ML-style confounder reasoning, causal-forest thinking about which sub-groups an effect concentrates in, agent-based simulation of emergent system behavior (bank runs, market failures, supply-chain disruptions beyond DSGE-style equilibrium), market-design analysis for pricing claims, and data-harmonization checks on messy or digitized series.</p>
+      <p>The <b>📈 Analysts</b> tab runs the <b>Trading Analyst Pipeline</b> for today's date: the <b>Market Scanner</b> pulls the day's analyst calls, the <b>CFA Analyst Desk</b> turns them into trade recommendations (market-native action verbs, ENTER / NO ENTRY decisions, confidence, position size and risk/reward in dollars on a $100k book), the <b>Debating Researchers</b> argue every idea for and against, and the <b>Investment Manager</b> makes her trade choice. The board shows her choice and her point-form <b>Research Report</b> — concise bullets of statistical indicators and precise qualitative statements, with key figures bolded and important dates and trading terms highlighted — press <b>Hear her take</b> to hear it spoken in her voice — tap it again to pause the take (the badge flips to a pause button while it plays), and once more to resume where it left off — plus a tile per CFA recommendation; pressing a tile loads that idea's for/against arguments. At the top of the tab there are two ways to run the desk: <b>Analysts Call</b> produces today's full call, and next to it the <b>Analyze</b> form runs the same research machinery on a single opportunity of your choosing — type the opportunity (e.g. <b>NVDA into earnings</b>), pick its scan category from the dropdown, and use the <b>🌍 Context</b> button next to it to select the country the symbol trades in — the desk then researches, argues and judges the idea in that country's market context: native exchange and currency, regulator and central bank, national data sources and macro drivers. On <b>Auto</b> it infers the country from the exchange suffix (<b>.TO</b>, <b>.L</b>, <b>.T</b>…) or market keywords (TSX, FTSE, Nikkei…), defaulting to the United States; press <b>Analyze</b>, and the CFA desk researches it, the Debating Researchers argue it for and against, the Investment Manager delivers her verdict (with the same price validation as the daily call), and the result is displayed in the same call-panel format — execution strip, choice badge, research report, expert verdict and chart. Every call panel opens with that idea's <b>exact trade execution details</b> at the top — entry decision, position size, risk/reward (target, stop, max loss, reward:risk) and confidence. Prices are validated end to end: every idea must carry a <b>freshly verified as-of price</b> (the desk is forbidden from quoting prices from analyst notes, price targets or older research as current), the manager re-verifies each price before deciding, and a built-in <b>price check</b> flags any idea that ships without a verified quote, whose as-of price is dated, or whose target or stop sits on the wrong side of the live price — flagged prices show an amber warning in the call panel and the production log. The Showrunner then turns the meeting into a playable episode, with the MANAGER speaking in her own distinct voice. When your <b>Experts</b> roster holds an expert whose domain fits the day's board, an <b>interactive guest</b> joins the show: the pipeline picks the best-matched roster expert, and in the show's outlook the <b>EXPERT</b> weighs the manager's call in first person — stating their position (agree, disagree, or agree with reservations) with dated, proven reasons drawn from their recorded knowledge and fresh searches, pushing back on the weakest link, and putting one sharp question to the desk, which the manager answers live. The Analysts board shows their verdict as a point right beside her call — <b>AGREE</b>, <b>DISAGREE</b> or <b>AGREE WITH RESERVATIONS</b>, with their stated reason. The guest speaks in their own distinct voice — pick it under <b>Expert guest voice</b> in Settings (Studio voices), or it auto-pairs; with browser voices it gets its own pitch. The <b>Investment Manager keeps asking the CFA desk for more ideas until her book holds 5 recommendations at 80%+ confidence in each of the four daily-scan categories</b> — STOCKS, PREDICTIONS, BONDS, OTHER — so expect several desk rounds before the show is written. Her re-asks are capped by a <b>desk clock</b>, a time limit you can configure in the <b>Settings</b> tab (default 5 minutes): when the clock runs out she produces the show with whatever high-conviction ideas the desk has delivered so far, and the log keeps her running tally per category. Stock ideas show a live daily candle chart (with technicals) sourced from <b>Finviz</b> beside the desk write-up — press a tile to see it, and pressing the chart opens its live data-source page in a new tab (the Finviz quote page for stocks, the FRED series page for bond yields). Every category has its own contextual data panel: bond ideas map to the matching yield series on <b>FRED</b> (the St. Louis Fed) — treasuries, TIPS real yields, high-yield credit spreads; prediction-market ideas link to the live contract on <b>Polymarket</b> and <b>Kalshi</b>; sports and odds ideas link to current lines across books. If an image is blocked (e.g. in an embedded preview), the panel links straight to the source. In the Episode tab, the daily call displays as a <b>live indicator board</b> instead of the raw script: one minimal card per idea, grouped by the four categories, showing the quantitative indicators (entry decision, position size, risk/reward, confidence) and the qualitative ones (the desk's case, the researchers' best for and against arguments). As the manager reads the script and discusses each opportunity, that idea's card lights up and the indicators she is talking about highlight; toggle back to the raw script with the <b>Show script</b> button — the script is always saved with the episode. From research to verdict, the desk agents apply an <b>advanced analytics toolkit</b>: separating prediction from causation, Double/Debiased-ML-style confounder reasoning, causal-forest thinking about which sub-groups an effect concentrates in, agent-based simulation of emergent system behavior (bank runs, market failures, supply-chain disruptions beyond DSGE-style equilibrium), market-design analysis for pricing claims, and data-harmonization checks on messy or digitized series.</p>
 
       <h3>The Monitor tab</h3>
       <p>The <b>📊 Monitor</b> tab tracks everything your latest episode claimed. Pick an entry from the <b>watchlist dropdown</b> — the <b>trading opportunities</b> from the analyst board (grouped into their trading categories: STOCKS / PREDICTIONS / BONDS / OTHER) alongside <b>Topics</b>, one entry per episode segment listed by its whole topic name; re-checked entries carry a status marker (✓ / ↻ / ✖). The right panel shows, top to bottom: the <b>verdict or point</b> (the call with its action badge and thesis tag, or the segment's point), the <b>quantitative proof</b> (entry, size, risk/reward, confidence — or the dated sources behind a topic), the <b>qualitative proof</b> (the case, for/against arguments, or the segment script), and a <b>still-valid check</b>. Press <b>Re-check with live search</b> and the <b>Monitor Analyst</b> agent searches the live web for what has changed since the episode was produced, then rules the item <b>STILL VALID</b>, <b>SHOULD CHANGE</b>, or <b>EVOLVED</b> — with a severity grade on the change impact: <b>HIGH</b> means the direction flipped (a buy is now a sell — requires immediate attention), <b>MEDIUM</b> means the call stands but entry, size or timing must change, <b>LOW</b> means minor nuance. The Monitor Analyst weighs the evidence with the same <b>advanced analytics toolkit</b> as the desk — causal vs. predictive claims, heterogeneous effects, emergent-behavior simulation, and data-quality checks — before ruling. Re-checks are saved with the episode, and any sources the Monitor Analyst finds are added to the Sources &amp; Dates registry. Producing a new episode starts a fresh watchlist.</p>
@@ -906,7 +914,7 @@ body.mode-desk #srctable table{min-width:0}
 <script>
 "use strict";
 /* ============================== state ============================== */
-var LSKEY = "topiccast-key", LSMODEL = "topiccast-model", LSEP = "topiccast-episode", LSVOICE = "topiccast-voices", LSSTYLE = "topiccast-style", LSDESK = "topiccast-deskmins", LSEXPERTS = "topiccast-experts", LSDEV = "topiccast-devmode", LSCLOUD = "topiccast-cloud-eps";
+var LSKEY = "topiccast-key", LSMODEL = "topiccast-model", LSEP = "topiccast-episode", LSVOICE = "topiccast-voices", LSSTYLE = "topiccast-style", LSDESK = "topiccast-deskmins", LSEXPERTS = "topiccast-experts", LSDEV = "topiccast-devmode", LSCLOUD = "topiccast-cloud-eps", LSCOUNTRY = "topiccast-country";
 var S = { running: false, cancel: false, ep: null, dur: "medium", plan: null, engine: "browser", voxVoices: null, style: "story", analystsSel: 0, analystsView: "indicators", takeAudio: null, takeState: "", experts: null, expertSel: "", monitorSel: "", monitorRun: "", monitorErr: "", deviceMode: "auto", cloudUser: null, cloudEps: null, cloudLoading: false };
 var TTS = { playing: false, paused: false, seg: 0, line: 0, cursor: 0, gapTimer: null, inUtterance: false };
 var VOX = { groups: null, idx: 0, token: 0, cur: null, cache: {}, voicesLoaded: false };
@@ -2177,6 +2185,113 @@ async function produceAnalystsCall() {
   if (!ep.segments || !ep.segments.length) showTab("studio");
 }
 
+/* ============================== country context (opportunity analysis) ============================== */
+/* 🌍 Context — the user picks the country the symbol trades in (or leaves it on Auto); the desk, the
+   researchers and the manager then analyze the idea in that country's market context. */
+var CTX_COUNTRIES = [
+  { key: "US", name: "United States", flag: "\uD83C\uDDFA\uD83C\uDDF8", ccy: "USD", exch: "NYSE / Nasdaq", reg: "SEC", cb: "Federal Reserve", data: "BLS · US Treasury · FRED" },
+  { key: "CA", name: "Canada", flag: "\uD83C\uDDE8\uD83C\uDDE6", ccy: "CAD", exch: "TSX / TSX-V / NEO", reg: "CSA / OSC", cb: "Bank of Canada", data: "Statistics Canada" },
+  { key: "GB", name: "United Kingdom", flag: "\uD83C\uDDEC\uD83C\uDDE7", ccy: "GBP", exch: "London Stock Exchange", reg: "FCA", cb: "Bank of England", data: "ONS" },
+  { key: "DE", name: "Germany", flag: "\uD83C\uDDE9\uD83C\uDDEA", ccy: "EUR", exch: "Xetra / Frankfurt", reg: "BaFin", cb: "Bundesbank / ECB", data: "Destatis" },
+  { key: "FR", name: "France", flag: "\uD83C\uDDEB\uD83C\uDDF7", ccy: "EUR", exch: "Euronext Paris", reg: "AMF", cb: "Banque de France / ECB", data: "INSEE" },
+  { key: "NL", name: "Netherlands", flag: "\uD83C\uDDF3\uD83C\uDDF1", ccy: "EUR", exch: "Euronext Amsterdam", reg: "AFM", cb: "DNB / ECB", data: "CBS" },
+  { key: "CH", name: "Switzerland", flag: "\uD83C\uDDE8\uD83C\uDDED", ccy: "CHF", exch: "SIX Swiss Exchange", reg: "FINMA", cb: "Swiss National Bank", data: "FSO" },
+  { key: "JP", name: "Japan", flag: "\uD83C\uDDEF\uD83C\uDDF5", ccy: "JPY", exch: "Tokyo Stock Exchange (JPX)", reg: "FSA / JFSA", cb: "Bank of Japan", data: "Statistics Bureau Japan" },
+  { key: "CN", name: "China", flag: "\uD83C\uDDE8\uD83C\uDDF3", ccy: "CNY", exch: "Shanghai / Shenzhen", reg: "CSRC", cb: "PBoC", data: "NBS China" },
+  { key: "HK", name: "Hong Kong", flag: "\uD83C\uDDED\uD83C\uDDF0", ccy: "HKD", exch: "HKEX", reg: "SFC", cb: "HKMA", data: "C&SD Hong Kong" },
+  { key: "TW", name: "Taiwan", flag: "\uD83C\uDDF9\uD83C\uDDFC", ccy: "TWD", exch: "TWSE / TPEx", reg: "FSC Taiwan", cb: "Central Bank of Taiwan", data: "DGBAS" },
+  { key: "KR", name: "South Korea", flag: "\uD83C\uDDF0\uD83C\uDDF7", ccy: "KRW", exch: "KRX (KOSPI / KOSDAQ)", reg: "FSC Korea", cb: "Bank of Korea", data: "Statistics Korea" },
+  { key: "IN", name: "India", flag: "\uD83C\uDDEE\uD83C\uDDF3", ccy: "INR", exch: "NSE / BSE", reg: "SEBI", cb: "RBI", data: "MoSPI" },
+  { key: "AU", name: "Australia", flag: "\uD83C\uDDE6\uD83C\uDDFA", ccy: "AUD", exch: "ASX", reg: "ASIC", cb: "RBA", data: "ABS" },
+  { key: "SG", name: "Singapore", flag: "\uD83C\uDDF8\uD83C\uDDEC", ccy: "SGD", exch: "SGX", reg: "MAS", cb: "MAS", data: "SingStat" },
+  { key: "BR", name: "Brazil", flag: "\uD83C\uDDE7\uD83C\uDDF7", ccy: "BRL", exch: "B3", reg: "CVM", cb: "Banco Central do Brasil", data: "IBGE" },
+  { key: "MX", name: "Mexico", flag: "\uD83C\uDDF2\uD83C\uDDFD", ccy: "MXN", exch: "Bolsa Mexicana de Valores", reg: "CNBV", cb: "Banxico", data: "INEGI" },
+  { key: "ES", name: "Spain", flag: "\uD83C\uDDEA\uD83C\uDDF8", ccy: "EUR", exch: "BME Madrid", reg: "CNMV", cb: "Banco de España / ECB", data: "INE" },
+  { key: "IT", name: "Italy", flag: "\uD83C\uDDEE\uD83C\uDDF9", ccy: "EUR", exch: "Borsa Italiana", reg: "Consob", cb: "Banca d'Italia / ECB", data: "ISTAT" },
+  { key: "SE", name: "Sweden", flag: "\uD83C\uDDF8\uD83C\uDDEA", ccy: "SEK", exch: "Nasdaq Stockholm", reg: "FI Sweden", cb: "Riksbank", data: "SCB" },
+  { key: "ZA", name: "South Africa", flag: "\uD83C\uDDFF\uD83C\uDDE6", ccy: "ZAR", exch: "JSE", reg: "FSCA", cb: "SARB", data: "Stats SA" }
+];
+/* exchange-suffix hints (Yahoo-style) — checked against the raw text first */
+var CTX_SUFFIX = [
+  [/\.NEO\b/i, "CA"], [/\.TO\b/i, "CA"], [/\.CN\b/i, "CA"], [/\.TR\b/i, "CA"], [/\.V\b/i, "CA"],
+  [/\.L(N)?\b/, "GB"], [/\.DE\b/i, "DE"], [/\.(F|S|BE)\b/, "DE"], [/\.PA\b/i, "FR"], [/\.(AS|AMS)\b/, "NL"], [/\.SW\b/i, "CH"],
+  [/\.(T|TYO|JP)\b/, "JP"], [/\.(SS|SZ|SH)\b/, "CN"], [/\.HK\b/i, "HK"], [/\.(TW|TWO)\b/, "TW"], [/\.(KS|KQ)\b/, "KR"],
+  [/\.(NS|BO)\b/, "IN"], [/\.AX\b/i, "AU"], [/\.SI\b/i, "SG"], [/\.SA\b/i, "BR"], [/\.MX\b/i, "MX"],
+  [/\.MC\b/i, "ES"], [/\.MI\b/i, "IT"], [/\.ST\b/i, "SE"], [/\.JO\b/i, "ZA"]
+];
+/* market-keyword hints — checked against the uppercased text second */
+var CTX_WORDS = [
+  [/TSX-?V?\b|CANAD(A|IAN)|LOONIE|BANK OF CANADA|\bBOC\b/, "CA"],
+  [/\bLSE\b|\bFTSE\b|LONDON STOCK|\bGILTS?\b|BANK OF ENGLAND|\bBOE\b|\bSTERLING\b|\bUK\b|BRITISH/, "GB"],
+  [/\bDAX\b|\bXETRA\b|GERMANY|GERMAN\b|BUNDESBANK|\bBUND\b|\bBOBL\b/, "DE"],
+  [/\bCAC ?40\b|\bFRANCE\b|FRENCH\b/, "FR"],
+  [/\bAEX\b|NETHERLANDS|\bDUTCH\b/, "NL"],
+  [/\bSMI\b|\bSWISS\b|SWITZERLAND|\bSNB\b/, "CH"],
+  [/\bNIKKEI\b|\bJAPAN\b|JAPANESE|BANK OF JAPAN|\bBOJ\b|\bYEN\b|\bJPY\b/, "JP"],
+  [/\bSHANGHAI\b|\bSHENZHEN\b|\bCHINA\b|CHINESE|\bCSI ?[0-9]{3}\b|BANK OF CHINA|\bPBOC\b|\bYUAN\b|\bRMB\b/, "CN"],
+  [/\bHANG ?SENG\b|HONG ?KONG|\bHKEX\b/, "HK"],
+  [/\bTAIEX\b|\bTAIWAN\b|TAIWANESE|\bTWD\b/, "TW"],
+  [/\bKOSPI\b|\bKOSDAQ\b|\bKOREA\b|KOREAN|\bKRW\b|BANK OF KOREA/, "KR"],
+  [/\bNIFTY\b|\bSENSEX\b|\bINDIA\b|INDIAN|\bINR\b|\bRUPEE\b|\bRBI\b/, "IN"],
+  [/\bASX ?2?00?\b|\bAUSTRALIA\b|AUSTRALIAN|\bAUSSIE\b|\bAUD\b|RESERVE BANK OF AUSTRALIA|\bRBA\b/, "AU"],
+  [/\bSGX\b|SINGAPORE/, "SG"],
+  [/\bBOVESPA\b|\bBRAZIL\b|BRAZILIAN|\bBRL\b|BRAZILIAN REAL/, "BR"],
+  [/\bBMV\b|BOLSA MEXICANA|\bMEXICO\b|MEXICAN|\bMXN\b|BANXICO/, "MX"],
+  [/\bIBEX\b|\bSPAIN\b|SPANISH\b/, "ES"],
+  [/\bFTSE ?MIB\b|\bBTPS?\b|\bITALY\b|ITALIAN\b/, "IT"],
+  [/\bOMX\b|STOCKHOLM|\bSWEDEN\b|SWEDISH\b|\bSEK\b|RIKSBANK/, "SE"],
+  [/\bJSE\b|SOUTH AFRIC|\bZAR\b|\bSARB\b/, "ZA"],
+  [/\bNYSE\b|\bNASDAQ\b|\bS&P ?500\b|\bDOW\b|FEDERAL RESERVE|\bFOMC\b|\bUSA\b|UNITED STATES/, "US"]
+];
+function ctxCountry(key) { for (var i = 0; i < CTX_COUNTRIES.length; i++) if (CTX_COUNTRIES[i].key === key) return CTX_COUNTRIES[i]; return null; }
+function ctxDetectCountry(text) {
+  var s = String(text || "");
+  for (var i = 0; i < CTX_SUFFIX.length; i++) if (CTX_SUFFIX[i][0].test(s)) return ctxCountry(CTX_SUFFIX[i][1]) || ctxCountry("US");
+  var up = " " + s.toUpperCase() + " ";
+  for (var j = 0; j < CTX_WORDS.length; j++) if (CTX_WORDS[j][0].test(up)) return ctxCountry(CTX_WORDS[j][1]) || ctxCountry("US");
+  return ctxCountry("US");
+}
+function ctxSelectedKey() { var sel = el("analysts-country"); var v = sel ? String(sel.value || "auto") : "auto"; return (v === "auto" || ctxCountry(v)) ? v : "auto"; }
+function ctxCountryFor(text) { var k = ctxSelectedKey(); return k === "auto" ? ctxDetectCountry(text) : ctxCountry(k); }
+/* full country block for the CFA desk prompt */
+function ctxDeskBlock(c) {
+  return "COUNTRY CONTEXT: " + c.flag + " " + c.name.toUpperCase() + " \u2014 treat this as a " + c.name.toUpperCase() + " market idea.\n" +
+    "Primary exchange(s): " + c.exch + " \u00b7 quote currency: " + c.ccy + " \u00b7 regulator: " + c.reg + " \u00b7 central bank: " + c.cb + " \u00b7 official statistics: " + c.data + ".\n" +
+    "Apply the country context throughout: verify the current price on the native exchange in the native currency (state dollar risk on the $100k book in USD, but quote levels in " + c.ccy + "), weigh the country's own macro drivers \u2014 " + c.cb + " rate path, national inflation and growth prints, policy and election calendars \u2014 and prefer national data sources and local outlets.\n\n";
+}
+/* one-line reminders for the researchers and the manager */
+function ctxResearchLine(c) {
+  return "Country context \u2014 the idea trades in " + c.name + " (" + c.exch + ", " + c.ccy + ", central bank " + c.cb + "): pin the price on the native exchange in " + c.ccy + " and build both cases from national sources and the country's own macro (rates, inflation, growth, policy calendar).\n";
+}
+function ctxManagerLine(c) {
+  return "The opportunity trades in " + c.name + " (" + c.flag + " " + c.exch + ", " + c.ccy + ", central bank " + c.cb + ") \u2014 judge it in that market's context: native currency, local rates and regulation, national catalysts.\n\n";
+}
+/* 🌍 Context panel */
+function analystsCtxInit() {
+  var sel = el("analysts-country"); if (!sel) return;
+  var html = '<option value="auto">Auto \u2014 detect from symbol</option>';
+  CTX_COUNTRIES.forEach(function (c) { html += '<option value="' + c.key + '">' + c.flag + " " + c.name + " (" + c.ccy + ")</option>"; });
+  sel.innerHTML = html;
+  var saved = lsGet(LSCOUNTRY);
+  sel.value = (saved && (saved === "auto" || ctxCountry(saved))) ? saved : "auto";
+  analystsCtxHint();
+}
+function analystsCtxToggle() { var box = el("analysts-ctxbox"); if (!box) return; box.style.display = (box.style.display === "none") ? "" : "none"; if (box.style.display !== "none") analystsCtxHint(); }
+function saveAnalystsCountry() { var sel = el("analysts-country"); if (sel) lsSet(LSCOUNTRY, String(sel.value || "auto")); analystsCtxHint(); }
+function analystsCtxHint() {
+  var hint = el("analysts-ctxhint"); if (!hint) return;
+  var key = ctxSelectedKey();
+  if (key !== "auto") {
+    var c = ctxCountry(key);
+    hint.innerHTML = "Selected \u2014 " + c.flag + " <b>" + esc(c.name) + "</b> \u00b7 " + esc(c.exch) + " \u00b7 " + esc(c.ccy) + " \u00b7 " + esc(c.reg) + " \u00b7 " + esc(c.cb) + " \u2014 every analysis runs in this market context until changed.";
+    return;
+  }
+  var opp = el("analysts-opp") ? el("analysts-opp").value : "";
+  if (!opp.trim()) { hint.innerHTML = "Auto-detect \u2014 the desk infers the country from the symbol (exchange suffix like <b>.TO</b>, <b>.L</b>, <b>.T</b> or market keywords like <b>TSX</b>, <b>FTSE</b>, <b>Nikkei</b>); plain US tickers default to the United States."; return; }
+  var d = ctxDetectCountry(opp);
+  hint.innerHTML = "Auto-detected \u2014 " + d.flag + " <b>" + esc(d.name) + "</b> \u00b7 " + esc(d.exch) + " \u00b7 " + esc(d.ccy) + " \u00b7 " + esc(d.cb) + ".";
+}
+
 /* ============================== single-opportunity analysis ============================== */
 /* Analyze one user-submitted opportunity: desk research → researchers' debate → manager's verdict → optional expert guest.
    No scanner, no showrunner, no script — the verdict lands on the analyst board in the same call-panel format as the daily call. */
@@ -2185,6 +2300,7 @@ async function analyzeOpportunity() {
   var key = el("key").value.trim();
   var opp = el("analysts-opp").value.trim();
   var cat = el("analysts-cat") ? String(el("analysts-cat").value || "STOCKS") : "STOCKS";
+  var country = ctxCountryFor(opp);
   if (!key) {
     showTab("settings");
     showGenError("Add your Mistral API key in the Settings tab (get one at console.mistral.ai) to analyze an opportunity.");
@@ -2212,12 +2328,14 @@ async function analyzeOpportunity() {
   setAgent(ep, "scanner", "off", "skipped \u2014 single-opportunity analysis");
   setAgent(ep, "showrunner", "off", "skipped \u2014 analysis only, no show script");
   logLine("Analyzing \u201c<b>" + esc(opp) + "</b>\u201d \u00b7 " + esc(cat) + " \u00b7 desk research \u2192 debate \u2192 verdict \u00b7 today is " + todayHuman(), "hi");
+  logLine("Country context \u2014 " + country.flag + " <b>" + esc(country.name) + "</b> \u00b7 " + esc(country.exch) + " \u00b7 " + esc(country.ccy) + " \u00b7 " + esc(country.cb), "hi");
   try {
     /* ---- 1 · CFA DESK — research the submitted opportunity and build the trade idea ---- */
     var cfa = await researchStep(ep, "cfa", "researching the opportunity\u2026",
       "You are the CFA ANALYST DESK on a trading podcast research team. Today\u2019s date is " + todayHuman() + ".\n" +
       "A single trading opportunity has been submitted to the desk for analysis.\n\n" +
       "OPPORTUNITY: \u201c" + opp + "\u201d\nSCAN CATEGORY: " + cat + "\n\n" +
+      ctxDeskBlock(country) +
       "Research it with web search: verify its CURRENT market price fresh, the analyst or market activity behind it, its key catalysts with exact dates, and its risks.\n" +
       "Then build the desk\u2019s trade recommendation and output it in the exact IDEA format below.\n\n" +
       analystHouseStyle(),
@@ -2227,6 +2345,7 @@ async function analyzeOpportunity() {
       "You are the DEBATING RESEARCHERS on a trading podcast research team \u2014 two sharp researchers who argue both sides of every idea. Today\u2019s date is " + todayHuman() + ".\n" +
       "For the single idea in the CFA desk\u2019s analysis below, use web search to build both cases:\n" +
       "First pin the idea\u2019s CURRENT market price with a fresh search and argue from the live quote \u2014 if the desk\u2019s AS-OF PRICE is stale or missing, correct it in your arguments and say so.\n" +
+      ctxResearchLine(country) +
       "FOR: 3-4 dated arguments for executing the trade (evidence, catalysts, positioning).\n" +
       "AGAINST: 3-4 dated arguments for NOT executing the trade (risk, valuation, macro, timing).\n" +
       "Every argument starts with its date or \u201cas of today\u201d.\n\n" +
@@ -2239,6 +2358,7 @@ async function analyzeOpportunity() {
     var mgr = await researchStep(ep, "manager", "making the call\u2026",
       "You are the INVESTMENT MANAGER on a trading podcast research team. You run the book. Today\u2019s date is " + todayHuman() + ".\n" +
       "Read the desk analysis and the researchers\u2019 debate below and decide whether the book trades this opportunity.\n\n" +
+      ctxManagerLine(country) +
       "== CFA DESK ANALYSIS ==\n" + cfa.text + "\n\n== RESEARCHERS\u2019 DEBATE ==\n" + res.text + "\n\n" +
       "Output, in this exact order:\n" +
       "1) MY TRADE CHOICE: the call on this idea with its native verb (BUY / SELL / LONG / SHORT / BET YES / BET NO / BACK / FADE) \u2014 or PASS, with one line saying why.\n" +
@@ -5565,6 +5685,7 @@ function init() {
   var avkey = lsGet(LSAVKEY); if (avkey && el("avkey")) el("avkey").value = avkey;
   var model = lsGet(LSMODEL); if (model) el("model").value = model;
   var deskmins = parseFloat(lsGet(LSDESK)); if (deskmins > 0 && el("analysts-mins")) el("analysts-mins").value = deskmins;
+  analystsCtxInit();
   var savedStyle = lsGet(LSSTYLE); pickStyle(savedStyle && STYLES[savedStyle] ? savedStyle : "story");
   var savedDev = lsGet(LSDEV); S.deviceMode = (savedDev === "phone" || savedDev === "desk") ? savedDev : "auto";
   applyDeviceMode();
