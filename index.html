@@ -779,9 +779,9 @@ body.mode-desk #srctable table{min-width:0}
       <div class="row">
         <input type="text" id="key" placeholder="Mistral API key" style="flex:1;min-width:240px" oninput="saveKey()">
         <select id="model" style="width:auto" onchange="saveModel()">
-          <option value="mistral-small-latest">mistral-small-latest (fast)</option>
-          <option value="mistral-medium-latest" selected>mistral-medium-latest</option>
-          <option value="mistral-large-latest">mistral-large-latest (best)</option>
+          <option value="mistral-small-latest" selected>mistral-small-latest — Small 4 (fast)</option>
+          <option value="mistral-large-4">mistral-large-4 — Large 4 (best)</option>
+          <option value="mistral-medium-latest">mistral-medium-latest — Medium 3.5 (legacy)</option>
         </select>
       </div>
     </div>
@@ -1048,6 +1048,17 @@ function showTab(name) {
 /* ============================== settings ============================== */
 function saveKey() { lsSet(LSKEY, el("key").value.trim()); }
 function saveModel() { lsSet(LSMODEL, el("model").value); }
+
+/* Mistral retired Large 3 (mistral-large-2512) on 2026-10-31 and the mistral-large-latest alias still points at the dead snapshot,
+   so a stored model may no longer exist at the API. Map what we can, reset the rest, and say so in the log. */
+function modelMigrate() {
+  var model = lsGet(LSMODEL), msel = el("model");
+  if (!model) return;
+  for (var mi = 0; mi < msel.options.length; mi++) if (msel.options[mi].value === model) { msel.value = model; return; }
+  var mapped = model.indexOf("mistral-large") === 0 ? "mistral-large-4" : msel.options[0].value;
+  msel.value = mapped; lsSet(LSMODEL, mapped);
+  logLine("Model " + model + " no longer exists at Mistral — switched to " + mapped + " (pick a different one in the Settings tab).", "err");
+}
 function deskMinsSetting() { var v = parseFloat(el("analysts-mins") ? el("analysts-mins").value : ""); return v > 0 ? v : 5; }
 function saveDeskMins() { var v = deskMinsSetting(); if (v > 0) lsSet(LSDESK, String(v)); }
 function voicePrefs() {
@@ -1102,11 +1113,13 @@ async function apiCall(inputs, tools) {
       if (!r.ok) {
         var t = ""; try { t = await r.text(); } catch (e2) {}
         if (r.status === 401 || r.status === 403) throw mkErr("auth", r.status, t || "Invalid API key");
+        var pj = null; try { pj = JSON.parse(t); } catch (e3) {}
+        if (pj && pj.message && (pj.code === 3040 || /does not exist/i.test(pj.message))) throw mkErr("model", pj.code || 3040, pj.message);
         throw mkErr("http", r.status, t || ("HTTP " + r.status));
       }
       return await r.json();
     } catch (e) {
-      if (e && (e.kind === "auth" || e.kind === "http")) throw e;
+      if (e && (e.kind === "auth" || e.kind === "http" || e.kind === "model")) throw e;
       last = mkErr("network", 0, String(e && e.message || e));
       await sleep(900 * Math.pow(2, attempt));
     }
@@ -1482,6 +1495,8 @@ async function runEpisode(ep) {
       agentsOf(ep).forEach(function (a) { if (ep.agents[a.id] && ep.agents[a.id].status === "run") setAgent(ep, a.id, "off", "stopped"); });
     } else if (e && e.kind === "auth") {
       showGenError("API key rejected (" + (e.message || "") + "). Check your Mistral key and try again.");
+    } else if (e && e.kind === "model") {
+      showGenError("Mistral rejected the selected model: " + (e.message || "") + " — open the Settings tab and pick a current model.");
     } else if (e && e.kind === "empty") {
       showGenError(e.message || "Empty response from the model.");
     } else {
@@ -2601,6 +2616,9 @@ async function analyzeOpportunity() {
     } else if (e && e.kind === "auth") {
       showGenError("API key rejected (" + (e.message || "") + "). Check your Mistral key and try again.");
       analyzeFailShow("Analysis failed \u2014 API key rejected (" + (e.message || "") + "). Check your Mistral key in the Settings tab.");
+    } else if (e && e.kind === "model") {
+      showGenError("Mistral rejected the selected model: " + (e.message || "") + " — open the Settings tab and pick a current model.");
+      analyzeFailShow("Analysis failed \u2014 Mistral rejected the selected model: " + (e.message || "") + " Open the <b>Settings</b> tab and pick a current model (mistral-small-latest or mistral-large-4).");
     } else if (e && e.kind === "empty") {
       showGenError(e.message || "Empty response from the model.");
       analyzeFailShow("Analysis failed \u2014 " + (e.message || "Empty response from the model."));
@@ -5894,7 +5912,7 @@ function deleteExpert(id) {
 function init() {
   var key = lsGet(LSKEY); if (key) el("key").value = key;
   var avkey = lsGet(LSAVKEY); if (avkey && el("avkey")) el("avkey").value = avkey;
-  var model = lsGet(LSMODEL); if (model) el("model").value = model;
+  var model = lsGet(LSMODEL); if (model) el("model").value = model; modelMigrate();
   var deskmins = parseFloat(lsGet(LSDESK)); if (deskmins > 0 && el("analysts-mins")) el("analysts-mins").value = deskmins;
   analystsCtxInit();
   var savedStyle = lsGet(LSSTYLE); pickStyle(savedStyle && STYLES[savedStyle] ? savedStyle : "story");
