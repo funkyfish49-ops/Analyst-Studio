@@ -1812,17 +1812,47 @@ function cleanManagerName(n) {
   return t || "Investment Manager";
 }
 
+/* lenient JSON for model-emitted CALL DATA: strict parse first, then trailing-comma fixup, then smart-quote normalization */
+function parseJsonLoose(raw) {
+  var s = String(raw || "").trim();
+  if (!s) return null;
+  try { return JSON.parse(s); } catch (e) {}
+  try { return JSON.parse(s.replace(/,\s*([}\]])/g, "$1")); } catch (e) {}
+  try { return JSON.parse(s.replace(/[\u201c\u201d]/g, '"').replace(/[\u2018\u2019]/g, "'")); } catch (e) {}
+  return null;
+}
+/* brace-balanced, string-aware extraction of the first {...} object starting at pos */
+function jsonCandidateAt(t, pos) {
+  var depth = 0, inStr = false, esc = false;
+  for (var i = pos; i < t.length; i++) {
+    var ch = t.charAt(i);
+    if (inStr) { if (esc) esc = false; else if (ch === "\\") esc = true; else if (ch === '"') inStr = false; continue; }
+    if (ch === '"') inStr = true;
+    else if (ch === "{") depth++;
+    else if (ch === "}") { depth--; if (!depth) return t.slice(pos, i + 1); }
+  }
+  return null;
+}
 function parseCallData(text) {
   var t = String(text || "");
-  var m = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  var raw = m ? m[1].trim() : "";
-  if (!raw) {
-    var a = t.indexOf("{"), b = t.lastIndexOf("}");
-    if (a >= 0 && b > a) raw = t.slice(a, b + 1);
-  }
-  if (!raw) return null;
   var data = null;
-  try { data = JSON.parse(raw); } catch (e) { return null; }
+  /* every fenced block first (a reply may quote earlier fences), then balanced {...} spans from the prose */
+  var cands = [];
+  var fre = /```(?:json)?\s*([\s\S]*?)```/gi, m;
+  while ((m = fre.exec(t)) !== null) { var f = m[1].trim(); if (f) cands.push(f); }
+  var bi = t.indexOf("{");
+  while (bi >= 0 && cands.length < 24) {
+    var span = jsonCandidateAt(t, bi);
+    if (!span) break;
+    cands.push(span);
+    bi = t.indexOf("{", bi + span.length);
+  }
+  for (var ci = 0; ci < cands.length && !data; ci++) {
+    var d = parseJsonLoose(cands[ci]);
+    if (d && Array.isArray(d) && d.length === 1 && d[0] && (d[0].manager || Array.isArray(d[0].calls))) d = d[0];
+    if (d && !Array.isArray(d) && (d.manager || d.calls)) data = d;
+  }
+  if (!data) return null;
   var str = function (x) { return String(x == null ? "" : x).trim(); };
   var arrOf = function (x) {
     if (!Array.isArray(x)) return x ? [str(x)] : [];
@@ -2301,6 +2331,17 @@ function analystsCtxHint() {
 function analyzeIdle() { var b = el("analysts-analyze"); b.disabled = false; b.className = "btn"; b.innerHTML = "\uD83D\uDD0D Analyze"; b.title = "Run the desk on this opportunity"; }
 function analyzeWait() { var b = el("analysts-analyze"); b.disabled = true; b.className = "btn wait"; b.innerHTML = '<span class="bspin"></span> Analyzing\u2026'; b.title = "Analysis in progress \u2014 desk research \u2192 debate \u2192 verdict"; }
 function analyzeFail() { var b = el("analysts-analyze"); b.disabled = false; b.className = "btn fail"; b.innerHTML = "\u2757 Failed \u2014 retry"; b.title = "The last analysis failed \u2014 press to run it again"; }
+/* fallback when the manager delivers a verdict but NO CALL DATA entry — typical for a symbol that cannot be identified (e.g. bare "mp1"): render the verdict as a NO ENTRY idea instead of failing the run */
+function mgrFallbackCall(opp, cat, reason) {
+  var c = (cat === "PREDICTIONS" || cat === "BONDS" || cat === "OTHER") ? cat : "STOCKS";
+  var why = String(reason || "the symbol could not be identified with high confidence").slice(0, 300);
+  return {
+    analyst: "Investment Manager", asset: String(opp || "unknown").slice(0, 40), category: c, action: "NO ENTRY", tag: "Unidentified",
+    confidence: "0%", entry: "NO ENTRY \u2014 could not identify the symbol", size: "0% \u2014 $0",
+    rr: "target \u2014 | stop \u2014 | max loss $0 | reward:risk n/a", price: "UNCONFIRMED", priceAsOf: "",
+    rationale: why, forArgs: [], againstArgs: [why]
+  };
+}
 
 /* ============================== single-opportunity analysis ============================== */
 /* Analyze one user-submitted opportunity: desk research → researchers' debate → manager's verdict → optional expert guest.
@@ -2382,14 +2423,23 @@ async function analyzeOpportunity() {
       sourcePromptSuffix();
     var mgr = await researchStep(ep, "manager", "making the call\u2026", mgrPrompt, "Investment Manager", "manager");
     var data = parseCallData(mgr.text);
-    if (!data || !data.calls || !data.calls.length) {
-      /* obscure bare tickers (e.g. "mp1") can make the manager hedge in prose instead of emitting the CALL DATA block — one strict retry */
+    /* a well-behaved manager returns a verdict but an EMPTY calls array when the symbol can't be identified — render the verdict, don't fail */
+    if (data && (!data.calls || !data.calls.length)) {
+      logLine("The manager\u2019s verdict carries no CALL DATA entry \u2014 rendering it as a NO ENTRY idea.", "err");
+      data = { manager: data.manager, calls: [mgrFallbackCall(opp, cat, data.manager.opinion || "")] };
+    }
+    if (!data) {
+      /* no JSON anywhere — the manager hedged in prose; one strict retry */
       logLine("No usable CALL DATA in the manager\u2019s reply \u2014 asking once more for the strict format\u2026", "err");
       var mgr2 = await researchStep(ep, "manager", "re-requesting the call data\u2026",
         "IMPORTANT \u2014 your previous reply for this opportunity contained no usable CALL DATA: the fenced ```json block was missing or not valid JSON. Re-issue your full verdict in the same sections and exact formats, and this time END with the fenced ```json CALL DATA block \u2014 valid JSON, exactly ONE entry, even if the verdict is PASS or the symbol could not be identified (then asset = the submitted symbol and entry = \u201cNO ENTRY \u2014 <reason>\u201d).\n\n" +
         mgrPrompt,
         "Investment Manager", "manager");
       data = parseCallData(mgr2.text);
+      if (data && (!data.calls || !data.calls.length)) {
+        logLine("The retried verdict still carries no CALL DATA entry \u2014 rendering it as a NO ENTRY idea.", "err");
+        data = { manager: data.manager, calls: [mgrFallbackCall(opp, cat, data.manager.opinion || "")] };
+      }
     }
     if (!data || !data.calls || !data.calls.length) throw mkErr("empty", 0, "The Investment Manager returned no usable CALL DATA for this opportunity. Try again, or make the symbol easier to identify \u2014 the full company name (e.g. \u201cWoolworths Group (ASX: WOW)\u201d) or the exchange-suffixed ticker (e.g. \u201cMP1.AX\u201d) helps the desk resolve obscure tickers.");
     data = validateCallPrices(data);
