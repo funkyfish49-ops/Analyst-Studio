@@ -1,8 +1,17 @@
 # Analyst-Studio (TopicCast Studio)
 
 A single-file HTML app: AI research agents produce fully narrated, source-cited podcast episodes,
-run the Trading Analyst Pipeline (market scanner, CFA desk, debating researchers, investment manager,
+run the Trading Analyst Pipeline (daily call scout, CFA desk, debating researchers, investment manager,
 expert guest), track every opportunity through a Results ledger with live position P&L, and play the show with studio voices.
+
+The daily call is calendar-first: the scout scans the **next 10 days of catalysts** — earnings dates,
+Treasury auctions, CPI/PPI/Fed prints, prediction-market contracts and the sports slate, every date
+verified three ways (in-window, weekday-matched, source-confirmed) — and treats today's street
+research as the secondary source. Under **Settings → Daily auto-call** the call can run itself when
+the app opens (a prompt banner, or fully automatic — prices are verified at run time, so the desk
+works when you open it), and any idea that fails price validation is dropped from the board before
+the show is written. The **📋 Ledger** button copies the whole board as log-ready entries in the
+daily scan's ledger format for the append-only trading opportunity log.
 
 Every BUY/SELL opportunity on the board is auto-scored by an embedded causal-entropic engine
 (F = T·∇Sτ): a second opinion on whether committing to the trade preserves more of the desk's
