@@ -62,6 +62,10 @@ Live app: https://funkyfish49-ops.github.io/Analyst-Studio/
 
 Everything runs client-side in the browser — there is no server component.
 
+## Install as an app (phone & PC)
+
+The site is a Progressive Web App: on Android, Chrome menu → **Add to Home screen / Install app** installs a full-screen TopicCast app with its own icon; on a PC, Chrome or Edge offers the install icon in the address bar (or the ⋮ menu → **Install app**), which opens the studio in its own window with a taskbar entry. Installed app and browser site share the same browser local storage, so the API key and settings are entered once per device and do not sync between phone and PC.
+
 ## Results ledger
 
 The **Results** tab is the ledger of every analyzed opportunity: one-line rows with entry, stop,
