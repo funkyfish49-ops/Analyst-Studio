@@ -6083,6 +6083,479 @@ function deleteExpert(id) {
 }
 
 /* ============================== init ============================== */
+/* ===================== KNOWLEDGE BASE — data model (round 13) =====================
+   Structured, versioned memory for the research desk. Six evolving knowledge
+   categories (market / economic / industry / social / stock / other), knowledge
+   cards with claims + sources + facet coverage, append-only event log (compacted
+   locally, full fidelity in the cloud), decision attribute vectors with
+   per-category directional weights updated by realized outcomes, and a source
+   registry for user-fed ingestion. Local persistence is per-entity under
+   topiccast-kb-* keys with an index + byte budget (localStorage-friendly at
+   thousands of cards); cloud mapping to Firestore collections kb_cards /
+   kb_events / kb_decisions / kb_sources / kb_digests / kb_weights (small docs,
+   validated by the firebaseSA rules). Sync wiring and UI land in later rounds;
+   this module is the storage engine + pure logic they build on. */
+
+var KB_SCHEMA = 1;
+var KB_CATS = ["market", "economic", "industry", "social", "stock", "other"];
+var KB_CAT_LABELS = { market: "Market", economic: "Economic", industry: "Industry", social: "Social media", stock: "Stock-specific", other: "Other" };
+var KB_FACETS = {
+  market: ["sentiment", "breadth", "positioning", "volatility", "liquidity"],
+  economic: ["rates", "inflation", "labour", "growth", "policy"],
+  industry: ["structure", "competition", "cycle", "regulation", "supplychain"],
+  social: ["sentiment", "trends", "momentum", "crowding"],
+  stock: ["valuation", "catalysts", "financials", "ownership", "moat", "risk"],
+  other: ["general"]
+};
+var KB_CARD_MAX = { claims: 40, sources: 60, keys: 12, facets: 12, title: 140, claim: 600, basis: 300, keyChars: 32 };
+var KB_EV_MAX = 400;            // events kept locally; older ones compacted away
+var KB_EV_TRIM_TO = 300;        // compaction target when the byte budget is hit
+var KB_W = { floor: 0.5, ceil: 2, lr: 0.15, decay: 0.02, minN: 5, histMax: 200 };
+var KB_LOCAL_BUDGET = 2200000; // bytes (approx) before compaction nudges
+var KB_PAGE = 50;
+
+var KBC = { ix: "topiccast-kb-ix", card: "topiccast-kb-card-", dec: "topiccast-kb-dec-", src: "topiccast-kb-src-", dig: "topiccast-kb-dig-", w: "topiccast-kb-weights", ev: "topiccast-kb-events" };
+var KB_FB = { cards: "kb_cards", events: "kb_events", decs: "kb_decisions", srcs: "kb_sources", digs: "kb_digests", weights: "kb_weights" };
+
+function kbId(p) { return p + "_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function kbNow() { return Date.now(); }
+
+/* ---------- validators (pure) ---------- */
+
+function kbIsCat(c) { return KB_CATS.indexOf(c) >= 0; }
+function kbIsArray(x) { return Object.prototype.toString.call(x) === "[object Array]"; }
+
+function kbValidCard(c) {
+  var errs = [];
+  if (!c || typeof c !== "object") return { ok: false, errs: ["card:not-object"] };
+  if (!kbIsCat(c.cat)) errs.push("cat");
+  if (!(typeof c.title === "string" && c.title.length >= 1 && c.title.length <= KB_CARD_MAX.title)) errs.push("title");
+  if (!kbIsArray(c.keys)) errs.push("keys");
+  else if (c.keys.length > KB_CARD_MAX.keys) errs.push("keys:max");
+  else {
+    for (var i = 0; i < c.keys.length; i++) if (typeof c.keys[i] !== "string" || !c.keys[i] || c.keys[i].length > KB_CARD_MAX.keyChars) { errs.push("keys:item"); break; }
+  }
+  if (!kbIsArray(c.claims)) errs.push("claims");
+  else if (c.claims.length > KB_CARD_MAX.claims) errs.push("claims:max");
+  else {
+    for (var j = 0; j < c.claims.length; j++) {
+      var cl = c.claims[j];
+      if (!cl || typeof cl !== "object" || typeof cl.t !== "string" || !cl.t || cl.t.length > KB_CARD_MAX.claim ||
+        typeof cl.conf !== "number" || cl.conf < 0 || cl.conf > 100 ||
+        (cl.basis !== undefined && cl.basis !== null && (typeof cl.basis !== "string" || cl.basis.length > KB_CARD_MAX.basis))) { errs.push("claims:item"); break; }
+    }
+  }
+  if (!kbIsArray(c.sources)) errs.push("sources");
+  else if (c.sources.length > KB_CARD_MAX.sources) errs.push("sources:max");
+  else {
+    for (var k = 0; k < c.sources.length; k++) {
+      var so = c.sources[k];
+      if (!so || typeof so !== "object" || typeof so.url !== "string" || so.url.length > 800 || typeof so.date !== "string" || so.date.length > 10) { errs.push("sources:item"); break; }
+    }
+  }
+  if (!kbIsArray(c.facets)) errs.push("facets");
+  else {
+    var rub = KB_FACETS[c.cat] || [];
+    for (var f = 0; f < c.facets.length; f++) if (typeof c.facets[f] !== "string" || rub.indexOf(c.facets[f]) < 0) { errs.push("facets:item"); break; }
+    if (c.facets.length > KB_CARD_MAX.facets) errs.push("facets:max");
+  }
+  if (["active", "superseded", "retired"].indexOf(c.status) < 0) errs.push("status");
+  if (!(typeof c.created === "number" && c.created > 0)) errs.push("created");
+  if (!(typeof c.updated === "number" && c.updated > 0)) errs.push("updated");
+  if (!(typeof c.lastVerified === "number" && c.lastVerified > 0)) errs.push("lastVerified");
+  if (!(typeof c.verifyDays === "number" && c.verifyDays >= 1 && c.verifyDays <= 365)) errs.push("verifyDays");
+  if (!(typeof c.v === "number" && c.v >= 1 && Math.floor(c.v) === c.v)) errs.push("v");
+  if (c.supersededBy !== null && c.supersededBy !== undefined && typeof c.supersededBy !== "string") errs.push("supersededBy");
+  return { ok: errs.length === 0, errs: errs };
+}
+
+var KB_EV_TYPES = ["commit", "edit", "retire", "revive", "digest", "decision", "weight", "review"];
+
+function kbValidEvent(e) {
+  var errs = [];
+  if (!e || typeof e !== "object") return { ok: false, errs: ["event:not-object"] };
+  if (KB_EV_TYPES.indexOf(e.type) < 0) errs.push("type");
+  if (["agent", "user"].indexOf(e.actor) < 0) errs.push("actor");
+  if (!(typeof e.at === "number" && e.at > 0)) errs.push("at");
+  if (typeof e.summary !== "string" || e.summary.length > 400) errs.push("summary");
+  if (e.cat !== null && e.cat !== undefined && !kbIsCat(e.cat)) errs.push("cat");
+  if (e.card !== null && e.card !== undefined && typeof e.card !== "string") errs.push("card");
+  if (e.run !== null && e.run !== undefined && typeof e.run !== "string") errs.push("run");
+  if (!kbIsArray(e.refs)) errs.push("refs");
+  else if (e.refs.length > 20) errs.push("refs:max");
+  return { ok: errs.length === 0, errs: errs };
+}
+
+function kbValidDecision(d) {
+  var errs = [];
+  if (!d || typeof d !== "object") return { ok: false, errs: ["decision:not-object"] };
+  if (!(typeof d.symbol === "string" && d.symbol.length >= 1 && d.symbol.length <= 24)) errs.push("symbol");
+  if (["buy", "sell", "noenter"].indexOf(d.action) < 0) errs.push("action");
+  if (!(typeof d.conf === "number" && d.conf >= 0 && d.conf <= 100)) errs.push("conf");
+  if (!(typeof d.at === "number" && d.at > 0)) errs.push("at");
+  if (!d.attrs || typeof d.attrs !== "object" || kbIsArray(d.attrs)) errs.push("attrs");
+  else {
+    for (var cat in d.attrs) {
+      if (!kbIsCat(cat)) { errs.push("attrs:cat"); break; }
+      var a = d.attrs[cat];
+      if (!a || typeof a !== "object" || typeof a.d !== "number" || a.d < -1 || a.d > 1 ||
+        typeof a.m !== "number" || a.m < 0 || a.m > 1 || !kbIsArray(a.cards) || a.cards.length > 6 ||
+        (a.note !== undefined && a.note !== null && (typeof a.note !== "string" || a.note.length > 200))) { errs.push("attrs:item"); break; }
+    }
+  }
+  if (d.run !== null && d.run !== undefined && typeof d.run !== "string") errs.push("run");
+  if (d.ledger !== null && d.ledger !== undefined && typeof d.ledger !== "string") errs.push("ledger");
+  if (d.outcome !== null && d.outcome !== undefined) {
+    var o = d.outcome;
+    if (!o || typeof o !== "object" || ["win", "loss", "void"].indexOf(o.res) < 0 ||
+      typeof o.pnlPct !== "number" || typeof o.at !== "number" || o.at <= 0) errs.push("outcome");
+  }
+  return { ok: errs.length === 0, errs: errs };
+}
+
+function kbValidSource(s) {
+  var errs = [];
+  if (!s || typeof s !== "object") return { ok: false, errs: ["source:not-object"] };
+  if (["once", "feed"].indexOf(s.kind) < 0) errs.push("kind");
+  if (!(typeof s.url === "string" && s.url.length >= 8 && s.url.length <= 800)) errs.push("url");
+  if (s.title !== null && s.title !== undefined && (typeof s.title !== "string" || s.title.length > 200)) errs.push("title");
+  if (s.cat !== null && s.cat !== undefined && !kbIsCat(s.cat)) errs.push("cat");
+  if (["new", "digested", "error"].indexOf(s.status) < 0) errs.push("status");
+  if (!(typeof s.added === "number" && s.added > 0)) errs.push("added");
+  if (!kbIsArray(s.cards)) errs.push("cards");
+  else if (s.cards.length > 200) errs.push("cards:max");
+  if (s.lastDigest !== null && s.lastDigest !== undefined && typeof s.lastDigest !== "number") errs.push("lastDigest");
+  if (s.errs !== null && s.errs !== undefined && (typeof s.errs !== "string" || s.errs.length > 600)) errs.push("errs");
+  return { ok: errs.length === 0, errs: errs };
+}
+
+function kbValidDigest(g) {
+  var errs = [];
+  if (!g || typeof g !== "object") return { ok: false, errs: ["digest:not-object"] };
+  if (!(typeof g.at === "number" && g.at > 0)) errs.push("at");
+  if (!(typeof g.sourceId === "string" && g.sourceId.length >= 1)) errs.push("sourceId");
+  if (["queued", "running", "done", "error"].indexOf(g.status) < 0) errs.push("status");
+  if (g.proposed !== null && g.proposed !== undefined && (typeof g.proposed !== "object" || kbIsArray(g.proposed))) errs.push("proposed");
+  if (typeof g.reviewed !== "boolean") errs.push("reviewed");
+  if (g.err !== null && g.err !== undefined && (typeof g.err !== "string" || g.err.length > 600)) errs.push("err");
+  if (g.run !== null && g.run !== undefined && typeof g.run !== "string") errs.push("run");
+  return { ok: errs.length === 0, errs: errs };
+}
+
+/* ---------- local storage layer (per-entity keys + index) ---------- */
+
+function kbIxGet() {
+  var raw = lsGet(KBC.ix);
+  if (raw) { try { var ix = JSON.parse(raw); if (ix && ix.v === KB_SCHEMA) return ix; } catch (e) {} }
+  return { v: KB_SCHEMA, cards: [], decs: [], srcs: [], digs: [], ev: { n: 0, trimmed: 0 } };
+}
+function kbIxSave(ix) { lsSet(KBC.ix, JSON.stringify(ix)); }
+function kbIxCardEntry(c) { return { id: c.id, cat: c.cat, status: c.status, updated: c.updated, title: c.title.slice(0, KB_CARD_MAX.title), v: c.v }; }
+
+function kbPut(kind, id, obj) { lsSet(KBC[kind] + id, JSON.stringify(obj)); }
+function kbGet(kind, id) { var r = lsGet(KBC[kind] + id); if (!r) return null; try { return JSON.parse(r); } catch (e) { return null; } }
+function kbDel(kind, id) { try { localStorage.removeItem(KBC[kind] + id); } catch (e) {} }
+
+/* ---------- event log (append-only, compacted locally) ---------- */
+
+function kbEvGet() { var r = lsGet(KBC.ev); if (r) { try { return JSON.parse(r); } catch (e) {} } return { n: 0, trimmed: 0, list: [] }; }
+function kbEvSave(ev) { lsSet(KBC.ev, JSON.stringify(ev)); }
+function kbLogEvent(type, opts) {
+  opts = opts || {};
+  var e = { id: kbId("kbe"), at: kbNow(), type: type, actor: opts.actor || "user", cat: opts.cat || null, card: opts.card || null, run: opts.run || null, summary: (opts.summary || "").slice(0, 400), refs: opts.refs || [] };
+  var v = kbValidEvent(e);
+  if (!v.ok) return { ok: false, errs: v.errs };
+  var ev = kbEvGet();
+  ev.list.push(e);
+  if (ev.list.length > KB_EV_MAX) { ev.trimmed += ev.list.length - KB_EV_TRIM_TO; ev.list = ev.list.slice(ev.list.length - KB_EV_TRIM_TO); }
+  ev.n = ev.n + 1;
+  kbEvSave(ev);
+  return { ok: true, ev: e };
+}
+function kbEvents() { return kbEvGet().list; }
+
+/* ---------- cards ---------- */
+
+function kbGetCard(id) { return kbGet("card", id); }
+function kbNewCard(cat, title, keys) {
+  var t = kbNow();
+  return { id: kbId("kbc"), schema: KB_SCHEMA, cat: cat, title: title, keys: keys || [], claims: [], sources: [], facets: [], status: "active", created: t, updated: t, lastVerified: t, verifyDays: 30, v: 1, supersededBy: null };
+}
+
+function kbCommitCard(card, summary, actor, run) {
+  var isNew = !kbGet("card", card.id);
+  var v = kbValidCard(card);
+  if (!v.ok) return { ok: false, errs: v.errs };
+  card.updated = kbNow();
+  if (!card.v || isNew) card.v = 1; else card.v = card.v + 1;
+  kbPut("card", card.id, card);
+  var ix = kbIxGet();
+  var found = false;
+  for (var i = 0; i < ix.cards.length; i++) if (ix.cards[i].id === card.id) { ix.cards[i] = kbIxCardEntry(card); found = true; break; }
+  if (!found) ix.cards.push(kbIxCardEntry(card));
+  kbIxSave(ix);
+  kbLogEvent(isNew ? "commit" : "edit", { actor: actor || "user", cat: card.cat, card: card.id, run: run || null, summary: summary || (isNew ? "new card" : "edit"), refs: [card.id] });
+  return { ok: true, card: card };
+}
+
+function kbRetireCard(id, byId) {
+  var c = kbGetCard(id);
+  if (!c) return { ok: false, errs: ["card:not-found"] };
+  c.status = byId ? "superseded" : "retired";
+  if (byId) c.supersededBy = byId;
+  kbPut("card", c.id, c);
+  var ix = kbIxGet();
+  for (var i = 0; i < ix.cards.length; i++) if (ix.cards[i].id === id) { ix.cards[i] = kbIxCardEntry(c); break; }
+  kbIxSave(ix);
+  kbLogEvent(byId ? "edit" : "retire", { cat: c.cat, card: id, summary: byId ? ("superseded by " + byId) : "retired", refs: [id].concat(byId ? [byId] : []) });
+  return { ok: true, card: c };
+}
+
+function kbCardsPage(cat, cursor, n) {
+  var ix = kbIxGet();
+  var rows = [];
+  for (var i = 0; i < ix.cards.length; i++) {
+    var e = ix.cards[i];
+    if (cat && e.cat !== cat) continue;
+    rows.push(e);
+  }
+  rows.sort(function (a, b) { return b.updated - a.updated; });
+  var size = n || KB_PAGE;
+  var start = 0;
+  if (cursor) { for (var j = 0; j < rows.length; j++) if (rows[j].id === cursor) { start = j + 1; break; } }
+  var page = rows.slice(start, start + size);
+  return { page: page, next: (start + size < rows.length) ? page[page.length - 1].id : null, total: rows.length };
+}
+
+function kbCardsFor(keys, cat) {
+  var ix = kbIxGet(), out = [];
+  for (var i = 0; i < ix.cards.length; i++) {
+    var e = ix.cards[i];
+    if (cat && e.cat !== cat) continue;
+    var c = kbGetCard(e.id);
+    if (!c || c.status !== "active") continue;
+    if (keys && keys.length) {
+      var hit = false;
+      for (var k = 0; k < keys.length; k++) for (var q = 0; q < c.keys.length; q++) if (c.keys[q].toUpperCase() === keys[k].toUpperCase()) { hit = true; break; }
+      if (!hit) continue;
+    }
+    out.push(c);
+  }
+  out.sort(function (a, b) { return b.updated - a.updated; });
+  return out;
+}
+
+/* ---------- decisions (attribute vectors at call time) ---------- */
+
+function kbNewDecision(symbol, action, conf) { return { id: kbId("kbd"), at: kbNow(), symbol: symbol, action: action, conf: conf, attrs: {}, run: null, ledger: null, outcome: null }; }
+
+function kbSaveDecision(d) {
+  var v = kbValidDecision(d);
+  if (!v.ok) return { ok: false, errs: v.errs };
+  var isNew = !kbGet("dec", d.id);
+  kbPut("dec", d.id, d);
+  var ix = kbIxGet();
+  var found = false;
+  for (var i = 0; i < ix.decs.length; i++) if (ix.decs[i].id === d.id) { ix.decs[i] = { id: d.id, at: d.at, symbol: d.symbol, action: d.action }; found = true; break; }
+  if (!found) ix.decs.push({ id: d.id, at: d.at, symbol: d.symbol, action: d.action });
+  kbIxSave(ix);
+  kbLogEvent("decision", { actor: "agent", card: null, summary: d.action + " " + d.symbol + (isNew ? " (decision recorded)" : " (outcome updated)"), refs: [] });
+  return { ok: true, dec: d };
+}
+
+function kbGetDecision(id) { return kbGet("dec", id); }
+function kbDecisionsPage(cursor, n) {
+  var ix = kbIxGet(), rows = ix.decs.slice().sort(function (a, b) { return b.at - a.at; });
+  var size = n || KB_PAGE, start = 0;
+  if (cursor) { for (var j = 0; j < rows.length; j++) if (rows[j].id === cursor) { start = j + 1; break; } }
+  var page = rows.slice(start, start + size);
+  return { page: page, next: (start + size < rows.length) ? page[page.length - 1].id : null, total: rows.length };
+}
+
+/* ---------- category weights (outcome-driven, directional, clamped) ----------
+   Per category two reliability weights: wl = how much to trust this lens when it
+   supports a LONG (buy), ws = when it supports a SHORT (sell). A resolved position
+   moves the weights of the lenses that mattered: a winning buy raises the wl of
+   aligned lenses, a losing buy lowers them and raises the ws of lenses that
+   warned against it. Guardrails: learning rate, magnitude cap by |pnl|, credit
+   split across correlated lenses, slow decay back to neutral 1.0, clamped to
+   [KB_W.floor, KB_W.ceil], and a weight is only "effective" (used in prompts)
+   once its sample count n >= KB_W.minN. */
+
+function kbWInit() {
+  var w = { v: KB_SCHEMA };
+  for (var i = 0; i < KB_CATS.length; i++) w[KB_CATS[i]] = { wl: 1, ws: 1, n: 0, wins: 0, sumRet: 0, hist: [] };
+  return w;
+}
+function kbWLoad() { var r = lsGet(KBC.w); if (r) { try { var w = JSON.parse(r); if (w && w.v === KB_SCHEMA && kbIsCat("market") && w.market) return w; } catch (e) {} } return kbWInit(); }
+function kbWSave(w) { lsSet(KBC.w, JSON.stringify(w)); }
+
+function kbWClamp(x) { return Math.max(KB_W.floor, Math.min(KB_W.ceil, x)); }
+
+/* pure: apply one resolved outcome to the weights. weights mutated in place and returned. */
+function kbWApply(weights, decision, outcome) {
+  var a = decision.action === "buy" ? 1 : decision.action === "sell" ? -1 : 0;
+  if (!a) return weights;
+  if (!outcome || outcome.res === "void") return weights;
+  var o = outcome.res === "win" ? 1 : -1;
+  var mag = Math.min(1, Math.abs(outcome.pnlPct || 0) / 50);
+  var sig = [];
+  for (var ci = 0; ci < KB_CATS.length; ci++) {
+    var cat = KB_CATS[ci], at = decision.attrs && decision.attrs[cat];
+    if (at && typeof at.d === "number" && Math.abs(at.d) >= 0.05) sig.push({ cat: cat, at: at });
+  }
+  if (!sig.length) return weights;
+  var share = 1 / sig.length;
+  for (var i = 0; i < sig.length; i++) {
+    var c = sig[i].cat, w = weights[c];
+    if (!w) continue;
+    var aligned = sig[i].at.d * a > 0;
+    var target = a > 0 ? "wl" : "ws";   // side the trade was on
+    var other = a > 0 ? "ws" : "wl";    // side a warning lens pointed to
+    var delta = KB_W.lr * share * mag * sig[i].at.m;
+    if (aligned) w[target] = kbWClamp(w[target] + o * delta);
+    else w[other] = kbWClamp(w[other] - o * delta);
+    w[target] = kbWClamp(w[target] + (1 - w[target]) * KB_W.decay);
+    w[other] = kbWClamp(w[other] + (1 - w[other]) * KB_W.decay);
+    w.n += 1;
+    if (o > 0) w.wins += 1;
+    w.sumRet += (outcome.pnlPct || 0);
+    w.hist.push({ at: kbNow(), wl: Math.round(w.wl * 1e4) / 1e4, ws: Math.round(w.ws * 1e4) / 1e4, n: w.n });
+    if (w.hist.length > KB_W.histMax) w.hist = w.hist.slice(w.hist.length - KB_W.histMax);
+  }
+  return weights;
+}
+
+function kbWEffective(weights, cat) {
+  var w = weights[cat];
+  if (!w) return { wl: 1, ws: 1, ready: false };
+  return { wl: w.n >= KB_W.minN ? w.wl : 1, ws: w.n >= KB_W.minN ? w.ws : 1, ready: w.n >= KB_W.minN };
+}
+
+/* ---------- sources (user-fed ingestion registry) ---------- */
+
+function kbNewSource(kind, url, title, cat) { return { id: kbId("kbs"), kind: kind, url: url, title: title || null, cat: cat || null, status: "new", lastDigest: null, lastOk: null, cards: [], errs: null, added: kbNow() }; }
+
+function kbSaveSource(s) {
+  var v = kbValidSource(s);
+  if (!v.ok) return { ok: false, errs: v.errs };
+  kbPut("src", s.id, s);
+  var ix = kbIxGet();
+  var found = false;
+  for (var i = 0; i < ix.srcs.length; i++) if (ix.srcs[i].id === s.id) { ix.srcs[i] = { id: s.id, at: s.added, status: s.status }; found = true; break; }
+  if (!found) ix.srcs.push({ id: s.id, at: s.added, status: s.status });
+  kbIxSave(ix);
+  return { ok: true, src: s };
+}
+
+function kbGetSource(id) { return kbGet("src", id); }
+function kbSourcesPage(cursor, n) {
+  var ix = kbIxGet(), rows = ix.srcs.slice().sort(function (a, b) { return b.at - a.at; });
+  var size = n || KB_PAGE, start = 0;
+  if (cursor) { for (var j = 0; j < rows.length; j++) if (rows[j].id === cursor) { start = j + 1; break; } }
+  var page = rows.slice(start, start + size);
+  return { page: page, next: (start + size < rows.length) ? page[page.length - 1].id : null, total: rows.length };
+}
+
+/* ---------- digests (ingestion runs) ---------- */
+
+function kbNewDigest(sourceId, run) { return { id: kbId("kbdg"), at: kbNow(), sourceId: sourceId, status: "queued", proposed: null, reviewed: false, err: null, run: run || null }; }
+
+function kbSaveDigest(g) {
+  var v = kbValidDigest(g);
+  if (!v.ok) return { ok: false, errs: v.errs };
+  kbPut("dig", g.id, g);
+  var ix = kbIxGet();
+  var found = false;
+  for (var i = 0; i < ix.digs.length; i++) if (ix.digs[i].id === g.id) { ix.digs[i] = { id: g.id, at: g.at, status: g.status }; found = true; break; }
+  if (!found) ix.digs.push({ id: g.id, at: g.at, status: g.status });
+  kbIxSave(ix);
+  kbLogEvent("digest", { actor: "agent", summary: "digest " + g.status + " for " + g.sourceId, refs: [g.sourceId] });
+  return { ok: true, dig: g };
+}
+
+function kbGetDigest(id) { return kbGet("dig", id); }
+
+/* ---------- coverage / depth (rubric-based) ---------- */
+
+function kbCoverage(cat, keys) {
+  var cards = kbCardsFor(keys || null, cat);
+  var out = {}, cnt = {}, conf = {};
+  for (var f = 0; f < KB_FACETS[cat].length; f++) out[KB_FACETS[cat][f]] = { n: 0, avgConf: 0 };
+  for (var i = 0; i < cards.length; i++) {
+    var c = cards[i];
+    if (!c.facets) continue;
+    var mean = 0;
+    if (c.claims && c.claims.length) { var s = 0; for (var q = 0; q < c.claims.length; q++) s += (c.claims[q].conf || 0); mean = s / c.claims.length; }
+    for (var k = 0; k < c.facets.length; k++) {
+      var fc = c.facets[k];
+      if (!(fc in out)) continue;
+      out[fc].n += 1;
+      cnt[fc] = (cnt[fc] || 0) + 1;
+      conf[fc] = (conf[fc] || 0) + mean;
+    }
+  }
+  for (var fc2 in out) if (cnt[fc2]) out[fc2].avgConf = Math.round(conf[fc2] / cnt[fc2]);
+  return out;
+}
+
+function kbDepth(keys) {
+  var out = {};
+  for (var i = 0; i < KB_CATS.length; i++) {
+    var cat = KB_CATS[i];
+    var cov = kbCoverage(cat, keys);
+    var filled = 0, total = KB_FACETS[cat].length;
+    for (var f in cov) if (cov[f].n > 0) filled++;
+    var active = kbCardsFor(keys || null, cat).length;
+    out[cat] = { cards: active, facetsFilled: filled, facetsTotal: total, pct: total ? Math.round(100 * filled / total) : 0 };
+  }
+  return out;
+}
+
+/* ---------- byte budget + compaction ---------- */
+
+function kbBytes() {
+  var total = 0;
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf("topiccast-kb-") === 0) total += k.length + (localStorage.getItem(k) || "").length;
+    }
+  } catch (e) {}
+  return total;
+}
+
+function kbCompact() {
+  var before = kbBytes(), freed = 0;
+  var ev = kbEvGet();
+  if (ev.list.length > KB_EV_TRIM_TO) { ev.trimmed += ev.list.length - KB_EV_TRIM_TO; ev.list = ev.list.slice(ev.list.length - KB_EV_TRIM_TO); kbEvSave(ev); }
+  var w = kbWLoad();
+  var trimmedW = false;
+  for (var i = 0; i < KB_CATS.length; i++) { var cw = w[KB_CATS[i]]; if (cw && cw.hist && cw.hist.length > 100) { cw.hist = cw.hist.slice(cw.hist.length - 100); trimmedW = true; } }
+  if (trimmedW) kbWSave(w);
+  freed = before - kbBytes();
+  return { freed: freed, stillOver: kbBytes() > KB_LOCAL_BUDGET, bytes: kbBytes() };
+}
+
+/* ---------- firestore mapping (wiring lands with the sync round) ---------- */
+
+function kbDocPath(kind, id) { return KB_FB[kind] + "/" + id; }
+function kbWeightsDocId(cat) { return cat; }
+
+window.KB = {
+  schema: KB_SCHEMA, cats: KB_CATS, catLabels: KB_CAT_LABELS, facets: KB_FACETS,
+  id: kbId, validCard: kbValidCard, validEvent: kbValidEvent, validDecision: kbValidDecision, validSource: kbValidSource, validDigest: kbValidDigest,
+  ix: kbIxGet, events: kbEvents, logEvent: kbLogEvent,
+  newCard: kbNewCard, getCard: kbGetCard, commitCard: kbCommitCard, retireCard: kbRetireCard, cardsPage: kbCardsPage, cardsFor: kbCardsFor,
+  newDecision: kbNewDecision, saveDecision: kbSaveDecision, getDecision: kbGetDecision, decisionsPage: kbDecisionsPage,
+  wInit: kbWInit, wLoad: kbWLoad, wSave: kbWSave, wApply: kbWApply, wEffective: kbWEffective,
+  newSource: kbNewSource, saveSource: kbSaveSource, getSource: kbGetSource, sourcesPage: kbSourcesPage,
+  newDigest: kbNewDigest, saveDigest: kbSaveDigest, getDigest: kbGetDigest,
+  coverage: kbCoverage, depth: kbDepth,
+  bytes: kbBytes, compact: kbCompact,
+  docPath: kbDocPath, weightsDocId: kbWeightsDocId
+};
+
 function init() {
   var key = lsGet(LSKEY); if (key) el("key").value = key;
   var avkey = lsGet(LSAVKEY); if (avkey && el("avkey")) el("avkey").value = avkey;
