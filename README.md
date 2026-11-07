@@ -91,6 +91,17 @@ added or edited manually (claims one per line as `text | confidence | basis`, so
 `url | date`). Storage is per-device for now; cloud sync for the knowledge base lands in a
 later round.
 
+Round 15 wires the desk to this base end to end. While forming calls, the CFA desk and the
+investment manager receive the established cards (with staleness labels and cite keys) plus any
+earned lens-reliability weights as prompt context — key-scoped to the submitted symbol in
+single-opportunity analysis. The manager records which lenses moved each call in the CALL DATA
+(`kb` field: per-lens direction -1..1, magnitude 0-1, cited card keys, one-line note), sanitized
+at parse time and frozen into a KB decision at board freeze. Every Won/Lost resolution — manual,
+target/stop auto-close, or a cloud ledger row — feeds the outcome back into the lens weights:
+an aligned lens gains trust on the side it supported, a dissenting lens gains trust on the side
+it warned about. Voids, expiries, no-entry calls and re-resolutions never move the weights, and
+a lens's weights only enter prompts once it holds 5+ resolved outcomes.
+
 ## Forecast Lab
 
 The standalone **Entropic Forecast Lab** lives at
