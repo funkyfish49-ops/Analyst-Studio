@@ -114,6 +114,21 @@ source's last digest and contributed-card count show beside it. This round also 
 `mistral-large-4` to the Settings model select — Large 4 is GA and supports built-in connectors
 again — with stale stored models falling back to the default.
 
+Round 17 syncs the knowledge base itself. A new **☁️ Sync KB** button beside "Compact storage"
+in the Coverage card does a stateless, idempotent two-way sync over the owner-scoped
+`kb_*` Firestore collections (cards, timeline events, decisions, sources, digests and the
+per-category weight docs; the security rules shipped with the cloud rounds already cover
+them): pull merges the cloud into the local base first — cards by version number, events as
+a union of both append-only logs, decisions by the newer outcome, sources and digests by
+content, weights by sample count — then push publishes what the cloud lacks or trails.
+Nothing is ever deleted remotely and nothing double-counts: events are append-only in the
+cloud, decisions are frozen at creation, and weight docs only move forward. While you are
+signed in, every knowledge write (card edits, verifications, accepted proposals, digests,
+frozen decisions, resolved outcomes) also auto-pushes a few seconds later, and a fresh
+device that signs in with an empty base pulls the cloud copy automatically — so the whole
+base travels between phone and PC. The coverage line shows the last sync time, and the base
+still lives in local storage, so nothing is lost offline.
+
 ## Forecast Lab
 
 The standalone **Entropic Forecast Lab** lives at

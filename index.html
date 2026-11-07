@@ -831,6 +831,7 @@ body.mode-desk #srctable table{min-width:0}
       <div class="row" style="margin-top:10px">
         <span class="dim" id="kb-store" style="font-size:12.5px"></span>
         <button class="btn ghost small" onclick="kbuiCompact()">Compact storage</button>
+        <button class="btn ghost small" onclick="kbuiSyncKb()">☁️ Sync KB</button>
       </div>
     </div>
   </section>
@@ -965,7 +966,7 @@ body.mode-desk #srctable table{min-width:0}
       <p>The <b>Settings</b> tab has a <b>☁️ Cloud sync</b> card: sign in with Google and every episode you produce — podcast or analyst call — is saved to your Firebase cloud library, together with one trackable document per board opportunity and per episode topic. The <b>Monitor</b> tab doubles as your track record: each re-check appends to that item's cloud history, and the <b>🏆 Track record</b> row lets you resolve any opportunity as <b>Won</b>, <b>Lost</b> or <b>Void</b> — or reopen it — with the outcome saved with the episode and synced to the cloud. Press <b>Load cloud library</b> in Settings to bring any past episode back onto this device with its full watchlist and track record intact. Everything works offline too: without sign-in (or without a connection) the app runs entirely on this browser's local storage.</p>
 
       <h3>🧠 The Knowledge tab</h3>
-      <p>The <b>🧠 Knowledge</b> tab is the desk's living knowledge base. Every card is one established fact or theme with <b>claims</b> (each with a 0-100 confidence and an optional basis), <b>dated sources</b>, <b>link keys</b>, and a place in a category facet rubric — six evolving categories (Market, Economic, Industry, Social media, Stock-specific, Other), each with its own rubric of facets that make depth measurable. Cards are versioned: every commit, edit, verification or retirement lands in a per-card <b>version timeline</b>. Freshness is policy-driven — each card declares its own <b>re-verify window</b>, and cards past it go <b>stale</b>, then <b>overdue</b>, surfacing in the <b>🧐 Review queue</b> where you can mark them verified, revise or retire them in one click. The <b>🗺️ Coverage &amp; depth</b> map shows how many cards cover each facet per category (with their average claim confidence), a bar per category, and how far each lens is <b>trusted</b>: once a category accumulates 5 resolved outcomes, its learned reliability weights (long / short) start showing beside it — below that it is still learning. Use <b>＋ New card</b> to add knowledge manually, or expand a card and press <b>✎ Edit</b> — the editor takes claims one per line in the form <b>text | confidence | basis</b> and sources as <b>url | date</b>. The desk is wired to this base: while forming calls the desk and manager read the established cards and the earned lens-reliability weights (a lens activates at <b>5 resolved outcomes</b>), the manager records which lenses moved each call in the CALL DATA, those vectors are frozen into decisions at board freeze, and every <b>Won / Lost</b> resolution feeds the lens weights automatically — voids, expiries and re-resolutions never double-count. The <b>📡 Sources &amp; digestion</b> card feeds the base: add any URL as a one-time read or a repeatable feed, press <b>🍽️ Digest now</b> (or <b>🍽️ Digest due</b> for every pending source), and the research agent reads the source and proposes new cards, claims to add to existing cards, and contradictions — the proposals wait in the review queue, where you save, apply or edit them one by one. Everything is stored on this device for now; cloud sync for the knowledge base lands in a later round.</p>
+      <p>The <b>🧠 Knowledge</b> tab is the desk's living knowledge base. Every card is one established fact or theme with <b>claims</b> (each with a 0-100 confidence and an optional basis), <b>dated sources</b>, <b>link keys</b>, and a place in a category facet rubric — six evolving categories (Market, Economic, Industry, Social media, Stock-specific, Other), each with its own rubric of facets that make depth measurable. Cards are versioned: every commit, edit, verification or retirement lands in a per-card <b>version timeline</b>. Freshness is policy-driven — each card declares its own <b>re-verify window</b>, and cards past it go <b>stale</b>, then <b>overdue</b>, surfacing in the <b>🧐 Review queue</b> where you can mark them verified, revise or retire them in one click. The <b>🗺️ Coverage &amp; depth</b> map shows how many cards cover each facet per category (with their average claim confidence), a bar per category, and how far each lens is <b>trusted</b>: once a category accumulates 5 resolved outcomes, its learned reliability weights (long / short) start showing beside it — below that it is still learning. Use <b>＋ New card</b> to add knowledge manually, or expand a card and press <b>✎ Edit</b> — the editor takes claims one per line in the form <b>text | confidence | basis</b> and sources as <b>url | date</b>. The desk is wired to this base: while forming calls the desk and manager read the established cards and the earned lens-reliability weights (a lens activates at <b>5 resolved outcomes</b>), the manager records which lenses moved each call in the CALL DATA, those vectors are frozen into decisions at board freeze, and every <b>Won / Lost</b> resolution feeds the lens weights automatically — voids, expiries and re-resolutions never double-count. The <b>📡 Sources &amp; digestion</b> card feeds the base: add any URL as a one-time read or a repeatable feed, press <b>🍽️ Digest now</b> (or <b>🍽️ Digest due</b> for every pending source), and the research agent reads the source and proposes new cards, claims to add to existing cards, and contradictions — the proposals wait in the review queue, where you save, apply or edit them one by one. Cards, decisions, weights and sources sync through your private Firebase cloud: press <b>☁️ Sync KB</b> in the Coverage card to push and pull the whole base between phone and PC, and while you are signed in every knowledge write also syncs automatically a few seconds later. Everything also stays stored locally on this device.</p>
 
       <h3>🌀 Entropic second opinion</h3>
       <p>Every BUY / SELL opportunity the desk produces is auto-scored by an embedded <b>causal-entropic engine</b> (F = T·∇Sτ, after Alex Wissner-Gross's work on intelligence as freedom-seeking): it simulates thousands of ten-day futures from the idea's <b>own board numbers</b> — conviction, reward:risk, position size — and asks whether committing to the trade preserves more of the desk's future freedom of action than staying in cash. The board tiles, indicator cards and Monitor panels show the resulting <b>🌀 F chip</b> (green = the trade keeps more future options open, red = it forecloses them), and every opportunity carries a <b>🌀 Entropic deep-dive</b> — its regime priors, expected value, ∇Sτ and impairment probability, with editable priors you can re-score against your own view. PREDICTIONS and OTHER ideas are proxy-scored as price paths, so treat those F values as rougher. Treat the score as a <b>second opinion</b> beside the desk's expected value, never a replacement for analyst judgment: walk-forward backtests of this engine show entropic scores can be anti-predictive on some structures — which is exactly why the app surfaces the raw F instead of hiding it. When cloud sync is on, each opportunity's entropic score is stored in your cloud track record alongside its outcome, so over time you can see whether high-F calls really did keep more options open.</p>
@@ -1043,7 +1044,7 @@ body.mode-desk #srctable table{min-width:0}
 <script>
 "use strict";
 /* ============================== state ============================== */
-var LSKEY = "topiccast-key", LSMODEL = "topiccast-model", LSEP = "topiccast-episode", LSVOICE = "topiccast-voices", LSSTYLE = "topiccast-style", LSDESK = "topiccast-deskmins", LSEXPERTS = "topiccast-experts", LSDEV = "topiccast-devmode", LSCLOUD = "topiccast-cloud-eps", LSCOUNTRY = "topiccast-country", LSAUTO = "topiccast-autocall", LSAUTOLAST = "topiccast-autocall-lastrun", LSAUTODISMISSED = "topiccast-autocall-dismissed";
+var LSKEY = "topiccast-key", LSMODEL = "topiccast-model", LSEP = "topiccast-episode", LSVOICE = "topiccast-voices", LSSTYLE = "topiccast-style", LSDESK = "topiccast-deskmins", LSEXPERTS = "topiccast-experts", LSDEV = "topiccast-devmode", LSCLOUD = "topiccast-cloud-eps", LSCOUNTRY = "topiccast-country", LSAUTO = "topiccast-autocall", LSAUTOLAST = "topiccast-autocall-lastrun", LSAUTODISMISSED = "topiccast-autocall-dismissed", LSKBSYNC = "topiccast-kb-sync";
 var S = { running: false, cancel: false, ep: null, dur: "medium", plan: null, engine: "browser", voxVoices: null, style: "story", analystsSel: 0, analystsView: "indicators", takeAudio: null, takeState: "", experts: null, expertSel: "", monitorSel: "", monitorRun: "", monitorErr: "", deviceMode: "auto", cloudUser: null, cloudEps: null, cloudLoading: false };
 var TTS = { playing: false, paused: false, seg: 0, line: 0, cursor: 0, gapTimer: null, inUtterance: false };
 var VOX = { groups: null, idx: 0, token: 0, cur: null, cache: {}, voicesLoaded: false };
@@ -4206,6 +4207,7 @@ async function cloudInit() {
     authMod.onAuthStateChanged(FB.auth, function (u) {
       S.cloudUser = u ? { uid: u.uid, name: u.displayName || String(u.email || "analyst").split("@")[0], email: u.email || "" } : null;
       if (!S.cloudUser) S.cloudEps = null;
+      try { if (S.cloudUser) kbcOnSignIn(); } catch (e2) {}
       renderCloudPanel();
     });
   } catch (e) {
@@ -4279,7 +4281,8 @@ function renderCloudPanel() {
       '<div class="row" style="margin-top:10px">' +
       '<button class="btn small" onclick="cloudSaveEpisode()">☁️ Sync current episode</button>' +
       '<button class="btn small" onclick="cloudLoadLibrary()">Load cloud library</button>' +
-      '<button class="btn small" onclick="cloudSignOut()">Sign out</button></div>';
+      '<button class="btn small" onclick="cloudSignOut()">Sign out</button></div>' +
+      '<div class="hint" style="margin-top:8px">The knowledge base syncs separately — Knowledge tab → ☁️ Sync KB.</div>';
     if (S.cloudLoading) html += '<div class="hint" style="margin-top:8px">Loading your cloud library…</div>';
     else if (S.cloudEps && S.cloudEps.length) {
       html += '<div class="hint" style="margin-top:10px">Cloud library — press Load to open an episode on this device:</div>';
@@ -6801,7 +6804,7 @@ function kbdFreezeDecisions(ep, data) {
     var r = KB.saveDecision(dec);
     if (r.ok) { c.kbDec = dec.id; frozen++; if (Object.keys(dec.attrs).length) vecs++; }
   });
-  if (frozen) logLine("\uD83E\uDDE0 Knowledge base \u2014 froze " + frozen + " call decision" + (frozen > 1 ? "s" : "") + " (" + vecs + " with lens vectors) for the ledger.", "hi");
+  if (frozen) { kbcAutoPush(); logLine("\uD83E\uDDE0 Knowledge base \u2014 froze " + frozen + " call decision" + (frozen > 1 ? "s" : "") + " (" + vecs + " with lens vectors) for the ledger.", "hi"); }
 }
 
 /* results-tab outcome \u2192 KB outcome res */
@@ -6815,6 +6818,7 @@ function kbdApplyOutcome(decId, res, pnlPct) {
   var first = !(dec.outcome && dec.outcome.at);
   dec.outcome = { res: res, pnlPct: (typeof pnlPct === "number" && isFinite(pnlPct)) ? pnlPct : 0, at: Date.now() };
   KB.saveDecision(dec);
+  kbcAutoPush();
   if (!first) return { applied: false };
   var w = KB.wLoad();
   var snap = JSON.stringify(w);
@@ -6989,26 +6993,26 @@ function kbuiVerify(id) {
   var c = KB.getCard(id); if (!c) return;
   c.lastVerified = Date.now();
   var r = KB.commitCard(c, "re-verified against current sources", "user");
-  if (r.ok) { kbuiInvalidate(); logLine("<b>Knowledge</b>: card “" + esc(r.card.title) + "” marked verified (v" + r.card.v + ")."); renderKnowledge(); }
+  if (r.ok) { kbuiInvalidate(); kbcAutoPush(); logLine("<b>Knowledge</b>: card “" + esc(r.card.title) + "” marked verified (v" + r.card.v + ")."); renderKnowledge(); }
   else logLine("Knowledge: could not save verification — " + r.errs.join(", "), "err");
 }
 function kbuiRetire(id) {
   var c = KB.getCard(id); if (!c) return;
   if (typeof confirm === "function" && !confirm("Retire card “" + c.title + "”? It stays in the timeline but no longer feeds the desk.")) return;
   var r = KB.retireCard(id);
-  if (r.ok) { kbuiInvalidate(); logLine("<b>Knowledge</b>: card “" + esc(r.card.title) + "” retired."); renderKnowledge(); }
+  if (r.ok) { kbuiInvalidate(); kbcAutoPush(); logLine("<b>Knowledge</b>: card “" + esc(r.card.title) + "” retired."); renderKnowledge(); }
 }
 function kbuiRevive(id) {
   var c = KB.getCard(id); if (!c) return;
   c.status = "active"; c.supersededBy = null;
   var r = KB.commitCard(c, "revived", "user");
-  if (r.ok) { kbuiInvalidate(); logLine("<b>Knowledge</b>: card “" + esc(r.card.title) + "” revived (v" + r.card.v + ")."); renderKnowledge(); }
+  if (r.ok) { kbuiInvalidate(); kbcAutoPush(); logLine("<b>Knowledge</b>: card “" + esc(r.card.title) + "” revived (v" + r.card.v + ")."); renderKnowledge(); }
 }
 function kbuiReviewDigest(id) {
   var g = KB.getDigest(id); if (!g) return;
   g.reviewed = true;
   var r = KB.saveDigest(g);
-  if (r.ok) logLine("<b>Knowledge</b>: ingestion run reviewed."); 
+  if (r.ok) { logLine("<b>Knowledge</b>: ingestion run reviewed."); kbcAutoPush(); } 
   renderKnowledge();
 }
 function kbuiCompact() {
@@ -7107,6 +7111,7 @@ function kbuiSave() {
   var r = KB.commitCard(c, c.title, "user");
   if (!r.ok) { KBUI.editorErr = "Cannot save — fix: " + r.errs.join(", "); renderKnowledge(); return; }
   kbuiInvalidate();
+  kbcAutoPush();
   KBUI.editing = null;
   KBUI.editorErr = "";
   KBUI.openRow = r.card.id;
@@ -7194,7 +7199,7 @@ function kbuiRenderCoverage() {
   if (st) {
     var evs = KB.events();
     st.textContent = kbuiCards().length + " cards · " + evs.length + " timeline events · " +
-      (KB.bytes() / 1024).toFixed(1) + " KB stored locally (budget " + Math.round(KB_LOCAL_BUDGET / 1024) + " KB)";
+      (KB.bytes() / 1024).toFixed(1) + " KB stored locally (budget " + Math.round(KB_LOCAL_BUDGET / 1024) + " KB) · " + kbcLastSyncText();
   }
 }
 
@@ -7440,6 +7445,7 @@ async function kbDigestRun(srcId) {
   }
   KBDIG.running = false;
   kbuiInvalidate();
+  kbcAutoPush();
   renderKnowledge();
   return { ok: g.status === "done" };
 }
@@ -7509,6 +7515,7 @@ function kbuiAddSource() {
   el("kbs-url").value = "";
   el("kbs-title").value = "";
   logLine("<b>Knowledge</b>: source “" + esc(title || url) + "” added (" + kind + ").");
+  kbcAutoPush();
   renderKnowledge();
 }
 
@@ -7517,7 +7524,7 @@ function kbuiDelSrc(id) {
   if (!s) return;
   if (typeof confirm === "function" && !confirm("Remove source “" + esc(s.title || s.url) + "”? Its digests stay in the review queue.")) return;
   var r = KB.delSource(id);
-  if (r.ok) { logLine("<b>Knowledge</b>: source “" + esc(s.title || s.url) + "” removed."); renderKnowledge(); }
+  if (r.ok) { logLine("<b>Knowledge</b>: source “" + esc(s.title || s.url) + "” removed."); kbcAutoPush(); renderKnowledge(); }
 }
 
 /* ---------- digest review (proposals land here; accept item by item) ---------- */
@@ -7567,6 +7574,7 @@ function kbuiSaveProposal(digId, i) {
   var src = KB.getSource(g.sourceId);
   if (src) { if ((src.cards || []).indexOf(r.card.id) < 0) { src.cards = src.cards || []; src.cards.push(r.card.id); } KB.saveSource(src); }
   kbuiInvalidate();
+  kbcAutoPush();
   KBUI.openRow = r.card.id;
   logLine("<b>Knowledge</b>: card “" + esc(r.card.title) + "” saved from digest (v" + r.card.v + ").");
   renderKnowledge();
@@ -7598,10 +7606,270 @@ function kbuiApplyEdit(digId, i) {
   var src = KB.getSource(g.sourceId);
   if (src) { if ((src.cards || []).indexOf(c.id) < 0) { src.cards = src.cards || []; src.cards.push(c.id); } KB.saveSource(src); }
   kbuiInvalidate();
+  kbcAutoPush();
   logLine("<b>Knowledge</b>: claim added to “" + esc(c.title) + "” from digest (v" + r.card.v + ").");
   renderKnowledge();
 }
 
+
+/* ============================== kb cloud sync (round 17) ============================== */
+/* Two-way sync of the whole knowledge base over the owner-scoped Firestore collections
+   (kb_cards / kb_events / kb_decisions / kb_sources / kb_digests / kb_weights; rules
+   deployed with round 13). The sync is stateless and idempotent: both directions read all
+   six collections once and reconcile by content, so a second run moves nothing.
+   Push = create what the cloud lacks and update where local is ahead (cards by monotonic
+   v, decisions only to attach a newer outcome, weights by sample count n, sources +
+   digests by full-content diff, events append-only create). Pull = merge the cloud into
+   local with the same precedence (cloud wins where it is ahead). Nothing is ever deleted
+   remotely; the merge is additive by design, and pulled docs are stripped of the
+   cloud-only bookkeeping fields so they re-validate as local entities. All engine writes
+   on pull go through the same storage primitives the KB module itself uses. */
+
+var KBSYNC = { busy: false, timer: null };
+
+function kbcState() { try { return JSON.parse(lsGet(LSKBSYNC) || "{}") || {}; } catch (e) { return {}; } }
+function kbcStateSave(st) { lsSet(LSKBSYNC, JSON.stringify(st)); }
+
+/* strip cloud-only bookkeeping fields so a pulled doc re-validates as a local entity */
+function kbcStripDoc(d) {
+  var o = {};
+  for (var k in d) if (k !== "userId" && k !== "createdAt" && k !== "updatedAt") o[k] = d[k];
+  return o;
+}
+
+function kbcLastSyncText() {
+  var st = kbcState();
+  var t = Math.max(st.lastPush || 0, st.lastPull || 0);
+  if (!t) return "never cloud-synced";
+  var d = new Date(t);
+  return "cloud-synced " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
+
+/* read one kb collection into an id -> data map (owner-scoped query, like episodes) */
+async function kbcReadColl(coll) {
+  var fs = FB.mod.fs;
+  var q = fs.query(fs.collection(FB.db, coll), fs.where("userId", "==", S.cloudUser.uid));
+  var snap = await fs.getDocs(q);
+  var out = {};
+  snap.forEach(function (d) { out[d.id] = d.data() || {}; });
+  return out;
+}
+
+async function kbcReadAll() {
+  var out = {};
+  for (var k in KB_FB) out[k] = await kbcReadColl(KB_FB[k]);
+  return out;
+}
+
+/* build the firestore record for a local entity: create stamps createdAt (immutable
+   afterwards per the rules), every write refreshes updatedAt; updates never resend
+   createdAt so a merge keeps the existing stamp and passes the immutability checks */
+function kbcRec(obj, create) {
+  var fs = FB.mod.fs;
+  var out = { userId: S.cloudUser.uid };
+  for (var k in obj) out[k] = obj[k];
+  if (create) out.createdAt = fs.serverTimestamp();
+  out.updatedAt = fs.serverTimestamp();
+  return out;
+}
+
+async function kbcPut(coll, id, obj, exists) {
+  var fs = FB.mod.fs;
+  await fs.setDoc(fs.doc(FB.db, coll, id), kbcRec(obj, !exists), { merge: true });
+}
+
+/* publish local state: read all six collections once, then write only what differs */
+async function kbcPush(silent) {
+  if (!cloudEnabled()) return { ok: false, off: true };
+  if (KBSYNC.busy) return { ok: false, busy: true };
+  KBSYNC.busy = true;
+  var stats = { cards: 0, events: 0, decs: 0, srcs: 0, digs: 0, weights: 0 };
+  try {
+    var cloud = await kbcReadAll();
+    var ix = KB.ix();
+    var id, c, cl;
+    /* cards — monotonic v; same v with drifted content still pushes (last writer wins) */
+    for (var i = 0; i < ix.cards.length; i++) {
+      id = ix.cards[i].id; c = KB.getCard(id); if (!c) continue;
+      cl = cloud.cards[id];
+      if (!cl) { await kbcPut(KB_FB.cards, id, c, false); stats.cards++; }
+      else if (c.v > (cl.v || 0) || (c.v === (cl.v || 0) && JSON.stringify(kbcStripDoc(cl)) !== JSON.stringify(c))) { await kbcPut(KB_FB.cards, id, c, true); stats.cards++; }
+    }
+    /* events — append-only: create what the cloud lacks, never touch what exists */
+    var evs = kbEvGet().list;
+    for (var e = 0; e < evs.length; e++) {
+      var ev = evs[e];
+      if (cloud.events[ev.id]) continue;
+      await kbcPut(KB_FB.events, ev.id, ev, false);
+      stats.events++;
+    }
+    /* decisions — frozen at create (rules); update only when the local outcome is newer */
+    for (var d = 0; d < ix.decs.length; d++) {
+      id = ix.decs[d].id; c = KB.getDecision(id); if (!c) continue;
+      cl = cloud.decs[id];
+      if (!cl) { await kbcPut(KB_FB.decs, id, c, false); stats.decs++; }
+      else if (c.outcome && (!cl.outcome || c.outcome.at > (cl.outcome.at || 0))) { await kbcPut(KB_FB.decs, id, c, true); stats.decs++; }
+    }
+    /* sources + digests — full-content diff */
+    for (var s = 0; s < ix.srcs.length; s++) {
+      id = ix.srcs[s].id; c = KB.getSource(id); if (!c) continue;
+      cl = cloud.srcs[id];
+      if (!cl || JSON.stringify(kbcStripDoc(cl)) !== JSON.stringify(c)) { await kbcPut(KB_FB.srcs, id, c, !!cl); stats.srcs++; }
+    }
+    for (var g = 0; g < ix.digs.length; g++) {
+      id = ix.digs[g].id; c = KB.getDigest(id); if (!c) continue;
+      cl = cloud.digs[id];
+      if (!cl || JSON.stringify(kbcStripDoc(cl)) !== JSON.stringify(c)) { await kbcPut(KB_FB.digs, id, c, !!cl); stats.digs++; }
+    }
+    /* weights — one doc per category (doc id = category name), n monotonic */
+    var w = KB.wLoad();
+    for (var k2 = 0; k2 < KB.cats.length; k2++) {
+      var cat = KB.cats[k2], wc = w[cat]; if (!wc) continue;
+      cl = cloud.weights[KB.weightsDocId(cat)];
+      var local = { wl: wc.wl, ws: wc.ws, n: wc.n, wins: wc.wins, sumRet: wc.sumRet, hist: wc.hist };
+      if (!cl) { await kbcPut(KB_FB.weights, KB.weightsDocId(cat), local, false); stats.weights++; }
+      else if (local.n >= (cl.n || 0) && JSON.stringify(kbcStripDoc(cl)) !== JSON.stringify(local)) { await kbcPut(KB_FB.weights, KB.weightsDocId(cat), local, true); stats.weights++; }
+    }
+    var st = kbcState(); st.lastPush = Date.now(); kbcStateSave(st);
+    var tot = stats.cards + stats.events + stats.decs + stats.srcs + stats.digs + stats.weights;
+    if (!silent) logLine(tot ? "☁️ Knowledge base pushed — " + stats.cards + " cards, " + stats.events + " events, " + stats.decs + " decisions, " + stats.srcs + " sources, " + stats.digs + " digests, " + stats.weights + " weight docs." : "☁️ Knowledge base already in sync.", tot ? "ok" : "");
+  } catch (e) {
+    if (!silent) logLine("☁️ Knowledge base push failed: " + cloudErrMsg(e), "err");
+  } finally {
+    KBSYNC.busy = false;
+    try { renderKnowledge(); } catch (e2) {}
+  }
+  return { ok: true, stats: stats };
+}
+
+/* merge cloud state into local: cloud wins only where it is ahead */
+async function kbcPull(silent) {
+  if (!cloudEnabled()) return { ok: false, off: true };
+  if (KBSYNC.busy) return { ok: false, busy: true };
+  KBSYNC.busy = true;
+  var stats = { cards: 0, events: 0, decs: 0, srcs: 0, digs: 0, weights: 0 };
+  try {
+    var cloud = await kbcReadAll();
+    var ix = KB.ix();
+    /* cards — cloud wins when its monotonic v is ahead */
+    Object.keys(cloud.cards).forEach(function (id) {
+      var doc = kbcStripDoc(cloud.cards[id]);
+      if (!KB.validCard(doc).ok) return;
+      var loc = KB.getCard(id);
+      if (!loc || (doc.v || 0) > loc.v) {
+        kbPut("card", id, doc);
+        var found = false;
+        for (var i = 0; i < ix.cards.length; i++) if (ix.cards[i].id === id) { ix.cards[i] = kbIxCardEntry(doc); found = true; break; }
+        if (!found) ix.cards.push(kbIxCardEntry(doc));
+        stats.cards++;
+      }
+    });
+    /* events — union of both append-only logs, capped to the engine's trim level */
+    var ev = kbEvGet(), seen = {};
+    for (var i2 = 0; i2 < ev.list.length; i2++) seen[ev.list[i2].id] = true;
+    Object.keys(cloud.events).forEach(function (id) {
+      var doc = kbcStripDoc(cloud.events[id]);
+      doc.id = id;
+      if (seen[id] || !KB.validEvent(doc).ok) return;
+      ev.list.push(doc); ev.n = (ev.n || 0) + 1; seen[id] = 1; stats.events++;
+    });
+    if (stats.events) {
+      ev.list.sort(function (a, b) { return a.at - b.at; });
+      if (ev.list.length > KB_EV_MAX) { ev.trimmed = (ev.trimmed || 0) + (ev.list.length - KB_EV_TRIM_TO); ev.list = ev.list.slice(ev.list.length - KB_EV_TRIM_TO); }
+      kbEvSave(ev);
+    }
+    /* decisions — cloud wins when it carries the newer (or the only) outcome */
+    Object.keys(cloud.decs).forEach(function (id) {
+      var doc = kbcStripDoc(cloud.decs[id]);
+      if (!KB.validDecision(doc).ok) return;
+      var loc = KB.getDecision(id);
+      if (!loc) {
+        kbPut("dec", id, doc);
+        ix.decs.push({ id: id, at: doc.at, symbol: doc.symbol, action: doc.action });
+        stats.decs++;
+      } else if (doc.outcome && (!loc.outcome || doc.outcome.at > loc.outcome.at)) {
+        loc.outcome = doc.outcome;
+        kbPut("dec", id, loc);
+        stats.decs++;
+      }
+    });
+    /* sources + digests — content diff, the cloud copy replaces when it differs */
+    Object.keys(cloud.srcs).forEach(function (id) {
+      var doc = kbcStripDoc(cloud.srcs[id]);
+      if (!KB.validSource(doc).ok) return;
+      var loc = KB.getSource(id);
+      if (!loc || JSON.stringify(loc) !== JSON.stringify(doc)) {
+        kbPut("src", id, doc);
+        var found2 = false;
+        for (var j = 0; j < ix.srcs.length; j++) if (ix.srcs[j].id === id) { ix.srcs[j] = { id: id, at: doc.added, status: doc.status }; found2 = true; break; }
+        if (!found2) ix.srcs.push({ id: id, at: doc.added, status: doc.status });
+        stats.srcs++;
+      }
+    });
+    Object.keys(cloud.digs).forEach(function (id) {
+      var doc = kbcStripDoc(cloud.digs[id]);
+      if (!KB.validDigest(doc).ok) return;
+      var loc = KB.getDigest(id);
+      if (!loc || JSON.stringify(loc) !== JSON.stringify(doc)) {
+        kbPut("dig", id, doc);
+        var found3 = false;
+        for (var m = 0; m < ix.digs.length; m++) if (ix.digs[m].id === id) { ix.digs[m] = { id: id, at: doc.at, status: doc.status }; found3 = true; break; }
+        if (!found3) ix.digs.push({ id: id, at: doc.at, status: doc.status });
+        stats.digs++;
+      }
+    });
+    kbIxSave(ix);
+    /* weights — cloud wins when its sample count is ahead */
+    var w = KB.wLoad(), wChanged = false;
+    Object.keys(cloud.weights).forEach(function (cat) {
+      var doc = kbcStripDoc(cloud.weights[cat]);
+      var loc = w[cat];
+      if (!loc || (doc.n || 0) > (loc.n || 0)) { w[cat] = { wl: doc.wl, ws: doc.ws, n: doc.n, wins: doc.wins, sumRet: doc.sumRet, hist: doc.hist || [] }; wChanged = true; stats.weights++; }
+    });
+    if (wChanged) kbWSave(w);
+    var st = kbcState(); st.lastPull = Date.now(); kbcStateSave(st);
+    var tot = stats.cards + stats.events + stats.decs + stats.srcs + stats.digs + stats.weights;
+    if (!silent) logLine(tot ? "☁️ Knowledge base pulled — +" + stats.cards + " cards, +" + stats.events + " events, +" + stats.decs + " decisions, +" + stats.srcs + " sources, +" + stats.digs + " digests, " + stats.weights + " weights updated." : "☁️ Knowledge base is already up to date.", tot ? "ok" : "");
+    kbuiInvalidate();
+  } catch (e) {
+    if (!silent) logLine("☁️ Knowledge base pull failed: " + cloudErrMsg(e), "err");
+  } finally {
+    KBSYNC.busy = false;
+    try { renderKnowledge(); } catch (e2) {}
+  }
+  return { ok: true, stats: stats };
+}
+
+/* the Sync KB button: pull first (merge remote changes), then push the reconciled state */
+async function kbcSync() {
+  if (!cloudEnabled()) { logLine("Sign in from the Settings tab (☁️ Cloud sync) to sync the knowledge base between devices."); return; }
+  if (KBSYNC.busy) { logLine("☁️ Knowledge base sync is already running…"); return; }
+  var p = await kbcPull(true);
+  if (!p || p.off || p.busy) return;
+  var q2 = await kbcPush(true);
+  var st = p.stats || {}, st2 = (q2 && q2.stats) || {};
+  var pulled = (st.cards + st.events + st.decs + st.srcs + st.digs + st.weights) || 0;
+  var pushed = (st2.cards + st2.events + st2.decs + st2.srcs + st2.digs + st2.weights) || 0;
+  logLine("☁️ Knowledge base synced" + ((pulled || pushed) ? " — pulled " + pulled + " and pushed " + pushed + " docs." : " — already in sync."), (pulled || pushed) ? "ok" : "");
+}
+function kbuiSyncKb() { kbcSync(); }
+
+/* debounced auto-push after every meaningful KB write while signed in */
+function kbcAutoPush() {
+  if (!cloudEnabled()) return;
+  if (KBSYNC.timer) clearTimeout(KBSYNC.timer);
+  KBSYNC.timer = setTimeout(function () { KBSYNC.timer = null; kbcPush(true); }, 15000);
+}
+
+/* sign-in hook: a fresh device with an empty base fetches the cloud copy once */
+function kbcOnSignIn() {
+  if (!cloudEnabled()) return;
+  var ix = KB.ix();
+  if (ix.cards.length === 0 && ix.srcs.length === 0 && ix.digs.length === 0) {
+    logLine("☁️ Empty knowledge base on this device — pulling your cloud copy…");
+    kbcPull(true);
+  }
+}
 
 function init() {
   var key = lsGet(LSKEY); if (key) el("key").value = key;
