@@ -102,6 +102,18 @@ an aligned lens gains trust on the side it supported, a dissenting lens gains tr
 it warned about. Voids, expiries, no-entry calls and re-resolutions never move the weights, and
 a lens's weights only enter prompts once it holds 5+ resolved outcomes.
 
+Round 16 adds the ingestion route. The **📡 Sources & digestion** card on the Knowledge tab holds a
+registry of sources — any URL, added as a *feed* (digest it again any time) or *once* (a one-time
+read), optionally pinned to one category lens. "Digest now" (or "Digest due" for every pending
+source) has the research agent read the source with web search and **propose** up to 3 new cards,
+3 claims to add to existing cards, and 3 contradictions against them — the proposal lands in the
+review queue as an unreviewed digest, and nothing enters the base until you accept it there:
+"Save as card", "Apply" (one claim onto an existing card, versioned like any edit), or "Edit" to
+tune the proposal in the card editor first. Accepted items link back to their source, and a
+source's last digest and contributed-card count show beside it. This round also restores
+`mistral-large-4` to the Settings model select — Large 4 is GA and supports built-in connectors
+again — with stale stored models falling back to the default.
+
 ## Forecast Lab
 
 The standalone **Entropic Forecast Lab** lives at

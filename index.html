@@ -802,6 +802,23 @@ body.mode-desk #srctable table{min-width:0}
       <div id="kb-list"></div>
       <div class="notice" id="kb-empty" style="display:none"></div>
     </div>
+    <div class="card" id="kb-srccard">
+      <h2>📡 Sources &amp; digestion</h2>
+      <div class="hint">Where the base gets fed. Add a source as a <b>feed</b> (digest it again any time) or <b>once</b> (a one-time read). “Digest now” has the research agent read the source (web search) and <b>propose</b> new cards, claims to add and conflicts — proposals land in the review queue below, and nothing enters the base until you accept it there.</div>
+      <div class="row resfilters" style="margin-top:10px">
+        <input id="kbs-url" type="text" placeholder="https://… source URL" style="flex:2;min-width:200px">
+        <input id="kbs-title" type="text" placeholder="Title (optional)" style="flex:1;min-width:150px">
+        <select id="kbs-cat"></select>
+        <select id="kbs-kind">
+          <option value="feed">Feed — digest repeatedly</option>
+          <option value="once">Once — one-time read</option>
+        </select>
+        <button class="btn small" onclick="kbuiAddSource()">＋ Add source</button>
+        <button class="btn small ghost" onclick="kbuiDigestDue()">🍽️ Digest due</button>
+      </div>
+      <div class="errbox" id="kbs-err" style="display:none"></div>
+      <div id="kbs-list"></div>
+    </div>
     <div class="card" id="kb-reviewcard" style="display:none">
       <h2>🧐 Review queue</h2>
       <div class="hint">Cards past their re-verify policy, and ingestion runs waiting for a review. Keep the base trustworthy: verify, revise or retire.</div>
@@ -874,6 +891,7 @@ body.mode-desk #srctable table{min-width:0}
         <select id="model" style="width:auto" onchange="saveModel()">
           <option value="mistral-small-latest" selected>mistral-small-latest — Small 4 (fast)</option>
           <option value="mistral-medium-latest">mistral-medium-latest — Medium 3.5 (best with web search, legacy)</option>
+          <option value="mistral-large-4">mistral-large-4 — Large 4 (GA, connectors — deepest research)</option>
         </select>
       </div>
     </div>
@@ -947,7 +965,7 @@ body.mode-desk #srctable table{min-width:0}
       <p>The <b>Settings</b> tab has a <b>☁️ Cloud sync</b> card: sign in with Google and every episode you produce — podcast or analyst call — is saved to your Firebase cloud library, together with one trackable document per board opportunity and per episode topic. The <b>Monitor</b> tab doubles as your track record: each re-check appends to that item's cloud history, and the <b>🏆 Track record</b> row lets you resolve any opportunity as <b>Won</b>, <b>Lost</b> or <b>Void</b> — or reopen it — with the outcome saved with the episode and synced to the cloud. Press <b>Load cloud library</b> in Settings to bring any past episode back onto this device with its full watchlist and track record intact. Everything works offline too: without sign-in (or without a connection) the app runs entirely on this browser's local storage.</p>
 
       <h3>🧠 The Knowledge tab</h3>
-      <p>The <b>🧠 Knowledge</b> tab is the desk's living knowledge base. Every card is one established fact or theme with <b>claims</b> (each with a 0-100 confidence and an optional basis), <b>dated sources</b>, <b>link keys</b>, and a place in a category facet rubric — six evolving categories (Market, Economic, Industry, Social media, Stock-specific, Other), each with its own rubric of facets that make depth measurable. Cards are versioned: every commit, edit, verification or retirement lands in a per-card <b>version timeline</b>. Freshness is policy-driven — each card declares its own <b>re-verify window</b>, and cards past it go <b>stale</b>, then <b>overdue</b>, surfacing in the <b>🧐 Review queue</b> where you can mark them verified, revise or retire them in one click. The <b>🗺️ Coverage &amp; depth</b> map shows how many cards cover each facet per category (with their average claim confidence), a bar per category, and how far each lens is <b>trusted</b>: once a category accumulates 5 resolved outcomes, its learned reliability weights (long / short) start showing beside it — below that it is still learning. Use <b>＋ New card</b> to add knowledge manually, or expand a card and press <b>✎ Edit</b> — the editor takes claims one per line in the form <b>text | confidence | basis</b> and sources as <b>url | date</b>. The desk is wired to this base: while forming calls the desk and manager read the established cards and the earned lens-reliability weights (a lens activates at <b>5 resolved outcomes</b>), the manager records which lenses moved each call in the CALL DATA, those vectors are frozen into decisions at board freeze, and every <b>Won / Lost</b> resolution feeds the lens weights automatically — voids, expiries and re-resolutions never double-count. Everything is stored on this device for now; cloud sync for the knowledge base lands in a later round.</p>
+      <p>The <b>🧠 Knowledge</b> tab is the desk's living knowledge base. Every card is one established fact or theme with <b>claims</b> (each with a 0-100 confidence and an optional basis), <b>dated sources</b>, <b>link keys</b>, and a place in a category facet rubric — six evolving categories (Market, Economic, Industry, Social media, Stock-specific, Other), each with its own rubric of facets that make depth measurable. Cards are versioned: every commit, edit, verification or retirement lands in a per-card <b>version timeline</b>. Freshness is policy-driven — each card declares its own <b>re-verify window</b>, and cards past it go <b>stale</b>, then <b>overdue</b>, surfacing in the <b>🧐 Review queue</b> where you can mark them verified, revise or retire them in one click. The <b>🗺️ Coverage &amp; depth</b> map shows how many cards cover each facet per category (with their average claim confidence), a bar per category, and how far each lens is <b>trusted</b>: once a category accumulates 5 resolved outcomes, its learned reliability weights (long / short) start showing beside it — below that it is still learning. Use <b>＋ New card</b> to add knowledge manually, or expand a card and press <b>✎ Edit</b> — the editor takes claims one per line in the form <b>text | confidence | basis</b> and sources as <b>url | date</b>. The desk is wired to this base: while forming calls the desk and manager read the established cards and the earned lens-reliability weights (a lens activates at <b>5 resolved outcomes</b>), the manager records which lenses moved each call in the CALL DATA, those vectors are frozen into decisions at board freeze, and every <b>Won / Lost</b> resolution feeds the lens weights automatically — voids, expiries and re-resolutions never double-count. The <b>📡 Sources &amp; digestion</b> card feeds the base: add any URL as a one-time read or a repeatable feed, press <b>🍽️ Digest now</b> (or <b>🍽️ Digest due</b> for every pending source), and the research agent reads the source and proposes new cards, claims to add to existing cards, and contradictions — the proposals wait in the review queue, where you save, apply or edit them one by one. Everything is stored on this device for now; cloud sync for the knowledge base lands in a later round.</p>
 
       <h3>🌀 Entropic second opinion</h3>
       <p>Every BUY / SELL opportunity the desk produces is auto-scored by an embedded <b>causal-entropic engine</b> (F = T·∇Sτ, after Alex Wissner-Gross's work on intelligence as freedom-seeking): it simulates thousands of ten-day futures from the idea's <b>own board numbers</b> — conviction, reward:risk, position size — and asks whether committing to the trade preserves more of the desk's future freedom of action than staying in cash. The board tiles, indicator cards and Monitor panels show the resulting <b>🌀 F chip</b> (green = the trade keeps more future options open, red = it forecloses them), and every opportunity carries a <b>🌀 Entropic deep-dive</b> — its regime priors, expected value, ∇Sτ and impairment probability, with editable priors you can re-score against your own view. PREDICTIONS and OTHER ideas are proxy-scored as price paths, so treat those F values as rougher. Treat the score as a <b>second opinion</b> beside the desk's expected value, never a replacement for analyst judgment: walk-forward backtests of this engine show entropic scores can be anti-predictive on some structures — which is exactly why the app surfaces the raw F instead of hiding it. When cloud sync is on, each opportunity's entropic score is stored in your cloud track record alongside its outcome, so over time you can see whether high-F calls really did keep more options open.</p>
@@ -1156,16 +1174,16 @@ function saveKey() { lsSet(LSKEY, el("key").value.trim()); }
 function saveModel() { lsSet(LSMODEL, el("model").value); }
 
 /* A stored model may be dead at the API (Mistral retired Large 3 / mistral-large-2512 on 2026-10-31 and the
-   mistral-large-latest alias still points at the corpse) or unusable for this app (mistral-large-4 exists but
-   does not support builtin connectors — error 3004 — so the research agents' web_search fails). Map it to a
-   model that can run the research agents, reset the rest, and say so in the log. */
+   mistral-large-latest alias still points at the corpse). Large 4 (mistral-large-4) is GA and supports builtin
+   connectors, so it now runs the research agents' web_search. Map any stored model the select no longer offers
+   to the default, and say so in the log. */
 function modelMigrate() {
   var model = lsGet(LSMODEL), msel = el("model");
   if (!model) return;
   for (var mi = 0; mi < msel.options.length; mi++) if (msel.options[mi].value === model) { msel.value = model; return; }
-  var mapped = model.indexOf("mistral-large") === 0 ? "mistral-medium-latest" : msel.options[0].value;
+  var mapped = msel.options[0].value;
   msel.value = mapped; lsSet(LSMODEL, mapped);
-  logLine("Model " + model + " can't run the research agents (retired at Mistral, or no built-in web search) — switched to " + mapped + ". Pick a different one in the Settings tab.", "err");
+  logLine("Model " + model + " is no longer offered — switched to " + mapped + ". Pick a different one in the Settings tab.", "err");
 }
 function deskMinsSetting() { var v = parseFloat(el("analysts-mins") ? el("analysts-mins").value : ""); return v > 0 ? v : 5; }
 function saveDeskMins() { var v = deskMinsSetting(); if (v > 0) lsSet(LSDESK, String(v)); }
@@ -2833,7 +2851,7 @@ async function analyzeOpportunity() {
       analyzeFailShow("Analysis failed \u2014 API key rejected (" + (e.message || "") + "). Check your Mistral key in the Settings tab.");
     } else if (e && e.kind === "model") {
       showGenError("Mistral rejected the selected model: " + (e.message || "") + " — open the Settings tab and pick a current model.");
-      analyzeFailShow("Analysis failed \u2014 Mistral rejected the selected model: " + (e.message || "") + " Open the <b>Settings</b> tab and pick a model that supports web search (mistral-small-latest or mistral-medium-latest).");
+      analyzeFailShow("Analysis failed \u2014 Mistral rejected the selected model: " + (e.message || "") + " Open the <b>Settings</b> tab and pick a model that supports web search (mistral-small-latest, mistral-medium-latest or mistral-large-4).");
     } else if (e && e.kind === "empty") {
       showGenError(e.message || "Empty response from the model.");
       analyzeFailShow("Analysis failed \u2014 " + (e.message || "Empty response from the model."));
@@ -6573,6 +6591,17 @@ function kbSaveDigest(g) {
 
 function kbGetDigest(id) { return kbGet("dig", id); }
 
+function kbDelSource(id) {
+  var s = kbGet("src", id);
+  if (!s) return { ok: false, errs: ["source:not-found"] };
+  kbDel("src", id);
+  var ix = kbIxGet();
+  for (var i = 0; i < ix.srcs.length; i++) if (ix.srcs[i].id === id) { ix.srcs.splice(i, 1); break; }
+  kbIxSave(ix);
+  kbLogEvent("retire", { cat: s.cat || null, summary: "source removed: " + String(s.url).slice(0, 200), refs: [] });
+  return { ok: true };
+}
+
 /* ---------- coverage / depth (rubric-based) ---------- */
 
 function kbCoverage(cat, keys) {
@@ -6646,7 +6675,7 @@ window.KB = {
   newCard: kbNewCard, getCard: kbGetCard, commitCard: kbCommitCard, retireCard: kbRetireCard, cardsPage: kbCardsPage, cardsFor: kbCardsFor,
   newDecision: kbNewDecision, saveDecision: kbSaveDecision, getDecision: kbGetDecision, decisionsPage: kbDecisionsPage,
   wInit: kbWInit, wLoad: kbWLoad, wSave: kbWSave, wApply: kbWApply, wEffective: kbWEffective,
-  newSource: kbNewSource, saveSource: kbSaveSource, getSource: kbGetSource, sourcesPage: kbSourcesPage,
+  newSource: kbNewSource, saveSource: kbSaveSource, getSource: kbGetSource, sourcesPage: kbSourcesPage, delSource: kbDelSource,
   newDigest: kbNewDigest, saveDigest: kbSaveDigest, getDigest: kbGetDigest,
   coverage: kbCoverage, depth: kbDepth,
   bytes: kbBytes, compact: kbCompact,
@@ -6813,9 +6842,9 @@ function kbdResolveMonitor(id, oc) {
    policy-driven staleness badges + review queue, coverage/depth map, and a manual
    card editor. Categories, labels, facet rubrics and limits are read from the KB
    module's constants — never hard-coded here. Round 15 wires the desk to read this
-   base; round 16 feeds it with digests; round 17 syncs it. */
+   base; round 16 feeds it from sources (the sources card below); round 17 syncs it. */
 
-var KBUI = { cat: "", status: "", fresh: "", q: "", sort: "new", openRow: "", cards: null, dirty: true, editing: null, editorErr: "" };
+var KBUI = { cat: "", status: "", fresh: "", q: "", sort: "new", openRow: "", openDigest: "", cards: null, dirty: true, editing: null, editorErr: "" };
 
 function kbuiInvalidate() { KBUI.dirty = true; }
 
@@ -7119,13 +7148,21 @@ function kbuiRenderReview(now) {
       '</span></div>';
   });
   digs.sort(function (a, b) { return b.at - a.at; }).forEach(function (g) {
+    var p = (g.status === "done" && g.proposed) ? g.proposed : null;
+    var src = KB.getSource(g.sourceId);
+    var nm = src ? (src.title || src.url) : g.sourceId;
+    var cnt = p ? " · " + (p.newCards || []).length + " new · " + (p.edits || []).length + " edits · " + (p.conflicts || []).length + " conflicts" : "";
     html += '<div class="resrow" style="cursor:default">' +
       '<span class="rescat">DIGEST</span>' +
-      '<span class="restitle">Ingestion run ' + esc(g.id) + '</span>' +
-      '<span class="resmut">' + esc(g.status) + (g.err ? " · " + esc(g.err) : "") + '</span>' +
-      '<span class="resbtns"><button class="btn small" onclick="kbuiReviewDigest(\'' + esc(g.id) + '\')">✓ Reviewed</button></span>' +
-      '</div>';
+      '<span class="restitle">' + esc(nm) + '</span>' +
+      '<span class="resmut">' + esc(g.status) + " · " + esc(kbuiDay(g.at)) + cnt + (g.err ? " · " + esc(g.err) : "") + '</span>' +
+      '<span class="resbtns">' +
+      (p ? '<button class="btn small ghost" onclick="kbuiToggleDigest(\'' + esc(g.id) + '\')">' + (KBUI.openDigest === g.id ? "▾" : "▸") + '</button>' : "") +
+      '<button class="btn small" onclick="kbuiReviewDigest(\'' + esc(g.id) + '\')">✓ Reviewed</button>' +
+      '</span></div>' +
+      (p && KBUI.openDigest === g.id ? kbuiDigestHtml(g) : "");
   });
+
   rl.innerHTML = html;
 }
 
@@ -7190,7 +7227,7 @@ function renderKnowledge() {
       empty.style.display = "block";
       empty.innerHTML = all.length
         ? "No cards match the current filter."
-        : "The knowledge base is empty. The desk (round 15) and source digests (round 16) will fill it — or press <b>＋ New card</b> to add the first card yourself.";
+        : "The knowledge base is empty. The desk and the Sources &amp; digestion card below will fill it — or press <b>＋ New card</b> to add the first card yourself.";
     }
   } else {
     empty.style.display = "none";
@@ -7200,8 +7237,371 @@ function renderKnowledge() {
     list.innerHTML = html;
   }
   kbuiRenderReview(now);
+  kbuiSrcRender();
   kbuiRenderCoverage();
 }
+
+/* ============================== sources & digestion (round 16) ============================== */
+/* The ingestion route into the knowledge base. Sources are a registry (once or feed); "Digest now"
+   runs one research-agent read of a source and PROPOSES new cards, claims to add to existing cards,
+   and conflicts. A proposal lands in the review queue as an unreviewed digest — nothing enters the
+   base until Simon saves or applies it there, one item at a time. All writes go through the KB
+   engine (window.KB); every UI write calls kbuiInvalidate() so the card list stays fresh. Constants
+   (categories, labels, facet rubrics, card caps) are read from the KB module — never hard-coded. */
+
+var KBDIG = { running: false };
+
+/* ---------- prompt ---------- */
+
+function kbdgCardsBlock(src) {
+  var lines = [], n = 0;
+  for (var i = 0; i < KB.cats.length && n < 40; i++) {
+    var cat = KB.cats[i];
+    if (src.cat && cat !== src.cat) continue;
+    var cards = KB.cardsFor(null, cat);
+    for (var j = 0; j < cards.length && n < 40; j++) {
+      var c = cards[j];
+      lines.push("- " + c.id + " · " + cat + " · " + String(c.title).slice(0, 100) + ((c.keys || []).length ? " · keys: " + c.keys.slice(0, 6).join(", ") : ""));
+      n++;
+    }
+  }
+  return lines.join("\n");
+}
+
+function kbdgPrompt(src, cardsBlock, today) {
+  var catLine = src.cat
+    ? ("Category lens: " + KB.catLabels[src.cat] + " (facets: " + (KB.facets[src.cat] || []).join(", ") + "). Propose only " + KB.catLabels[src.cat] + " knowledge.")
+    : ("Category lens: pick the single best-fitting category per new card from: " + KB.cats.join(", ") + ".");
+  return "You are the research librarian of a trading desk. Digest ONE source into the desk's knowledge base.\n\n" +
+    "SOURCE (" + src.kind + "): " + src.url + (src.title ? " — " + src.title : "") + "\n" +
+    catLine + "\n" +
+    "TODAY: " + today + "\n\n" +
+    "STEPS:\n" +
+    "1. Read the source (use web search). Extract what it establishes right now — facts, levels, dates, decisions, numbers.\n" +
+    "2. Compare against the desk's EXISTING CARDS below. Never re-propose knowledge the base already holds.\n" +
+    "3. Propose: brand-new cards (newCards), single claims to ADD to an existing card (edits, by cardId), and contradictions between the source and an existing card (conflicts).\n\n" +
+    "EXISTING CARDS (id · category · title · keys):\n" + (cardsBlock || "(none — the base is empty)") + "\n\n" +
+    "OUTPUT — exactly one JSON object, no prose around it:\n" +
+    "{\"summary\":\"one or two sentences on what this source adds\",\n" +
+    " \"newCards\":[{\"cat\":\"stock\",\"title\":\"up to 140 chars\",\"keys\":[\"NVDA\",\"SEMICONDUCTORS\"],\"facets\":[\"valuation\"],\"verifyDays\":30,\"claims\":[{\"t\":\"one checkable fact, up to 600 chars\",\"conf\":75,\"basis\":\"where it comes from\"}],\"sources\":[{\"url\":\"https://…\",\"date\":\"" + today + "\"}]}],\n" +
+    " \"edits\":[{\"cardId\":\"kbc_…\",\"t\":\"the claim to add, up to 600 chars\",\"conf\":75,\"basis\":\"…\",\"note\":\"why it belongs on that card\"}],\n" +
+    " \"conflicts\":[{\"cardId\":\"kbc_…\",\"claim\":\"what the source says instead\",\"note\":\"why it contradicts the card\"}]}\n\n" +
+    "CAPS: at most 3 newCards, 3 edits, 3 conflicts; at most 5 claims per new card; conf is 0-100; keys are SHORT uppercase link keys; verifyDays is 1-365; facets must come from the category's rubric. If the source adds nothing, return empty arrays and say so honestly in the summary.";
+}
+
+/* ---------- parse + sanitize (pure) ---------- */
+
+function kbdgExtractJson(text) {
+  var t = String(text || "");
+  var chunks = [], m;
+  var rx = /```[a-zA-Z]*\r?\n?([\s\S]*?)```/g;
+  while ((m = rx.exec(t)) !== null) chunks.push(m[1]);
+  chunks.push(t);
+  for (var ci = 0; ci < chunks.length; ci++) {
+    var c = chunks[ci];
+    for (var pos = c.indexOf("{"); pos >= 0; pos = c.indexOf("{", pos + 1)) {
+      var span = jsonCandidateAt(c, pos);
+      if (!span) continue;
+      var obj = parseJsonLoose(span);
+      if (obj && typeof obj === "object" && !Array.isArray(obj) &&
+        (obj.newCards || obj.edits || obj.conflicts || obj.summary !== undefined)) return obj;
+    }
+  }
+  return null;
+}
+
+/* raw model output -> engine-valid proposals. Cards are built through KB.newCard and must pass
+   KB.validCard or they are dropped; edits/conflicts must target existing card ids. */
+function kbdgSanitize(raw, src, now) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  var day = new Date(now).toISOString().slice(0, 10);
+  var out = { summary: String(raw.summary || "").trim().slice(0, 400), newCards: [], edits: [], conflicts: [] };
+  var list = Array.isArray(raw.newCards) ? raw.newCards.slice(0, 3) : [];
+  for (var i = 0; i < list.length; i++) {
+    var r = list[i];
+    if (!r || typeof r !== "object") continue;
+    var cat = (src.cat && kbIsCat(src.cat)) ? src.cat : ((r.cat && kbIsCat(r.cat)) ? r.cat : KB.cats[KB.cats.length - 1]);
+    var title = String(r.title || "").trim().slice(0, KB_CARD_MAX.title);
+    if (!title) continue;
+    var c = KB.newCard(cat, title, []);
+    var keys = [];
+    var rk = Array.isArray(r.keys) ? r.keys : String(r.keys || "").split(",");
+    for (var k = 0; k < rk.length && keys.length < KB_CARD_MAX.keys; k++) {
+      var kk = String(rk[k] || "").trim().slice(0, KB_CARD_MAX.keyChars);
+      if (kk) keys.push(kk);
+    }
+    c.keys = keys;
+    var rub = KB.facets[cat] || [];
+    var facs = [];
+    var rf = Array.isArray(r.facets) ? r.facets : [];
+    for (var f = 0; f < rf.length && facs.length < KB_CARD_MAX.facets; f++) {
+      var fc = String(rf[f] || "").trim();
+      if (fc && rub.indexOf(fc) >= 0 && facs.indexOf(fc) < 0) facs.push(fc);
+    }
+    c.facets = facs;
+    var vd = parseInt(r.verifyDays, 10);
+    c.verifyDays = (vd >= 1 && vd <= 365) ? vd : 30;
+    var rcl = Array.isArray(r.claims) ? r.claims.slice(0, 5) : [];
+    for (var q = 0; q < rcl.length; q++) {
+      var rc = rcl[q];
+      if (!rc || typeof rc !== "object") continue;
+      var ct = String(rc.t || "").trim().slice(0, KB_CARD_MAX.claim);
+      if (!ct) continue;
+      var conf = (typeof rc.conf === "number") ? rc.conf : parseFloat(rc.conf);
+      if (!isFinite(conf)) conf = 50;
+      c.claims.push({ t: ct, conf: Math.max(0, Math.min(100, Math.round(conf))), basis: rc.basis ? String(rc.basis).trim().slice(0, KB_CARD_MAX.basis) : null });
+    }
+    if (!c.claims.length) continue;                    /* a card with no claims is noise — drop it */
+    var rs = Array.isArray(r.sources) ? r.sources.slice(0, 5) : [];
+    for (var s = 0; s < rs.length; s++) {
+      var rso = rs[s];
+      if (!rso || typeof rso !== "object") continue;
+      var su = String(rso.url || "").trim().slice(0, 800);
+      if (!su) continue;
+      c.sources.push({ url: su, date: String(rso.date || "").trim().slice(0, 10) });
+    }
+    if (!c.sources.length) c.sources.push({ url: src.url, date: day });   /* never land a card sourceless */
+    var v = KB.validCard(c);
+    if (v.ok) out.newCards.push(c);
+  }
+  var eds = Array.isArray(raw.edits) ? raw.edits.slice(0, 5) : [];
+  for (var e = 0; e < eds.length; e++) {
+    var re = eds[e];
+    if (!re || typeof re !== "object") continue;
+    var tc = KB.getCard(String(re.cardId || ""));
+    if (!tc) continue;
+    var et = String(re.t || re.claim || "").trim().slice(0, KB_CARD_MAX.claim);
+    if (!et) continue;
+    var econf = (typeof re.conf === "number") ? re.conf : parseFloat(re.conf);
+    if (!isFinite(econf)) econf = 60;
+    out.edits.push({ cardId: tc.id, cardTitle: tc.title, t: et, conf: Math.max(0, Math.min(100, Math.round(econf))), basis: re.basis ? String(re.basis).trim().slice(0, KB_CARD_MAX.basis) : null, note: re.note ? String(re.note).trim().slice(0, 200) : null, applied: false });
+  }
+  var cfs = Array.isArray(raw.conflicts) ? raw.conflicts.slice(0, 3) : [];
+  for (var o = 0; o < cfs.length; o++) {
+    var ro = cfs[o];
+    if (!ro || typeof ro !== "object") continue;
+    var cc = KB.getCard(String(ro.cardId || ""));
+    if (!cc) continue;
+    var ccl = String(ro.claim || "").trim().slice(0, KB_CARD_MAX.claim);
+    if (!ccl) continue;
+    out.conflicts.push({ cardId: cc.id, cardTitle: cc.title, claim: ccl, note: ro.note ? String(ro.note).trim().slice(0, 300) : null });
+  }
+  return out;
+}
+
+/* ---------- runner ---------- */
+
+/* sources due for the batch button: every feed, plus never-digested sources (error feeds retry with the batch too) */
+function kbdgDueIds() {
+  var ix = KB.ix(), ids = [];
+  for (var i = 0; i < ix.srcs.length; i++) {
+    var s = KB.getSource(ix.srcs[i].id);
+    if (s && (s.kind === "feed" || s.status === "new")) ids.push(s.id);
+  }
+  return ids;
+}
+
+async function kbDigestRun(srcId) {
+  if (KBDIG.running) { logLine("Knowledge: a digest is already running — one source at a time.", "err"); return { ok: false }; }
+  var src = KB.getSource(srcId);
+  if (!src) return { ok: false };
+  var key = el("key") ? el("key").value.trim() : "";
+  if (!key) { logLine("Knowledge: digestion needs a Mistral API key — add it in the Settings tab.", "err"); return { ok: false }; }
+  KBDIG.running = true;
+  var name = src.title || src.url;
+  var g = KB.newDigest(src.id, "kbrun-" + kbNow().toString(36));
+  g.status = "queued";
+  KB.saveDigest(g);
+  logLine("<b>Knowledge</b>: digesting “" + esc(name) + "”…");
+  try {
+    g.status = "running";
+    KB.saveDigest(g);
+    var res = await agentTurn(kbdgPrompt(src, kbdgCardsBlock(src), todayISO()), true);
+    var proposed = kbdgSanitize(kbdgExtractJson(res.text), src, Date.now());
+    if (!proposed) throw mkErr("empty", 0, "the model's reply carried no digest JSON");
+    g.proposed = proposed;
+    g.status = "done";
+    KB.saveDigest(g);
+    src.status = "digested";
+    src.lastDigest = kbNow();
+    src.lastOk = kbNow();
+    src.errs = null;
+    KB.saveSource(src);
+    var n = proposed.newCards.length, m = proposed.edits.length, k = proposed.conflicts.length;
+    logLine("<b>Knowledge</b>: digest of “" + esc(name) + "” proposed " + n + " new card" + (n === 1 ? "" : "s") + ", " + m + " edit" + (m === 1 ? "" : "s") + ", " + k + " conflict" + (k === 1 ? "" : "s") + ((n + m + k) ? " — review them in the 🧐 Review queue." : " — nothing new worth adding."), (n + m + k) ? "ok" : "");
+  } catch (e) {
+    g.status = "error";
+    g.err = String((e && e.message) || e).slice(0, 600);
+    KB.saveDigest(g);
+    src.lastDigest = kbNow();
+    src.errs = g.err.slice(0, 200);
+    KB.saveSource(src);
+    logLine("<b>Knowledge</b>: digest of “" + esc(name) + "” failed — " + esc(g.err), "err");
+  }
+  KBDIG.running = false;
+  kbuiInvalidate();
+  renderKnowledge();
+  return { ok: g.status === "done" };
+}
+
+async function kbuiDigestDue() {
+  var ids = kbdgDueIds();
+  if (!ids.length) { logLine("Knowledge: nothing due for digestion (feeds and never-digested sources count as due)."); return; }
+  logLine("<b>Knowledge</b>: digesting " + ids.length + " due source" + (ids.length === 1 ? "" : "s") + "…");
+  var done = 0;
+  for (var i = 0; i < ids.length; i++) {
+    var r = await kbDigestRun(ids[i]);
+    if (r && r.ok) done++;
+  }
+  logLine("<b>Knowledge</b>: batch digestion finished — " + done + "/" + ids.length + " source" + (ids.length === 1 ? "" : "s") + " digested cleanly.");
+}
+function kbuiDigestSrc(id) { kbDigestRun(id); }
+
+/* ---------- sources registry UI ---------- */
+
+function kbuiSrcRender() {
+  var list = el("kbs-list");
+  if (!list) return;
+  var catSel = el("kbs-cat");
+  if (catSel && catSel.options && catSel.options.length <= 1) { catSel.innerHTML = kbuiCatOptions("Any lens…", ""); }
+  var ix = KB.ix(), rows = [];
+  for (var i = 0; i < ix.srcs.length; i++) { var s = KB.getSource(ix.srcs[i].id); if (s) rows.push(s); }
+  rows.sort(function (a, b) { return b.added - a.added; });
+  var html = "";
+  rows.forEach(function (s) {
+    var badge = s.status === "new" ? '<span class="kbadge fresh">new</span>'
+      : s.status === "error" ? '<span class="kbadge overdue">error</span>'
+      : '<span class="kbadge retired">digested</span>';
+    html += '<div class="resrow" style="cursor:default">' +
+      '<span class="rescat">' + esc(s.kind.toUpperCase()) + '</span>' +
+      '<span class="restitle"><a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.title || s.url) + '</a></span>' +
+      (s.cat ? '<span class="resmut">' + esc(KB.catLabels[s.cat] || s.cat) + '</span>' : '') +
+      badge +
+      '<span class="resmut">' + (s.lastDigest ? "last digest " + kbuiDay(s.lastDigest) : "never digested") +
+      ((s.cards || []).length ? " · " + s.cards.length + " card" + (s.cards.length === 1 ? "" : "s") : "") +
+      (s.errs ? " · " + esc(s.errs) : "") + '</span>' +
+      '<span class="resbtns">' +
+      '<button class="btn small" onclick="kbuiDigestSrc(\'' + esc(s.id) + '\')">🍽️ Digest now</button>' +
+      '<button class="btn small ghost" onclick="kbuiDelSrc(\'' + esc(s.id) + '\')">✕</button>' +
+      '</span></div>';
+  });
+  list.innerHTML = html || '<div class="hint" style="padding:6px 0">No sources yet — paste a URL above, pick once or feed, and add it. “Digest now” has the research agent read the source and propose cards, claims and conflicts for the review queue; nothing enters the base until you accept it there.</div>';
+}
+
+function kbsShowErr(msg) {
+  var eb = el("kbs-err");
+  if (!eb) { logLine("Knowledge: " + msg, "err"); return; }
+  eb.style.display = "block";
+  eb.innerHTML = esc(msg);
+}
+
+function kbuiAddSource() {
+  var eb = el("kbs-err");
+  if (eb) { eb.style.display = "none"; eb.innerHTML = ""; }
+  var url = el("kbs-url").value.trim();
+  var title = el("kbs-title").value.trim();
+  var cat = el("kbs-cat").value || null;
+  var kind = el("kbs-kind").value === "once" ? "once" : "feed";
+  if (!/^https?:\/\/\S+$/.test(url)) { kbsShowErr("Add a full http(s) URL — e.g. https://www.reuters.com/markets/"); return; }
+  var s = KB.newSource(kind, url.slice(0, 800), title ? title.slice(0, 200) : null, cat);
+  var r = KB.saveSource(s);
+  if (!r.ok) { kbsShowErr("Could not save the source — " + r.errs.join(", ")); return; }
+  el("kbs-url").value = "";
+  el("kbs-title").value = "";
+  logLine("<b>Knowledge</b>: source “" + esc(title || url) + "” added (" + kind + ").");
+  renderKnowledge();
+}
+
+function kbuiDelSrc(id) {
+  var s = KB.getSource(id);
+  if (!s) return;
+  if (typeof confirm === "function" && !confirm("Remove source “" + esc(s.title || s.url) + "”? Its digests stay in the review queue.")) return;
+  var r = KB.delSource(id);
+  if (r.ok) { logLine("<b>Knowledge</b>: source “" + esc(s.title || s.url) + "” removed."); renderKnowledge(); }
+}
+
+/* ---------- digest review (proposals land here; accept item by item) ---------- */
+
+function kbuiToggleDigest(id) { KBUI.openDigest = (KBUI.openDigest === id) ? "" : id; renderKnowledge(); }
+
+function kbuiDigestHtml(g) {
+  var p = g.proposed || {};
+  var html = '<div class="resdet">';
+  if (p.summary) html += '<div class="indrow"><span class="lbl">Run</span><span class="val">' + esc(p.summary) + ' <span class="resmut">· ' + esc(g.run || "") + '</span></span></div>';
+  (p.newCards || []).forEach(function (c, i) {
+    var cl = (c.claims || []).map(function (x) { return esc(String(x.t || "").slice(0, 110)) + " (" + Math.round(x.conf || 0) + "%)"; }).join(" · ");
+    html += '<div class="indrow"><span class="lbl">New card</span><span class="val"><b>' + esc(KB.catLabels[c.cat] || c.cat) + "</b> " + esc(c.title) +
+      (cl ? ' <span class="resmut">— ' + cl + "</span>" : "") + '</span><span class="resbtns">' +
+      (c.applied ? '<span class="kbadge retired">saved</span>' :
+        '<button class="btn small" onclick="kbuiSaveProposal(\'' + esc(g.id) + '\',' + i + ')">💾 Save as card</button>' +
+        '<button class="btn small ghost" onclick="kbuiEditProposal(\'' + esc(g.id) + '\',' + i + ')">✎ Edit</button>') +
+      "</span></div>";
+  });
+  (p.edits || []).forEach(function (ed, i) {
+    html += '<div class="indrow"><span class="lbl">Edit</span><span class="val"><b>' + esc(ed.cardTitle || ed.cardId) + "</b> + “" + esc(ed.t) + "” (" + Math.round(ed.conf) + "%)" +
+      (ed.note ? ' <span class="resmut">· ' + esc(ed.note) + "</span>" : "") + '</span><span class="resbtns">' +
+      (ed.applied ? '<span class="kbadge retired">applied</span>' :
+        '<button class="btn small" onclick="kbuiApplyEdit(\'' + esc(g.id) + '\',' + i + ')">✓ Apply</button>' +
+        '<button class="btn small ghost" onclick="kbuiOpen(\'' + esc(ed.cardId) + '\')">Open card</button>') +
+      "</span></div>";
+  });
+  (p.conflicts || []).forEach(function (cf) {
+    html += '<div class="indrow"><span class="lbl">⚠ Conflict</span><span class="val"><b>' + esc(cf.cardTitle || cf.cardId) + "</b> — " + esc(cf.claim) +
+      (cf.note ? ' <span class="resmut">· ' + esc(cf.note) + "</span>" : "") + '</span><span class="resbtns">' +
+      '<button class="btn small ghost" onclick="kbuiOpen(\'' + esc(cf.cardId) + '\')">Open card</button>' +
+      "</span></div>";
+  });
+  html += "</div>";
+  return html;
+}
+
+function kbuiSaveProposal(digId, i) {
+  var g = KB.getDigest(digId);
+  if (!g || !g.proposed || !g.proposed.newCards || !g.proposed.newCards[i]) return;
+  var c = g.proposed.newCards[i];
+  if (c.applied) return;
+  var r = KB.commitCard(c, "card added from source digest", "digest", g.run);
+  if (!r.ok) { logLine("Knowledge: could not save the proposed card — " + r.errs.join(", "), "err"); return; }
+  g.proposed.newCards[i].applied = true;
+  KB.saveDigest(g);
+  var src = KB.getSource(g.sourceId);
+  if (src) { if ((src.cards || []).indexOf(r.card.id) < 0) { src.cards = src.cards || []; src.cards.push(r.card.id); } KB.saveSource(src); }
+  kbuiInvalidate();
+  KBUI.openRow = r.card.id;
+  logLine("<b>Knowledge</b>: card “" + esc(r.card.title) + "” saved from digest (v" + r.card.v + ").");
+  renderKnowledge();
+}
+
+function kbuiEditProposal(digId, i) {
+  var g = KB.getDigest(digId);
+  if (!g || !g.proposed || !g.proposed.newCards || !g.proposed.newCards[i]) return;
+  KBUI.editing = JSON.parse(JSON.stringify(g.proposed.newCards[i]));
+  KBUI.editorErr = "";
+  renderKnowledge();
+  var t = el("kbe-title");
+  if (t && t.focus) t.focus();
+}
+
+function kbuiApplyEdit(digId, i) {
+  var g = KB.getDigest(digId);
+  if (!g || !g.proposed || !g.proposed.edits || !g.proposed.edits[i]) return;
+  var ed = g.proposed.edits[i];
+  if (ed.applied) return;
+  var c = KB.getCard(ed.cardId);
+  if (!c) { logLine("Knowledge: the card this edit targets no longer exists.", "err"); return; }
+  c.claims = c.claims || [];
+  c.claims.push({ t: ed.t, conf: ed.conf, basis: ed.basis || null });
+  var r = KB.commitCard(c, "claim added from source digest" + (ed.note ? " — " + ed.note : ""), "digest", g.run);
+  if (!r.ok) { logLine("Knowledge: could not apply the proposed claim — " + r.errs.join(", "), "err"); return; }
+  g.proposed.edits[i].applied = true;
+  KB.saveDigest(g);
+  var src = KB.getSource(g.sourceId);
+  if (src) { if ((src.cards || []).indexOf(c.id) < 0) { src.cards = src.cards || []; src.cards.push(c.id); } KB.saveSource(src); }
+  kbuiInvalidate();
+  logLine("<b>Knowledge</b>: claim added to “" + esc(c.title) + "” from digest (v" + r.card.v + ").");
+  renderKnowledge();
+}
+
 
 function init() {
   var key = lsGet(LSKEY); if (key) el("key").value = key;
