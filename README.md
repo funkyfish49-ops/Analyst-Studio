@@ -76,6 +76,21 @@ at effective resolution (>=98.5¢ / <=1.5¢), sports odds resolve manually, and 
 open past its 10-day horizon completes as expired. Closed positions never flip on later prices,
 and the whole ledger syncs to the cloud track record when signed in.
 
+## Knowledge base
+
+The **Knowledge** tab is the desk's living knowledge base: versioned cards of what the research
+has established, one card per fact or theme, organized into six evolving categories (Market,
+Economic, Industry, Social media, Stock-specific, Other) with a facet rubric each so depth is
+measurable. Cards carry claims with a 0-100 confidence and dated sources; every commit, edit,
+verification or retirement lands in a per-card version timeline. Freshness is policy-driven —
+each card declares its own re-verify window, and cards past it go stale, then overdue, surfacing
+in the review queue where they can be verified, revised or retired in one click. The coverage &
+depth map shows how many cards cover each facet per category (with average claim confidence)
+plus each lens's learned reliability weights once 5+ resolved outcomes accumulate. Cards can be
+added or edited manually (claims one per line as `text | confidence | basis`, sources as
+`url | date`). Storage is per-device for now; cloud sync for the knowledge base lands in a
+later round.
+
 ## Forecast Lab
 
 The standalone **Entropic Forecast Lab** lives at

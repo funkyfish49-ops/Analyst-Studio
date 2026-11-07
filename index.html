@@ -302,6 +302,32 @@ a{color:var(--acc2)}
 .resdet{padding:10px 8px 12px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.18);line-height:1.7;font-size:12.5px}
 .resdet .indrow{margin:4px -2px 0}
 .resbtns{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+/* ---- knowledge tab: cards, badges, editor, coverage ---- */
+.kbadge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
+.kbadge.fresh{background:rgba(61,220,151,.14);color:var(--green);border:1px solid rgba(61,220,151,.4)}
+.kbadge.stale{background:rgba(255,194,75,.14);color:var(--amber);border:1px solid rgba(255,194,75,.4)}
+.kbadge.overdue{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.45)}
+.kbadge.superseded,.kbadge.retired{background:rgba(255,255,255,.08);color:var(--mut);border:1px solid rgba(255,255,255,.2)}
+.kbkeys{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.kbkey{display:inline-block;padding:1px 8px;border-radius:4px;font-size:11px;font-weight:600;color:#7ec3ff;background:rgba(0,150,255,.08);border:1px solid rgba(0,150,255,.25)}
+.kbfacet{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.3px;border:1px solid var(--line2);color:var(--mut);white-space:nowrap}
+.kbfacet.onf{border-color:rgba(0,150,255,.5);color:#7ec3ff;background:rgba(0,150,255,.08)}
+.kbfacet input{margin-right:4px;vertical-align:middle}
+.kbclaim{margin:6px 0 0;line-height:1.55}
+.kbclaim .cbar{display:inline-block;width:44px;height:6px;border-radius:3px;background:rgba(255,255,255,.1);vertical-align:middle;margin:0 6px;position:relative;overflow:hidden}
+.kbclaim .cbar i{position:absolute;left:0;top:0;bottom:0;background:var(--acc2)}
+.kbtl{margin:8px 0 0;padding-left:0;list-style:none}
+.kbtl li{margin:0 0 4px;font-size:12px;color:var(--gmut);line-height:1.5}
+.kbtl .evty{display:inline-block;min-width:52px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;font-size:10px;color:var(--mut)}
+.kbcovbar{height:7px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin:6px 0 2px}
+.kbcovbar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2))}
+.kbcovhead{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:14px}
+.kbcovhead b{font-size:13.5px}
+.kbedit{border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:var(--rad);background:var(--panel2);padding:12px 14px;margin:10px 0}
+.kbedit input,.kbedit select,.kbedit textarea{width:100%;margin-top:8px}
+.kbedit .row{margin-top:8px}
+.kbedit .row input,.kbedit .row select{margin-top:0}
+.kbedit textarea{min-height:64px;resize:vertical;font-size:12.5px}
 .monstatus.valid{color:var(--green)} .monstatus.evolved{color:var(--amber)} .monstatus.change{color:var(--red)}
 .monpoint{white-space:pre-wrap;margin-top:10px;font-size:14px;line-height:1.55;color:var(--txt)}
 .monpoint:empty{display:none}
@@ -465,6 +491,7 @@ body.mode-desk #srctable table{min-width:0}
     <button class="tab" id="tab-analysts" onclick="showTab('analysts')">Analysts</button>
     <button class="tab" id="tab-monitor" onclick="showTab('monitor')">Monitor</button>
     <button class="tab" id="tab-results" onclick="showTab('results')">Results</button>
+    <button class="tab" id="tab-knowledge" onclick="showTab('knowledge')">Knowledge</button>
     <button class="tab" id="tab-economics" onclick="showTab('economics')">Economics</button>
     <button class="tab" id="tab-experts" onclick="showTab('experts')">Experts</button>
     <button class="tab" id="tab-sources" onclick="showTab('sources')" disabled>Sources &amp; Dates</button>
@@ -741,6 +768,56 @@ body.mode-desk #srctable table{min-width:0}
     </div>
   </section>
 
+  <!-- ============ KNOWLEDGE ============ -->
+  <section class="view" id="view-knowledge">
+    <div class="card">
+      <h2>🧠 Knowledge</h2>
+      <div class="hint">The desk's living knowledge base: versioned cards of what the research has established, one card per established fact or theme, organized into six evolving categories with a facet rubric each. Cards carry claims with confidence and dated sources, and every change lands in a per-card version timeline. Freshness is policy-driven — each card declares how often it must be re-verified, so stale and overdue cards surface in the review queue below, and the coverage map shows where knowledge is still thin.</div>
+      <div class="row resfilters" style="margin-top:10px">
+        <select id="kb-cat" onchange="kbuiFilter()"></select>
+        <select id="kb-status" onchange="kbuiFilter()">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="superseded">Superseded</option>
+          <option value="retired">Retired</option>
+        </select>
+        <select id="kb-fresh" onchange="kbuiFilter()">
+          <option value="">Any freshness</option>
+          <option value="fresh">Fresh</option>
+          <option value="stale">Stale</option>
+          <option value="overdue">Overdue</option>
+        </select>
+        <input id="kb-q" placeholder="Search title, keys, claims…" oninput="kbuiFilter()">
+        <select id="kb-sort" onchange="kbuiFilter()">
+          <option value="new">Newest first</option>
+          <option value="old">Oldest first</option>
+          <option value="title">Title A→Z</option>
+          <option value="stale">Stalest first</option>
+          <option value="claims">Most claims</option>
+        </select>
+        <button class="btn ghost small" onclick="kbuiNew()">＋ New card</button>
+      </div>
+      <div class="hint" id="kb-summary" style="margin-top:10px"></div>
+      <div class="errbox" id="kb-editor" style="display:none"></div>
+      <div id="kb-list"></div>
+      <div class="notice" id="kb-empty" style="display:none"></div>
+    </div>
+    <div class="card" id="kb-reviewcard" style="display:none">
+      <h2>🧐 Review queue</h2>
+      <div class="hint">Cards past their re-verify policy, and ingestion runs waiting for a review. Keep the base trustworthy: verify, revise or retire.</div>
+      <div id="kb-reviewlist"></div>
+    </div>
+    <div class="card">
+      <h2>🗺️ Coverage &amp; depth</h2>
+      <div class="hint">Facets filled per category — each chip shows how many cards cover that facet and their average claim confidence. Beside each category, how far the lens is trusted once enough resolved outcomes accumulate (weights are ignored by the desk below 5 outcomes).</div>
+      <div id="kb-covmap"></div>
+      <div class="row" style="margin-top:10px">
+        <span class="dim" id="kb-store" style="font-size:12.5px"></span>
+        <button class="btn ghost small" onclick="kbuiCompact()">Compact storage</button>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ ECONOMICS ============ -->
   <section class="view" id="view-economics">
     <div class="card">
@@ -868,6 +945,9 @@ body.mode-desk #srctable table{min-width:0}
       <h3>Cloud sync &amp; track record</h3>
       <p>The <b>🏁 Results</b> tab is the ledger of every opportunity the desk has ever produced — one line per idea, with a category filter, status filter, free-text filter and sort at the top, and a running summary of won / lost / void / expired / open with closed and open P&amp;L. Each line shows the entry price, stop, target, the current price and the position's profit / loss; press a line for the details behind it (decision, size, max loss, confidence, entropic F, the case, and how it closed). Positions are tracked the way their category works: <b>stock and bond</b> positions close themselves when the target or stop is crossed, <b>prediction-market</b> positions when the contract resolves (price ≈ 100¢ / 0¢), and <b>odds &amp; sports</b> positions are resolved with the Won / Lost buttons (odds have no universal price scale). Anything still open past its 10-day horizon completes as <b>expired</b>. Feed prices with the per-line <b>✎ Price</b> (type the quote) or <b>🔎 Live</b> (the desk agent searches the current price) — the same 📈 Position panel lives in the Monitor tab. Signed in, the ledger reads and writes your cloud track record directly; signed out it shows this device's current episode.</p>
       <p>The <b>Settings</b> tab has a <b>☁️ Cloud sync</b> card: sign in with Google and every episode you produce — podcast or analyst call — is saved to your Firebase cloud library, together with one trackable document per board opportunity and per episode topic. The <b>Monitor</b> tab doubles as your track record: each re-check appends to that item's cloud history, and the <b>🏆 Track record</b> row lets you resolve any opportunity as <b>Won</b>, <b>Lost</b> or <b>Void</b> — or reopen it — with the outcome saved with the episode and synced to the cloud. Press <b>Load cloud library</b> in Settings to bring any past episode back onto this device with its full watchlist and track record intact. Everything works offline too: without sign-in (or without a connection) the app runs entirely on this browser's local storage.</p>
+
+      <h3>🧠 The Knowledge tab</h3>
+      <p>The <b>🧠 Knowledge</b> tab is the desk's living knowledge base. Every card is one established fact or theme with <b>claims</b> (each with a 0-100 confidence and an optional basis), <b>dated sources</b>, <b>link keys</b>, and a place in a category facet rubric — six evolving categories (Market, Economic, Industry, Social media, Stock-specific, Other), each with its own rubric of facets that make depth measurable. Cards are versioned: every commit, edit, verification or retirement lands in a per-card <b>version timeline</b>. Freshness is policy-driven — each card declares its own <b>re-verify window</b>, and cards past it go <b>stale</b>, then <b>overdue</b>, surfacing in the <b>🧐 Review queue</b> where you can mark them verified, revise or retire them in one click. The <b>🗺️ Coverage &amp; depth</b> map shows how many cards cover each facet per category (with their average claim confidence), a bar per category, and how far each lens is <b>trusted</b>: once a category accumulates 5 resolved outcomes, its learned reliability weights (long / short) start showing beside it — below that it is still learning. Use <b>＋ New card</b> to add knowledge manually, or expand a card and press <b>✎ Edit</b> — the editor takes claims one per line in the form <b>text | confidence | basis</b> and sources as <b>url | date</b>. Everything is stored on this device for now; cloud sync for the knowledge base lands in a later round.</p>
 
       <h3>🌀 Entropic second opinion</h3>
       <p>Every BUY / SELL opportunity the desk produces is auto-scored by an embedded <b>causal-entropic engine</b> (F = T·∇Sτ, after Alex Wissner-Gross's work on intelligence as freedom-seeking): it simulates thousands of ten-day futures from the idea's <b>own board numbers</b> — conviction, reward:risk, position size — and asks whether committing to the trade preserves more of the desk's future freedom of action than staying in cash. The board tiles, indicator cards and Monitor panels show the resulting <b>🌀 F chip</b> (green = the trade keeps more future options open, red = it forecloses them), and every opportunity carries a <b>🌀 Entropic deep-dive</b> — its regime priors, expected value, ∇Sτ and impairment probability, with editable priors you can re-score against your own view. PREDICTIONS and OTHER ideas are proxy-scored as price paths, so treat those F values as rougher. Treat the score as a <b>second opinion</b> beside the desk's expected value, never a replacement for analyst judgment: walk-forward backtests of this engine show entropic scores can be anti-predictive on some structures — which is exactly why the app surfaces the raw F instead of hiding it. When cloud sync is on, each opportunity's entropic score is stored in your cloud track record alongside its outcome, so over time you can see whether high-F calls really did keep more options open.</p>
@@ -1056,13 +1136,14 @@ function countWords(s) { var t = String(s || "").trim(); return t ? t.split(/\s+
 
 /* ============================== tabs ============================== */
 function showTab(name) {
-  ["studio", "episode", "analysts", "monitor", "results", "economics", "experts", "sources", "settings", "help"].forEach(function (t) {
+  ["studio", "episode", "analysts", "monitor", "results", "knowledge", "economics", "experts", "sources", "settings", "help"].forEach(function (t) {
     el("tab-" + t).classList.toggle("on", t === name);
     el("view-" + t).classList.toggle("on", t === name);
   });
   if (name === "analysts") renderAnalysts();
   if (name === "monitor") renderMonitor();
   if (name === "results") resultsTabShown();
+  if (name === "knowledge") renderKnowledge();
   if (name === "economics") econTabShown();
   if (name === "experts") renderExperts();
   if (name === "settings") renderCloudPanel();
@@ -6555,6 +6636,401 @@ window.KB = {
   bytes: kbBytes, compact: kbCompact,
   docPath: kbDocPath, weightsDocId: kbWeightsDocId
 };
+
+/* ============================== knowledge tab (round 14) ============================== */
+/* UI over the KB engine (window.KB): browse/search, per-card version timeline,
+   policy-driven staleness badges + review queue, coverage/depth map, and a manual
+   card editor. Categories, labels, facet rubrics and limits are read from the KB
+   module's constants — never hard-coded here. Round 15 wires the desk to read this
+   base; round 16 feeds it with digests; round 17 syncs it. */
+
+var KBUI = { cat: "", status: "", fresh: "", q: "", sort: "new", openRow: "", cards: null, dirty: true, editing: null, editorErr: "" };
+
+function kbuiInvalidate() { KBUI.dirty = true; }
+
+function kbuiAllCards() { /* full card objects behind the index — browsing/search needs more than index entries */
+  var ix = KB.ix(), out = [];
+  for (var i = 0; i < ix.cards.length; i++) { var c = KB.getCard(ix.cards[i].id); if (c) out.push(c); }
+  return out;
+}
+function kbuiCards() {
+  if (KBUI.dirty || !KBUI.cards) { KBUI.cards = kbuiAllCards(); KBUI.dirty = false; }
+  return KBUI.cards;
+}
+
+/* staleness is policy-driven: fresh inside verifyDays, stale past it, overdue past 2× (review queue level) */
+function kbuiStaleState(card, now) {
+  var ageDays = Math.floor(((now || Date.now()) - (card.lastVerified || 0)) / 86400000);
+  var vd = card.verifyDays || 30;
+  if (ageDays >= vd * 2) return "overdue";
+  if (ageDays >= vd) return "stale";
+  return "fresh";
+}
+function kbuiAgeDays(card, now) { return Math.floor(((now || Date.now()) - (card.lastVerified || 0)) / 86400000); }
+function kbuiDay(t) { return new Date(t).toISOString().slice(0, 10); }
+
+function kbuiBadge(card, now) {
+  if (card.status !== "active") return '<span class="kbadge ' + esc(card.status) + '">' + esc(card.status) + '</span>';
+  var st = kbuiStaleState(card, now), age = kbuiAgeDays(card, now);
+  return '<span class="kbadge ' + st + '">' + st + (st === "fresh" ? "" : " " + age + "d") + '</span>';
+}
+
+function kbuiFiltered(now) {
+  var q = KBUI.q.trim().toLowerCase(), out = [], cards = kbuiCards();
+  for (var i = 0; i < cards.length; i++) {
+    var c = cards[i];
+    if (KBUI.cat && c.cat !== KBUI.cat) continue;
+    if (KBUI.status && c.status !== KBUI.status) continue;
+    if (KBUI.fresh && (c.status !== "active" || kbuiStaleState(c, now) !== KBUI.fresh)) continue;
+    if (q) {
+      var hay = (c.title + " " + (c.keys || []).join(" ") + " " + (c.claims || []).map(function (x) { return x && x.t ? x.t : ""; }).join(" ")).toLowerCase();
+      if (hay.indexOf(q) < 0) continue;
+    }
+    out.push(c);
+  }
+  return out;
+}
+
+function kbuiSort(rows) {
+  var s = KBUI.sort;
+  rows.sort(function (a, b) {
+    if (s === "old") return a.updated - b.updated;
+    if (s === "title") return String(a.title).localeCompare(String(b.title));
+    if (s === "claims") return (b.claims || []).length - (a.claims || []).length;
+    if (s === "stale") return (a.lastVerified || 0) - (b.lastVerified || 0);
+    return b.updated - a.updated;
+  });
+  return rows;
+}
+
+function kbuiTimelineHtml(c) {
+  var evs = KB.events().filter(function (e) { return e.card === c.id || (e.refs || []).indexOf(c.id) >= 0; });
+  if (!evs.length) return "";
+  evs = evs.slice().reverse(); /* stored oldest→newest; show newest first, capped */
+  var html = "";
+  for (var i = 0; i < evs.length && i < 20; i++) {
+    var e = evs[i];
+    html += '<li><span class="evty">' + esc(e.type) + '</span> <span class="resnum">' + esc(new Date(e.at).toISOString().slice(0, 16).replace("T", " ")) + '</span> · ' + esc(e.summary || "") + ' <span class="resmut">(' + esc(e.actor) + ')</span></li>';
+  }
+  return html;
+}
+
+function kbuiDetailHtml(c, now) {
+  var keys = "", facets = "", claims = "", srcs = "";
+  (c.keys || []).forEach(function (k) { keys += '<span class="kbkey">' + esc(k) + '</span>'; });
+  (c.facets || []).forEach(function (f) { facets += '<span class="kbfacet onf">' + esc(f) + '</span>'; });
+  (c.claims || []).forEach(function (cl, i) {
+    var conf = Math.max(0, Math.min(100, cl.conf || 0));
+    claims += '<div class="kbclaim"><b>C' + (i + 1) + '</b> ' + esc(cl.t) +
+      '<span class="cbar"><i style="width:' + conf + '%"></i></span><b class="resnum">' + Math.round(conf) + '%</b>' +
+      (cl.basis ? ' <span class="resmut">· ' + esc(cl.basis) + '</span>' : '') + '</div>';
+  });
+  (c.sources || []).forEach(function (so) {
+    var u = String(so.url || "");
+    srcs += '<div><a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(u.length > 72 ? u.slice(0, 69) + "…" : u) + '</a>' + (so.date ? ' <span class="resmut">· ' + esc(so.date) + '</span>' : '') + '</div>';
+  });
+  var tl = kbuiTimelineHtml(c);
+  var actions = "";
+  if (c.status === "active") {
+    actions = '<button class="btn small" onclick="kbuiVerify(\'' + esc(c.id) + '\')">✓ Verified today</button>' +
+      '<button class="btn small ghost" onclick="kbuiEdit(\'' + esc(c.id) + '\')">✎ Edit</button>' +
+      '<button class="btn small ghost" onclick="kbuiRetire(\'' + esc(c.id) + '\')">Retire</button>';
+  } else {
+    actions = '<button class="btn small" onclick="kbuiRevive(\'' + esc(c.id) + '\')">Revive</button>' +
+      '<button class="btn small ghost" onclick="kbuiEdit(\'' + esc(c.id) + '\')">✎ Edit</button>';
+  }
+  return '<div class="resdet">' +
+    (keys ? '<div class="kbkeys">' + keys + '</div>' : '') +
+    (facets ? '<div class="kbkeys">' + facets + '</div>' : '') +
+    '<div class="indrow"><span class="lbl">Policy</span><span class="val">re-verify every <b>' + esc(String(c.verifyDays)) + '</b> day' + (c.verifyDays === 1 ? "" : "s") + ' · last verified <b>' + esc(kbuiDay(c.lastVerified)) + '</b> · created ' + esc(kbuiDay(c.created)) + '</span></div>' +
+    (c.supersededBy ? '<div class="indrow"><span class="lbl">Superseded</span><span class="val">by <b>' + esc(c.supersededBy) + '</b></span></div>' : '') +
+    '<div class="indrow"><span class="lbl">Claims</span><span class="val">' + (claims || '<span class="resmut">none yet</span>') + '</span></div>' +
+    (srcs ? '<div class="indrow"><span class="lbl">Sources</span><span class="val">' + srcs + '</span></div>' : '') +
+    (tl ? '<div class="indrow"><span class="lbl">Timeline</span><span class="val"><ul class="kbtl">' + tl + '</ul></span></div>' : '') +
+    '<div class="indrow"><span class="lbl">Actions</span><span class="val" style="display:flex;gap:6px;flex-wrap:wrap">' + actions + '</span></div>' +
+    '</div>';
+}
+
+function kbuiRowHtml(c, now) {
+  var claimsN = (c.claims || []).length, keysN = (c.keys || []).length;
+  var html = '<div class="resrow kbrow" onclick="kbuiToggle(\'' + esc(c.id) + '\')">' +
+    '<span class="rescat">' + esc((KB.catLabels[c.cat] || c.cat).toUpperCase()) + '</span>' +
+    '<span class="restitle">' + esc(c.title) + '</span>' +
+    '<span class="resmut">v' + esc(String(c.v)) + ' · ' + claimsN + ' claim' + (claimsN === 1 ? "" : "s") + ' · ' + keysN + ' key' + (keysN === 1 ? "" : "s") + '</span>' +
+    kbuiBadge(c, now) +
+    '<span class="resmut resnum">upd ' + esc(kbuiDay(c.updated)) + '</span>' +
+    '</div>';
+  if (KBUI.openRow === c.id) html += kbuiDetailHtml(c, now);
+  return html;
+}
+
+function kbuiCatOptions(anyLabel, sel) {
+  var html = '<option value="">' + anyLabel + '</option>';
+  for (var i = 0; i < KB.cats.length; i++) html += '<option value="' + esc(KB.cats[i]) + '"' + (KB.cats[i] === sel ? " selected" : "") + '>' + esc(KB.catLabels[KB.cats[i]] || KB.cats[i]) + '</option>';
+  return html;
+}
+
+function kbuiFilter() {
+  if (KBUI.editing && el("kbe-title")) kbuiHarvest(); /* keep typed editor content across re-renders */
+  KBUI.cat = el("kb-cat").value;
+  KBUI.status = el("kb-status").value;
+  KBUI.fresh = el("kb-fresh").value;
+  KBUI.q = el("kb-q").value;
+  KBUI.sort = el("kb-sort").value;
+  renderKnowledge();
+}
+
+function kbuiToggle(id) { KBUI.openRow = (KBUI.openRow === id) ? "" : id; renderKnowledge(); }
+function kbuiOpen(id) { KBUI.openRow = id; renderKnowledge(); }
+
+/* ---------- actions (every one logs through the engine's event log) ---------- */
+
+function kbuiVerify(id) {
+  var c = KB.getCard(id); if (!c) return;
+  c.lastVerified = Date.now();
+  var r = KB.commitCard(c, "re-verified against current sources", "user");
+  if (r.ok) { kbuiInvalidate(); logLine("<b>Knowledge</b>: card “" + esc(r.card.title) + "” marked verified (v" + r.card.v + ")."); renderKnowledge(); }
+  else logLine("Knowledge: could not save verification — " + r.errs.join(", "), "err");
+}
+function kbuiRetire(id) {
+  var c = KB.getCard(id); if (!c) return;
+  if (typeof confirm === "function" && !confirm("Retire card “" + c.title + "”? It stays in the timeline but no longer feeds the desk.")) return;
+  var r = KB.retireCard(id);
+  if (r.ok) { kbuiInvalidate(); logLine("<b>Knowledge</b>: card “" + esc(r.card.title) + "” retired."); renderKnowledge(); }
+}
+function kbuiRevive(id) {
+  var c = KB.getCard(id); if (!c) return;
+  c.status = "active"; c.supersededBy = null;
+  var r = KB.commitCard(c, "revived", "user");
+  if (r.ok) { kbuiInvalidate(); logLine("<b>Knowledge</b>: card “" + esc(r.card.title) + "” revived (v" + r.card.v + ")."); renderKnowledge(); }
+}
+function kbuiReviewDigest(id) {
+  var g = KB.getDigest(id); if (!g) return;
+  g.reviewed = true;
+  var r = KB.saveDigest(g);
+  if (r.ok) logLine("<b>Knowledge</b>: ingestion run reviewed."); 
+  renderKnowledge();
+}
+function kbuiCompact() {
+  var r = KB.compact();
+  kbuiInvalidate();
+  logLine("<b>Knowledge</b>: compaction freed " + (r.freed / 1024).toFixed(1) + " KB" + (r.stillOver ? " — still over the local budget; consider retiring old cards." : "."));
+  renderKnowledge();
+}
+
+/* ---------- card editor ---------- */
+
+function kbuiNew() {
+  KBUI.editing = KB.newCard(KB.cats[0], "", []);
+  KBUI.editorErr = "";
+  renderKnowledge();
+  var t = el("kbe-title"); if (t && t.focus) t.focus();
+}
+function kbuiEdit(id) {
+  var c = KB.getCard(id); if (!c) return;
+  KBUI.editing = JSON.parse(JSON.stringify(c)); /* edit a copy — Save commits it */
+  KBUI.editorErr = "";
+  KBUI.openRow = id;
+  renderKnowledge();
+  var t = el("kbe-title"); if (t && t.focus) t.focus();
+}
+function kbuiCancelEdit() { KBUI.editing = null; KBUI.editorErr = ""; renderKnowledge(); }
+
+function kbuiEditorHtml(c) {
+  var facHtml = "", rub = KB.facets[c.cat] || [];
+  for (var f = 0; f < rub.length; f++) {
+    var on = (c.facets || []).indexOf(rub[f]) >= 0;
+    facHtml += '<label class="kbfacet' + (on ? " onf" : "") + '"><input type="checkbox" class="kbefac" value="' + esc(rub[f]) + '"' + (on ? " checked" : "") + '> ' + esc(rub[f]) + '</label>';
+  }
+  var claimsTxt = (c.claims || []).map(function (cl) { return cl.t + " | " + Math.round(cl.conf || 0) + (cl.basis ? " | " + cl.basis : ""); }).join("\n");
+  var srcTxt = (c.sources || []).map(function (so) { return so.url + (so.date ? " | " + so.date : ""); }).join("\n");
+  return '<div class="kbedit">' +
+    '<b>' + (c.title ? "Edit card" : "New knowledge card") + '</b> <span class="dim" style="font-size:12px">— one card per established fact or theme; claims carry a 0-100 confidence, sources carry their own date</span>' +
+    '<div class="row"><input id="kbe-title" placeholder="Card title" value="' + esc(c.title) + '" style="flex:2;min-width:180px">' +
+    '<select id="kbe-cat" onchange="kbuiEditorCat()" style="flex:1;min-width:110px">' + kbuiCatOptions("Category…", c.cat) + '</select>' +
+    '<input id="kbe-vd" type="number" min="1" max="365" value="' + esc(String(c.verifyDays || 30)) + '" title="Re-verify every N days" style="width:84px"></div>' +
+    '<input id="kbe-keys" placeholder="Keys — comma-separated (e.g. NVDA, semis, ai-capex)" value="' + esc((c.keys || []).join(", ")) + '">' +
+    (rub.length ? '<div class="kbkeys" style="margin-top:8px">' + facHtml + '</div>' : '') +
+    '<textarea id="kbe-claims" placeholder="One claim per line —  text | confidence | optional basis   (e.g.  NVDA holds 80%+ share in AI accelerators | 85 | company filings)">' + esc(claimsTxt) + '</textarea>' +
+    '<textarea id="kbe-sources" placeholder="One source per line —  https://… | 2026-11-07">' + esc(srcTxt) + '</textarea>' +
+    '<div class="row">' +
+    '<button class="btn small" onclick="kbuiSave()">💾 Save card</button>' +
+    '<button class="btn small ghost" onclick="kbuiCancelEdit()">Cancel</button>' +
+    '<span style="font-size:12.5px;color:var(--red)">' + esc(KBUI.editorErr) + '</span></div>' +
+    '</div>';
+}
+
+/* copy the editor's DOM state into the editing card (before any re-render or save) */
+function kbuiHarvest() {
+  var c = KBUI.editing; if (!c || !el("kbe-title")) return;
+  c.title = el("kbe-title").value.trim();
+  c.cat = el("kbe-cat").value;
+  var vd = parseInt(el("kbe-vd").value, 10);
+  c.verifyDays = (vd >= 1 && vd <= 365) ? vd : 30;
+  c.keys = el("kbe-keys").value.split(",").map(function (k) { return k.trim(); }).filter(function (k) { return k; });
+  var facs = [];
+  var boxes = document.querySelectorAll("#kb-editor .kbefac");
+  for (var i = 0; i < boxes.length; i++) if (boxes[i].checked) facs.push(boxes[i].value);
+  c.facets = facs;
+  c.claims = [];
+  var lines = el("kbe-claims").value.split("\n");
+  for (var j = 0; j < lines.length; j++) {
+    var ln = lines[j].trim(); if (!ln) continue;
+    var parts = ln.split("|");
+    var conf = parts.length > 1 ? parseFloat(parts[1]) : 50;
+    var basis = parts.length > 2 ? parts.slice(2).join("|").trim() : null;
+    c.claims.push({ t: parts[0].trim(), conf: (isFinite(conf) && conf >= 0 && conf <= 100) ? conf : 50, basis: basis || null });
+  }
+  c.sources = [];
+  var sl = el("kbe-sources").value.split("\n");
+  for (var k = 0; k < sl.length; k++) {
+    var s = sl[k].trim(); if (!s) continue;
+    var sp = s.split("|");
+    c.sources.push({ url: (sp[0] || "").trim(), date: sp.length > 1 ? (sp[1] || "").trim().slice(0, 10) : "" });
+  }
+}
+
+function kbuiEditorCat() { /* category switch: harvest, then drop facets outside the new rubric */
+  if (!KBUI.editing) return;
+  kbuiHarvest();
+  var rub = KB.facets[KBUI.editing.cat] || [];
+  KBUI.editing.facets = (KBUI.editing.facets || []).filter(function (f) { return rub.indexOf(f) >= 0; });
+  renderKnowledge();
+}
+
+function kbuiSave() {
+  if (!KBUI.editing) return;
+  kbuiHarvest();
+  var c = KBUI.editing;
+  var v = KB.validCard(c);
+  if (!v.ok) { KBUI.editorErr = "Cannot save — fix: " + v.errs.join(", "); renderKnowledge(); return; }
+  var r = KB.commitCard(c, c.title, "user");
+  if (!r.ok) { KBUI.editorErr = "Cannot save — fix: " + r.errs.join(", "); renderKnowledge(); return; }
+  kbuiInvalidate();
+  KBUI.editing = null;
+  KBUI.editorErr = "";
+  KBUI.openRow = r.card.id;
+  logLine("<b>Knowledge</b>: card “" + esc(r.card.title) + "” saved (v" + r.card.v + ").");
+  renderKnowledge();
+}
+
+/* ---------- review queue + coverage map ---------- */
+
+function kbuiRenderReview(now) {
+  var rc = el("kb-reviewcard"), rl = el("kb-reviewlist");
+  if (!rc || !rl) return;
+  var items = [];
+  kbuiCards().forEach(function (c) {
+    if (c.status !== "active") return;
+    var st = kbuiStaleState(c, now);
+    if (st === "stale" || st === "overdue") items.push({ c: c, st: st });
+  });
+  items.sort(function (a, b) { return a.c.lastVerified - b.c.lastVerified; });
+  var digs = [];
+  var ix = KB.ix();
+  for (var i = 0; i < ix.digs.length; i++) {
+    var g = KB.getDigest(ix.digs[i].id);
+    if (g && !g.reviewed && (g.status === "done" || g.status === "error")) digs.push(g);
+  }
+  if (!items.length && !digs.length) { rc.style.display = "none"; rl.innerHTML = ""; return; }
+  rc.style.display = "block";
+  var html = "";
+  items.forEach(function (it) {
+    html += '<div class="resrow" style="cursor:default">' +
+      kbuiBadge(it.c, now) +
+      '<span class="restitle">' + esc(it.c.title) + '</span>' +
+      '<span class="resmut">' + kbuiAgeDays(it.c, now) + 'd since last verification (policy ' + esc(String(it.c.verifyDays)) + 'd)</span>' +
+      '<span class="resbtns">' +
+      '<button class="btn small" onclick="kbuiVerify(\'' + esc(it.c.id) + '\')">✓ Verified</button>' +
+      '<button class="btn small ghost" onclick="kbuiOpen(\'' + esc(it.c.id) + '\')">Open</button>' +
+      '<button class="btn small ghost" onclick="kbuiEdit(\'' + esc(it.c.id) + '\')">✎ Edit</button>' +
+      '<button class="btn small ghost" onclick="kbuiRetire(\'' + esc(it.c.id) + '\')">Retire</button>' +
+      '</span></div>';
+  });
+  digs.sort(function (a, b) { return b.at - a.at; }).forEach(function (g) {
+    html += '<div class="resrow" style="cursor:default">' +
+      '<span class="rescat">DIGEST</span>' +
+      '<span class="restitle">Ingestion run ' + esc(g.id) + '</span>' +
+      '<span class="resmut">' + esc(g.status) + (g.err ? " · " + esc(g.err) : "") + '</span>' +
+      '<span class="resbtns"><button class="btn small" onclick="kbuiReviewDigest(\'' + esc(g.id) + '\')">✓ Reviewed</button></span>' +
+      '</div>';
+  });
+  rl.innerHTML = html;
+}
+
+function kbuiRenderCoverage() {
+  var map = el("kb-covmap"), st = el("kb-store");
+  if (!map) return;
+  var depth = KB.depth(null), w = KB.wLoad();
+  var html = "";
+  for (var i = 0; i < KB.cats.length; i++) {
+    var cat = KB.cats[i];
+    var d = depth[cat] || { cards: 0, facetsFilled: 0, facetsTotal: 0, pct: 0 };
+    var cov = KB.coverage(cat, null);
+    var we = KB.wEffective(w, cat), wc = w[cat] || { n: 0, wins: 0 };
+    var wtxt = we.ready
+      ? ("trusted: long ×" + we.wl.toFixed(2) + " · short ×" + we.ws.toFixed(2) + " (" + wc.wins + "/" + wc.n + " won)")
+      : ("learning · " + wc.n + "/" + KB_W.minN + " outcomes before the desk uses it");
+    var facs = "";
+    var rub = KB.facets[cat] || [];
+    for (var f = 0; f < rub.length; f++) {
+      var fc = cov[rub[f]] || { n: 0, avgConf: 0 };
+      facs += '<span class="kbfacet' + (fc.n ? " onf" : "") + '">' + esc(rub[f]) + (fc.n ? " " + fc.n + "·" + fc.avgConf + "%" : "") + '</span>';
+    }
+    html += '<div class="kbcovhead"><b>' + esc(KB.catLabels[cat] || cat) + '</b>' +
+      '<span class="resmut">' + d.cards + ' card' + (d.cards === 1 ? "" : "s") + ' · ' + d.facetsFilled + '/' + d.facetsTotal + ' facets · ' + wtxt + '</span></div>' +
+      '<div class="kbcovbar"><i style="width:' + d.pct + '%"></i></div>' +
+      (facs ? '<div class="kbkeys" style="margin-top:6px">' + facs + '</div>' : '');
+  }
+  map.innerHTML = html;
+  if (st) {
+    var evs = KB.events();
+    st.textContent = kbuiCards().length + " cards · " + evs.length + " timeline events · " +
+      (KB.bytes() / 1024).toFixed(1) + " KB stored locally (budget " + Math.round(KB_LOCAL_BUDGET / 1024) + " KB)";
+  }
+}
+
+function renderKnowledge() {
+  var list = el("kb-list"); if (!list) return;
+  var now = Date.now();
+  var cat = el("kb-cat");
+  if (cat && cat.options.length <= 1) { cat.innerHTML = kbuiCatOptions("All categories", KBUI.cat); cat.value = KBUI.cat; }
+  var all = kbuiCards();
+  var rows = kbuiSort(kbuiFiltered(now));
+  var active = 0, stale = 0, overdue = 0;
+  all.forEach(function (c) {
+    if (c.status !== "active") return;
+    active++;
+    var st = kbuiStaleState(c, now);
+    if (st === "stale") stale++; else if (st === "overdue") overdue++;
+  });
+  var sum = el("kb-summary");
+  sum.innerHTML = all.length
+    ? "<b>" + all.length + "</b> cards · " + active + " active · <span class='respos'>" + (active - stale - overdue) + " fresh</span> · <span style='color:var(--amber)'>" + stale + " stale</span> · <span class='resneg'>" + overdue + " overdue</span>"
+    : "";
+  var ed = el("kb-editor");
+  if (KBUI.editing) { ed.style.display = "block"; ed.innerHTML = kbuiEditorHtml(KBUI.editing); }
+  else { ed.style.display = "none"; ed.innerHTML = ""; }
+  var empty = el("kb-empty");
+  if (!rows.length) {
+    list.innerHTML = "";
+    if (KBUI.editing) { empty.style.display = "none"; }
+    else {
+      empty.style.display = "block";
+      empty.innerHTML = all.length
+        ? "No cards match the current filter."
+        : "The knowledge base is empty. The desk (round 15) and source digests (round 16) will fill it — or press <b>＋ New card</b> to add the first card yourself.";
+    }
+  } else {
+    empty.style.display = "none";
+    var cap = 100, html = "";
+    for (var i = 0; i < Math.min(rows.length, cap); i++) html += kbuiRowHtml(rows[i], now);
+    if (rows.length > cap) html += '<div class="hint" style="padding:10px">Showing first ' + cap + ' of ' + rows.length + ' — narrow the filter to see more.</div>';
+    list.innerHTML = html;
+  }
+  kbuiRenderReview(now);
+  kbuiRenderCoverage();
+}
 
 function init() {
   var key = lsGet(LSKEY); if (key) el("key").value = key;
