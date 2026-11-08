@@ -172,4 +172,11 @@ and PC without re-entering it. The ☁️ Sync KB button re-checks the key as we
 device that was already signed in picks up a newly stored key without reloading, and the
 Settings card links straight to Alpha Vantage's free-key page if you need a fresh one.
 
+Syncing itself is seamless while signed in: knowledge, episodes, board outcomes and the market
+data key commit the moment they change, and one reconciler pulls the cloud copy at sign-in,
+whenever you return to the tab and on a slow heartbeat — work done on the phone shows up on
+the PC without pressing anything. The manual buttons (☁️ Sync KB, ☁️ Sync current episode,
+Load cloud library) remain as explicit controls, and loading an episode is always
+deliberate since it replaces the one on screen.
+
 Without sign-in, the app works fully offline from browser local storage.

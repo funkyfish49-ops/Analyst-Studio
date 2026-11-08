@@ -4226,8 +4226,7 @@ async function cloudInit() {
     authMod.onAuthStateChanged(FB.auth, function (u) {
       S.cloudUser = u ? { uid: u.uid, name: u.displayName || String(u.email || "analyst").split("@")[0], email: u.email || "" } : null;
       if (!S.cloudUser) S.cloudEps = null;
-      try { if (S.cloudUser) kbcOnSignIn(); } catch (e2) {}
-      try { if (S.cloudUser) cloudAVKeyOnSignIn(); } catch (e3) {}
+      try { if (S.cloudUser) cloudSyncAll("signin"); } catch (e2) {}
       renderCloudPanel();
     });
   } catch (e) {
@@ -4302,7 +4301,7 @@ function renderCloudPanel() {
       '<button class="btn small" onclick="cloudSaveEpisode()">☁️ Sync current episode</button>' +
       '<button class="btn small" onclick="cloudLoadLibrary()">Load cloud library</button>' +
       '<button class="btn small" onclick="cloudSignOut()">Sign out</button></div>' +
-      '<div class="hint" style="margin-top:8px">The knowledge base syncs separately — Knowledge tab → ☁️ Sync KB; that sync also restores your Alpha Vantage key on this device.</div>';
+      '<div class="hint" style="margin-top:8px">While you are signed in everything syncs itself — knowledge, episodes, outcomes and the market data key push as they change, and the app reconciles with the cloud when you return to the tab and every few minutes. The buttons below are manual controls; loading an episode is always deliberate.</div>';
     if (S.cloudLoading) html += '<div class="hint" style="margin-top:8px">Loading your cloud library…</div>';
     else if (S.cloudEps && S.cloudEps.length) {
       html += '<div class="hint" style="margin-top:10px">Cloud library — press Load to open an episode on this device:</div>';
@@ -7882,17 +7881,7 @@ function kbuiSyncKb() { kbcSync(); }
 function kbcAutoPush() {
   if (!cloudEnabled()) return;
   if (KBSYNC.timer) clearTimeout(KBSYNC.timer);
-  KBSYNC.timer = setTimeout(function () { KBSYNC.timer = null; kbcPush(true); }, 15000);
-}
-
-/* sign-in hook: a fresh device with an empty base fetches the cloud copy once */
-function kbcOnSignIn() {
-  if (!cloudEnabled()) return;
-  var ix = KB.ix();
-  if (ix.cards.length === 0 && ix.srcs.length === 0 && ix.digs.length === 0) {
-    logLine("☁️ Empty knowledge base on this device — pulling your cloud copy…");
-    kbcPull(true);
-  }
+  KBSYNC.timer = setTimeout(function () { KBSYNC.timer = null; cloudSyncAll("auto"); }, 15000);
 }
 
 /* ============================== kb evolution dashboards (round 18) ============================== */
@@ -8220,6 +8209,87 @@ async function kbuiImportPack(name) {
   } finally { KBIMP.busy = false; }
 }
 
+/* ============================== unified auto-sync (round 22) ============================== */
+/* One engine owns the whole cloud conversation while you are signed in. The push side was
+   already seamless — episodes and their board items commit at creation, analysis, outcome,
+   re-check and expiry; knowledge pushes on a 15 s debounce; the market data key on 1.5 s.
+   What was missing was the pull side: a signed-in device never learned about changes made
+   elsewhere without a manual Sync. cloudSyncAll reconciles both directions in one pass —
+   pull the knowledge base (the merge is additive and monotonic, so a blind pull is always
+   safe), push whatever local state differs, push a current episode the cloud has never
+   seen (covers work created while signed out, or after a failed push), reconcile the
+   market data key, and refresh the cloud library list — loading an episode stays
+   deliberate, because it replaces the one on screen. Triggers: sign-in, tab focus (at
+   most once per 2 minutes), a slow heartbeat (every 5 minutes), and the 15 s knowledge
+   debounce now rides the same engine, so every local write also picks up remote changes.
+   Single-flight — overlapping triggers coalesce — and the manual buttons stay as explicit
+   fallbacks. The Mistral API key and model settings remain device-local by design. */
+
+var SYNC = { busy: false, last: 0, knownEps: null };
+
+function syncDue(minMs) { return !SYNC.last || (Date.now() - SYNC.last) >= minMs; }
+
+function syncStatTotal(st) {
+  st = st || {};
+  return (st.cards || 0) + (st.events || 0) + (st.decs || 0) + (st.srcs || 0) + (st.digs || 0) + (st.weights || 0);
+}
+
+/* silent library refresh — reports how many episodes arrived from other devices */
+async function syncLibrary() {
+  if (!cloudEnabled()) return 0;
+  var fresh = [];
+  try {
+    var fs = FB.mod.fs;
+    var q = fs.query(fs.collection(FB.db, "episodes"), fs.where("userId", "==", S.cloudUser.uid));
+    var snap = await fs.getDocs(q);
+    fresh = snap.docs.map(function (d) {
+      var v = d.data() || {};
+      return { id: d.id, title: v.title || "Episode", created: v.createdLabel || "", when: (v.createdAt && v.createdAt.seconds) ? v.createdAt.seconds : 0 };
+    }).sort(function (a, b) { return b.when - a.when; });
+  } catch (e) { return 0; }
+  var news = 0;
+  if (SYNC.knownEps) for (var i = 0; i < fresh.length; i++) if (!SYNC.knownEps[fresh[i].id]) news++;
+  var known = {};
+  for (var j = 0; j < fresh.length; j++) known[fresh[j].id] = 1;
+  SYNC.knownEps = known;
+  S.cloudEps = fresh;
+  try { renderCloudPanel(); } catch (e2) {}
+  return news;
+}
+
+/* the single reconciler: pull KB → push KB → push unseen episode → AV key → library */
+async function cloudSyncAll(reason) {
+  if (!cloudEnabled()) return { ok: false, off: true };
+  if (SYNC.busy) return { ok: false, busy: true };
+  SYNC.busy = true;
+  var pulled = 0, pushed = 0, news = 0;
+  try {
+    if (reason === "signin") {
+      var ix = KB.ix();
+      if (ix.cards.length === 0 && ix.srcs.length === 0 && ix.digs.length === 0) logLine("☁️ Empty knowledge base on this device — pulling your cloud copy…");
+    }
+    var p = await kbcPull(true);
+    if (p && p.ok) pulled = syncStatTotal(p.stats);
+    var q2 = await kbcPush(true);
+    if (q2 && q2.ok) pushed = syncStatTotal(q2.stats);
+    /* an episode created while signed out (or whose push once failed) has never reached the
+       cloud — the engine gives it a first-class ticket at the next sync */
+    if (S.ep && !FB.savedEps[cloudEpId(S.ep)]) { try { await cloudSaveEpisode(); } catch (e1) {} }
+    try { if (S.cloudUser) await cloudAVKeyOnSignIn(); } catch (e2) {}
+    news = await syncLibrary();
+    SYNC.last = Date.now();
+    if (reason === "signin" || pulled || pushed || news) {
+      var bits = [];
+      if (pulled) bits.push("pulled " + pulled);
+      if (pushed) bits.push("pushed " + pushed);
+      if (news) bits.push(news + " new episode" + (news > 1 ? "s" : "") + " in the library (Settings → ☁️ Cloud sync to load)");
+      logLine("☁️ Cloud sync — " + (bits.length ? bits.join(", ") + "." : "everything already in sync."), (pulled || pushed || news) ? "ok" : "");
+    }
+  } catch (e) { /* offline or transient — local state stays the truth and the next trigger retries */ }
+  finally { SYNC.busy = false; }
+  return { ok: true, pulled: pulled, pushed: pushed, news: news };
+}
+
 function init() {
   var key = lsGet(LSKEY); if (key) el("key").value = key;
   var avkey = lsGet(LSAVKEY); if (avkey && el("avkey")) el("avkey").value = avkey;
@@ -8250,6 +8320,14 @@ function init() {
     showTab("studio");
   }
   cloudInit();
+  /* round 22: the unified auto-sync engine — reconcile on tab focus (min 2 minutes apart)
+     and on a slow heartbeat (every 5 minutes) while signed in */
+  try {
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible" && cloudEnabled() && syncDue(120000)) cloudSyncAll("focus");
+    });
+    setInterval(function () { if (cloudEnabled() && syncDue(300000)) cloudSyncAll("auto"); }, 60000);
+  } catch (e) {}
   /* the daily auto-call only fires in a real browser window — never inside an embedded preview */
   try { if (!window.frameElement) dailyCallCheck(); } catch (e) {}
   try {
