@@ -168,6 +168,8 @@ stored at decision time, so the track record doubles as the engine's out-of-samp
 Your optional **Alpha Vantage key** rides the same sign-in: once you're signed in it is
 stored on your private cloud profile and restored automatically on every device you sign
 into (clearing it stays local to that device), so the Economics market tiles work on phone
-and PC without re-entering it.
+and PC without re-entering it. The ☁️ Sync KB button re-checks the key as well, so a
+device that was already signed in picks up a newly stored key without reloading, and the
+Settings card links straight to Alpha Vantage's free-key page if you need a fresh one.
 
 Without sign-in, the app works fully offline from browser local storage.

@@ -917,7 +917,7 @@ body.mode-desk #srctable table{min-width:0}
     </div>
     <div class="card">
       <h2>💹 Market data key <span class="dim" style="font-weight:400;font-size:12px">(optional)</span></h2>
-      <div class="hint">A free <b>Alpha Vantage</b> key powers the <b>Global stocks &amp; commodities</b> tile in the <b>Economics</b> tab — S&amp;P 500, world &amp; emerging equities, gold, silver and oil via ETF quotes. Get a free key at <b>alphavantage.co/support/#api-key</b> (25 requests/day; one refresh uses 6, paced a few seconds apart to avoid rate-limiting). Stored in this browser, sent only to <code>www.alphavantage.co</code> — and once you sign in with Google (Settings → ☁️ Cloud sync), the key syncs privately through your cloud profile: every device you sign into picks it up automatically. Clearing it here clears it on this device only.</div>
+      <div class="hint">A free <b>Alpha Vantage</b> key powers the <b>Global stocks &amp; commodities</b> tile in the <b>Economics</b> tab — S&amp;P 500, world &amp; emerging equities, gold, silver and oil via ETF quotes. Get a free key at <a href="https://www.alphavantage.com/support/#api-key" target="_blank" rel="noopener">alphavantage.co/support/#api-key</a> (25 requests/day; one refresh uses 6, paced a few seconds apart to avoid rate-limiting). Stored in this browser, sent only to <code>www.alphavantage.co</code> — and once you sign in with Google (Settings → ☁️ Cloud sync), the key syncs privately through your cloud profile: every device you sign into picks it up automatically. Clearing it here clears it on this device only.</div>
       <input type="text" id="avkey" placeholder="Alpha Vantage API key (optional — Economics tab)" style="width:100%;min-width:240px" oninput="saveAVKey()">
     </div>
     <div class="card">
@@ -4302,7 +4302,7 @@ function renderCloudPanel() {
       '<button class="btn small" onclick="cloudSaveEpisode()">☁️ Sync current episode</button>' +
       '<button class="btn small" onclick="cloudLoadLibrary()">Load cloud library</button>' +
       '<button class="btn small" onclick="cloudSignOut()">Sign out</button></div>' +
-      '<div class="hint" style="margin-top:8px">The knowledge base syncs separately — Knowledge tab → ☁️ Sync KB.</div>';
+      '<div class="hint" style="margin-top:8px">The knowledge base syncs separately — Knowledge tab → ☁️ Sync KB; that sync also restores your Alpha Vantage key on this device.</div>';
     if (S.cloudLoading) html += '<div class="hint" style="margin-top:8px">Loading your cloud library…</div>';
     else if (S.cloudEps && S.cloudEps.length) {
       html += '<div class="hint" style="margin-top:10px">Cloud library — press Load to open an episode on this device:</div>';
@@ -7872,6 +7872,9 @@ async function kbcSync() {
   var pulled = (st.cards + st.events + st.decs + st.srcs + st.digs + st.weights) || 0;
   var pushed = (st2.cards + st2.events + st2.decs + st2.srcs + st2.digs + st2.weights) || 0;
   logLine("☁️ Knowledge base synced" + ((pulled || pushed) ? " — pulled " + pulled + " and pushed " + pushed + " docs." : " — already in sync."), (pulled || pushed) ? "ok" : "");
+  /* round 21: the Sync KB button also reconciles the Alpha Vantage key, so a device that
+     was already signed in picks up a key stored from another device without a reload */
+  try { if (S.cloudUser) await cloudAVKeyOnSignIn(); } catch (e4) {}
 }
 function kbuiSyncKb() { kbcSync(); }
 
