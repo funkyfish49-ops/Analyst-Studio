@@ -177,7 +177,10 @@ board outcomes and the market data key commit the moment they change, the curren
 rides every sync pass, and one reconciler pulls the cloud copy at sign-in, whenever you
 return to the tab and on a slow heartbeat — work done on the phone shows up on the PC
 without pressing anything. The Results tab refreshes itself whenever it is open, and the
-cloud library lists itself in Settings; loading an episode from it is the only deliberate
-action, since it replaces the one on screen.
+cloud library lists itself in Settings, and which episode is open rides the same sign-in:
+your devices open the episode you touched last by themselves (a device with no episode
+opens the newest one right away), so picking up on the phone where you left the PC — or
+vice versa — happens without pressing anything. Tapping an older episode in the library is
+the only deliberate navigation, since opening an episode replaces the one on screen.
 
 Without sign-in, the app works fully offline from browser local storage.
