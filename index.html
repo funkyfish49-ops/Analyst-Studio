@@ -832,6 +832,20 @@ body.mode-desk #srctable table{min-width:0}
         <span class="dim" id="kb-store" style="font-size:12.5px"></span>
         <button class="btn ghost small" onclick="kbuiCompact()">Compact storage</button>
         <button class="btn ghost small" onclick="kbuiSyncKb()">☁️ Sync KB</button>
+        <button class="btn ghost small" onclick="kbuiImportToggle()">📥 Import cards</button>
+      </div>
+    </div>
+    <div class="card" id="kb-importcard" style="display:none">
+      <h2>📥 Import cards</h2>
+      <div class="hint">Paste card JSON — an array like [ { "cat": "economic", "title": "…", "keys": ["TE"], "claims": [ { "t": "…", "conf": 90 } ], "sources": [ { "url": "https://…", "date": "2026-11-08" } ], "facets": ["growth"], "verifyDays": 90 } ] (or { "cards": [ … ] }). Every entry is validated against the card rubric — invalid entries are skipped, and a card whose category + title already exists is left alone, so re-running a pack never duplicates or resurrects. Imports sync like every knowledge write.</div>
+      <div class="kbedit">
+        <textarea id="kbi-json" placeholder="Paste card JSON here…"></textarea>
+        <div class="row" style="margin-top:8px">
+          <button class="btn small" onclick="kbuiImportJson()">📥 Import</button>
+          <button class="btn ghost small" onclick="kbuiImportPack('trading-economics')">🌐 Trading Economics pack</button>
+          <button class="btn ghost small" onclick="kbuiImportToggle()">Done</button>
+          <span class="dim" id="kbi-err" style="color:var(--red)"></span>
+        </div>
       </div>
     </div>
     <div class="card">
@@ -971,7 +985,7 @@ body.mode-desk #srctable table{min-width:0}
       <p>The <b>Settings</b> tab has a <b>☁️ Cloud sync</b> card: sign in with Google and every episode you produce — podcast or analyst call — is saved to your Firebase cloud library, together with one trackable document per board opportunity and per episode topic. The <b>Monitor</b> tab doubles as your track record: each re-check appends to that item's cloud history, and the <b>🏆 Track record</b> row lets you resolve any opportunity as <b>Won</b>, <b>Lost</b> or <b>Void</b> — or reopen it — with the outcome saved with the episode and synced to the cloud. Press <b>Load cloud library</b> in Settings to bring any past episode back onto this device with its full watchlist and track record intact. Everything works offline too: without sign-in (or without a connection) the app runs entirely on this browser's local storage.</p>
 
       <h3>🧠 The Knowledge tab</h3>
-      <p>The <b>🧠 Knowledge</b> tab is the desk's living knowledge base. Every card is one established fact or theme with <b>claims</b> (each with a 0-100 confidence and an optional basis), <b>dated sources</b>, <b>link keys</b>, and a place in a category facet rubric — six evolving categories (Market, Economic, Industry, Social media, Stock-specific, Other), each with its own rubric of facets that make depth measurable. Cards are versioned: every commit, edit, verification or retirement lands in a per-card <b>version timeline</b>. Freshness is policy-driven — each card declares its own <b>re-verify window</b>, and cards past it go <b>stale</b>, then <b>overdue</b>, surfacing in the <b>🧐 Review queue</b> where you can mark them verified, revise or retire them in one click. The <b>🗺️ Coverage &amp; depth</b> map shows how many cards cover each facet per category (with their average claim confidence), a bar per category, and how far each lens is <b>trusted</b>: once a category accumulates 5 resolved outcomes, its learned reliability weights (long / short) start showing beside it — below that it is still learning. Use <b>＋ New card</b> to add knowledge manually, or expand a card and press <b>✎ Edit</b> — the editor takes claims one per line in the form <b>text | confidence | basis</b> and sources as <b>url | date</b>. The desk is wired to this base: while forming calls the desk and manager read the established cards and the earned lens-reliability weights (a lens activates at <b>5 resolved outcomes</b>), the manager records which lenses moved each call in the CALL DATA, those vectors are frozen into decisions at board freeze, and every <b>Won / Lost</b> resolution feeds the lens weights automatically — voids, expiries and re-resolutions never double-count. The <b>📡 Sources &amp; digestion</b> card feeds the base: add any URL as a one-time read or a repeatable feed, press <b>🍽️ Digest now</b> (or <b>🍽️ Digest due</b> for every pending source), and the research agent reads the source and proposes new cards, claims to add to existing cards, and contradictions — the proposals wait in the review queue, where you save, apply or edit them one by one. Cards, decisions, weights and sources sync through your private Firebase cloud: press <b>☁️ Sync KB</b> in the Coverage card to push and pull the whole base between phone and PC, and while you are signed in every knowledge write also syncs automatically a few seconds later. Everything also stays stored locally on this device. The 📈 Evolution card on the Knowledge tab plots each lens's weight history and the P&amp;L of the decisions it shaped, with aligned-versus-dissenting win rates showing whether a lens's trust is earned.</p>
+      <p>The <b>🧠 Knowledge</b> tab is the desk's living knowledge base. Every card is one established fact or theme with <b>claims</b> (each with a 0-100 confidence and an optional basis), <b>dated sources</b>, <b>link keys</b>, and a place in a category facet rubric — six evolving categories (Market, Economic, Industry, Social media, Stock-specific, Other), each with its own rubric of facets that make depth measurable. Cards are versioned: every commit, edit, verification or retirement lands in a per-card <b>version timeline</b>. Freshness is policy-driven — each card declares its own <b>re-verify window</b>, and cards past it go <b>stale</b>, then <b>overdue</b>, surfacing in the <b>🧐 Review queue</b> where you can mark them verified, revise or retire them in one click. The <b>🗺️ Coverage &amp; depth</b> map shows how many cards cover each facet per category (with their average claim confidence), a bar per category, and how far each lens is <b>trusted</b>: once a category accumulates 5 resolved outcomes, its learned reliability weights (long / short) start showing beside it — below that it is still learning. Use <b>＋ New card</b> to add knowledge manually, or expand a card and press <b>✎ Edit</b> — the editor takes claims one per line in the form <b>text | confidence | basis</b> and sources as <b>url | date</b>. The desk is wired to this base: while forming calls the desk and manager read the established cards and the earned lens-reliability weights (a lens activates at <b>5 resolved outcomes</b>), the manager records which lenses moved each call in the CALL DATA, those vectors are frozen into decisions at board freeze, and every <b>Won / Lost</b> resolution feeds the lens weights automatically — voids, expiries and re-resolutions never double-count. The <b>📡 Sources &amp; digestion</b> card feeds the base: add any URL as a one-time read or a repeatable feed, press <b>🍽️ Digest now</b> (or <b>🍽️ Digest due</b> for every pending source), and the research agent reads the source and proposes new cards, claims to add to existing cards, and contradictions — the proposals wait in the review queue, where you save, apply or edit them one by one. Cards, decisions, weights and sources sync through your private Firebase cloud: press <b>☁️ Sync KB</b> in the Coverage card to push and pull the whole base between phone and PC, and while you are signed in every knowledge write also syncs automatically a few seconds later. Everything also stays stored locally on this device. The <b>📥 Import cards</b> button in the Coverage card loads starter packs that ship with the app (the Trading Economics pack catalogues its market and macro data sections) or pasted card JSON — every entry is validated against the rubric, invalid entries are skipped, and cards whose category + title already exists are left alone. The 📈 Evolution card on the Knowledge tab plots each lens's weight history and the P&amp;L of the decisions it shaped, with aligned-versus-dissenting win rates showing whether a lens's trust is earned.</p>
 
       <h3>🌀 Entropic second opinion</h3>
       <p>Every BUY / SELL opportunity the desk produces is auto-scored by an embedded <b>causal-entropic engine</b> (F = T·∇Sτ, after Alex Wissner-Gross's work on intelligence as freedom-seeking): it simulates thousands of ten-day futures from the idea's <b>own board numbers</b> — conviction, reward:risk, position size — and asks whether committing to the trade preserves more of the desk's future freedom of action than staying in cash. The board tiles, indicator cards and Monitor panels show the resulting <b>🌀 F chip</b> (green = the trade keeps more future options open, red = it forecloses them), and every opportunity carries a <b>🌀 Entropic deep-dive</b> — its regime priors, expected value, ∇Sτ and impairment probability, with editable priors you can re-score against your own view. PREDICTIONS and OTHER ideas are proxy-scored as price paths, so treat those F values as rougher. Treat the score as a <b>second opinion</b> beside the desk's expected value, never a replacement for analyst judgment: walk-forward backtests of this engine show entropic scores can be anti-predictive on some structures — which is exactly why the app surfaces the raw F instead of hiding it. When cloud sync is on, each opportunity's entropic score is stored in your cloud track record alongside its outcome, so over time you can see whether high-F calls really did keep more options open.</p>
@@ -8084,6 +8098,123 @@ async function cloudAVKeyOnSignIn() {
   } else if (cloudAVKeyValid(localKey) && localKey !== cloudKey) {
     await cloudAVKeyPush();
   }
+}
+
+/* ============================== kb card import (round 20) ============================== */
+/* Import validated knowledge cards from pasted JSON or a starter pack that ships with the
+   app (kb-packs/*.json, same-origin fetch). Entries are sanitized like digest proposals:
+   cards are built through kbNewCard, claims need text + a clamped 0-100 confidence,
+   sources must be http(s) URLs (dated, or stamped today), facets are intersected with the
+   category rubric — anything that fails is skipped with a count, never a half-card. A
+   card whose cat + title already exists (any status) is skipped too: retiring a card is a
+   decision, so packs cannot duplicate or resurrect. Successful imports log one line,
+   invalidate the tab cache, re-render, and schedule the same debounced cloud auto-push
+   as every other knowledge write. */
+
+var KBIMP = { busy: false };
+
+/* sanitize one imported entry into a valid card, or null when it should be skipped */
+function kbiCard(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  var cat = KB_CATS.indexOf(raw.cat) >= 0 ? raw.cat : (KB_CATS.indexOf(raw.category) >= 0 ? raw.category : null);
+  if (!cat) return null;
+  var title = typeof raw.title === "string" ? raw.title.trim().slice(0, KB_CARD_MAX.title) : "";
+  if (!title) return null;
+  var c = kbNewCard(cat, title);
+  if (kbIsArray(raw.keys)) for (var i = 0; i < raw.keys.length && c.keys.length < KB_CARD_MAX.keys; i++) {
+    var k = String(raw.keys[i] || "").trim().toUpperCase().slice(0, KB_CARD_MAX.keyChars);
+    if (k && c.keys.indexOf(k) < 0) c.keys.push(k);
+  }
+  if (kbIsArray(raw.claims)) for (var j = 0; j < raw.claims.length && c.claims.length < KB_CARD_MAX.claims; j++) {
+    var rc = raw.claims[j];
+    if (!rc || typeof rc !== "object" || typeof rc.t !== "string" || !rc.t.trim()) continue;
+    var conf = Math.round(Number(rc.conf)); if (!isFinite(conf)) conf = 50;
+    var cl = { t: rc.t.trim().slice(0, KB_CARD_MAX.claim), conf: Math.max(0, Math.min(100, conf)) };
+    if (typeof rc.basis === "string" && rc.basis.trim()) cl.basis = rc.basis.trim().slice(0, KB_CARD_MAX.basis);
+    c.claims.push(cl);
+  }
+  if (!c.claims.length) return null;
+  var today = todayISO();
+  if (kbIsArray(raw.sources)) for (var s = 0; s < raw.sources.length && c.sources.length < KB_CARD_MAX.sources; s++) {
+    var rs = raw.sources[s];
+    var url = rs && typeof rs.url === "string" ? rs.url.trim() : "";
+    if (!/^https?:\/\/\S+$/.test(url) || url.length > 800) continue;
+    var dt = rs && typeof rs.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(rs.date) ? rs.date : today;
+    c.sources.push({ url: url, date: dt });
+  }
+  if (!c.sources.length) return null;
+  var rub = KB_FACETS[cat] || [];
+  if (kbIsArray(raw.facets)) for (var f = 0; f < raw.facets.length && c.facets.length < KB_CARD_MAX.facets; f++) {
+    var fa = String(raw.facets[f] || "");
+    if (rub.indexOf(fa) >= 0 && c.facets.indexOf(fa) < 0) c.facets.push(fa);
+  }
+  var vd = Math.round(Number(raw.verifyDays));
+  c.verifyDays = (isFinite(vd) && vd >= 1 && vd <= 365) ? vd : 30;
+  return kbValidCard(c).ok ? c : null;
+}
+
+/* parse + dedupe + commit pasted text; returns { ok, imported, skipped } */
+function kbiImport(text) {
+  var data = null;
+  try { data = JSON.parse(String(text)); } catch (e) { return { ok: false, error: "parse", imported: 0, skipped: 0 }; }
+  if (!kbIsArray(data)) { if (data && kbIsArray(data.cards)) data = data.cards; else return { ok: false, error: "shape", imported: 0, skipped: 0 }; }
+  if (data.length > 100) data = data.slice(0, 100);
+  var existing = kbuiAllCards(), imported = 0, skipped = 0;
+  for (var i = 0; i < data.length; i++) {
+    var c = kbiCard(data[i]);
+    if (!c) { skipped++; continue; }
+    var dup = false;
+    for (var e = 0; e < existing.length; e++) if (existing[e].cat === c.cat && existing[e].title === c.title) { dup = true; break; }
+    if (dup) { skipped++; continue; }
+    var r = kbCommitCard(c, "card added via import", "user");
+    if (r.ok) { imported++; existing.push(c); } else skipped++;
+  }
+  return { ok: true, imported: imported, skipped: skipped };
+}
+
+/* shared success tail: invalidate + re-render + auto-push + one log line */
+function kbiImportDone(r, label) {
+  kbuiInvalidate();
+  try { renderKnowledge(); } catch (e) {}
+  kbcAutoPush();
+  logLine("📥 Knowledge base — imported " + r.imported + " card" + (r.imported === 1 ? "" : "s") + label + (r.skipped ? " (" + r.skipped + " skipped)" : "") + ".", "ok");
+}
+
+function kbuiImportToggle() {
+  var p = el("kb-importcard"); if (!p) return;
+  p.style.display = p.style.display === "none" ? "" : "none";
+  var err = el("kbi-err"); if (err) err.textContent = "";
+}
+
+function kbuiImportJson() {
+  if (KBIMP.busy) return;
+  var err = el("kbi-err"), ta = el("kbi-json");
+  if (err) err.textContent = "";
+  var text = ta ? String(ta.value || "").trim() : "";
+  if (!text) { if (err) err.textContent = "Paste card JSON first."; return; }
+  KBIMP.busy = true;
+  var r = kbiImport(text);
+  KBIMP.busy = false;
+  if (!r.ok) { if (err) err.textContent = r.error === "parse" ? "That is not valid JSON." : "Expected an array of cards (or { \"cards\": [ … ] })."; return; }
+  if (ta) ta.value = "";
+  kbuiImportToggle();
+  kbiImportDone(r, "");
+}
+
+/* starter packs ship with the app itself — same-origin fetch, no CORS, works offline-degraded */
+async function kbuiImportPack(name) {
+  if (KBIMP.busy) return;
+  var err = el("kbi-err"); if (err) err.textContent = "";
+  KBIMP.busy = true;
+  try {
+    var res = await fetch("kb-packs/" + encodeURIComponent(String(name)) + ".json");
+    if (!res || !res.ok) throw new Error("http");
+    var r = kbiImport(await res.text());
+    if (!r.ok) throw new Error(r.error);
+    kbiImportDone(r, " from the " + name + " pack");
+  } catch (e) {
+    if (err) err.textContent = "Could not load the pack (offline?) — paste its JSON instead.";
+  } finally { KBIMP.busy = false; }
 }
 
 function init() {

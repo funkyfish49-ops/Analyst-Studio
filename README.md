@@ -139,6 +139,14 @@ split that matters — the win rate when the lens was *aligned* with the trade v
 *dissented* (warned against the side taken) — so you can see whether a lens's trust is
 actually earned. A ledger strip on top summarizes every resolved decision, and a lens only
 counts as "trusted" once it holds 5+ outcomes, exactly as the desk does.
+Round 20 adds **📥 Import cards**. The Coverage card gains an import button that
+accepts pasted card JSON (an array, or `{ "cards": [ … ] }`) and starter packs that ship with
+the app at `kb-packs/*.json` — the **Trading Economics pack** catalogues tradingeconomics.com's
+data categories (macro indicators, economic calendar, forecasts, bonds, commodities,
+currencies, shares) as cards in the Economic, Market, Stock-specific and Other categories.
+Every entry is validated against the card rubric, invalid entries are skipped, and a card
+whose category + title already exists is left alone, so re-running a pack never duplicates
+or resurrects a retired card. Imports sync like every other knowledge write.
 
 ## Forecast Lab
 

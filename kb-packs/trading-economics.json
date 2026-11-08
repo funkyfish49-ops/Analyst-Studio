@@ -1,0 +1,133 @@
+[
+  {
+    "cat": "economic",
+    "title": "Trading Economics macro indicator coverage",
+    "keys": ["TRADINGECONOMICS", "TE", "MACRO", "GDP", "CPI", "PAYROLLS", "INDICATORS"],
+    "claims": [
+      { "t": "Trading Economics tracks about 20 million economic indicators from 196 countries, with actual values, consensus figures, forecasts, historical time series and news.", "conf": 95 },
+      { "t": "Country indicator pages group the data into categories: Overview, GDP, Labour, Prices, Money, Trade, Government, Business, Consumer, Housing, Energy and Health.", "conf": 95 },
+      { "t": "Each indicator row carries last, previous, highest and lowest values with the reference month (e.g. US unemployment 4.1% Oct/26, non-farm payrolls +165K Oct/26).", "conf": 90 }
+    ],
+    "sources": [
+      { "url": "https://tradingeconomics.com/united-states/indicators", "date": "2026-11-08" },
+      { "url": "https://tradingeconomics.com/forecast", "date": "2026-11-08" }
+    ],
+    "facets": ["growth", "inflation", "labour", "rates", "policy"],
+    "verifyDays": 90
+  },
+  {
+    "cat": "economic",
+    "title": "Trading Economics economic calendar event categories",
+    "keys": ["TE", "CALENDAR", "CPI", "PPI", "PAYROLLS", "FOMC", "AUCTIONS", "SENTIMENT"],
+    "claims": [
+      { "t": "The TE economic calendar filters events by category: Interest Rate, Prices & Inflation, Labour Market, GDP Growth, Foreign Trade, Government, Business Confidence, Consumer Sentiment, Housing Market, Bond Auctions, Energy and Holidays.", "conf": 95 },
+      { "t": "Calendar views span recent, today, tomorrow, this/next week, this/next month and custom date ranges, with per-country filters and a UTC-offset selector.", "conf": 90 }
+    ],
+    "sources": [
+      { "url": "https://tradingeconomics.com/calendar", "date": "2026-11-08" }
+    ],
+    "facets": ["policy", "rates", "growth"],
+    "verifyDays": 90
+  },
+  {
+    "cat": "economic",
+    "title": "Trading Economics forecasts and consensus figures",
+    "keys": ["TE", "FORECAST", "CONSENSUS", "MACRO", "EXPECTED"],
+    "claims": [
+      { "t": "TE publishes per-indicator forecasts and consensus figures alongside actuals, in per-country tables (last, previous, reference, unit) on its Forecast page.", "conf": 90 },
+      { "t": "TE news items pair each market move with the indicator release that drove it (e.g. the 10-year yield jumping on a payrolls beat), which makes it a quick cross-check for consensus-versus-actual surprise direction.", "conf": 80 }
+    ],
+    "sources": [
+      { "url": "https://tradingeconomics.com/forecast", "date": "2026-11-08" },
+      { "url": "https://tradingeconomics.com/", "date": "2026-11-08" }
+    ],
+    "facets": ["growth", "policy"],
+    "verifyDays": 90
+  },
+  {
+    "cat": "market",
+    "title": "Trading Economics market data sections",
+    "keys": ["TE", "MARKETS", "INDICES", "FX", "BONDS", "COMMODITIES", "CRYPTO", "SHARES"],
+    "claims": [
+      { "t": "TE market pages cover six sections: Commodities, Indexes, Shares, Currencies, Crypto and Bonds, each quoted with live prices plus weekly, monthly, YTD and YoY change windows.", "conf": 95 },
+      { "t": "Every market section offers Map, Scatter, Correlations and Forecasts views for cross-market comparison.", "conf": 90 }
+    ],
+    "sources": [
+      { "url": "https://tradingeconomics.com/commodities", "date": "2026-11-08" },
+      { "url": "https://tradingeconomics.com/currencies", "date": "2026-11-08" }
+    ],
+    "facets": ["liquidity", "volatility"],
+    "verifyDays": 90
+  },
+  {
+    "cat": "market",
+    "title": "Trading Economics government bond yields",
+    "keys": ["TE", "BONDS", "YIELDS", "TREASURY", "10Y", "JGB", "GILT"],
+    "claims": [
+      { "t": "The TE bonds page lists 10-year government bond yields by country (US, UK, Japan, Germany, Brazil, India, Canada and others) with intraday change and weekly, monthly, YTD and YoY moves.", "conf": 90 },
+      { "t": "The bonds page carries the same Map, Scatter, Correlations and Forecasts views as the other market sections, so yield moves can be compared across countries.", "conf": 85 }
+    ],
+    "sources": [
+      { "url": "https://tradingeconomics.com/bonds", "date": "2026-11-08" }
+    ],
+    "facets": ["liquidity"],
+    "verifyDays": 60
+  },
+  {
+    "cat": "market",
+    "title": "Trading Economics commodity coverage",
+    "keys": ["TE", "COMMODITIES", "OIL", "BRENT", "GAS", "GOLD", "COPPER", "WHEAT", "LITHIUM"],
+    "claims": [
+      { "t": "TE commodities span Energy (crude, Brent, natural gas, gasoline, heating oil, coal, EU/UK/German gas, ethanol, propane, uranium, LNG), Metals (gold, silver, copper, steel, lithium, iron ore, platinum, aluminum, cobalt and more) and Agricultural products (soybeans, wheat, lumber, palm oil, milk, rubber, orange juice and more).", "conf": 90 },
+      { "t": "Each commodity is quoted with intraday change plus weekly, monthly, YTD and YoY percentage windows (e.g. crude -12.8% weekly, +58% YTD), which makes the page a fast read on how stretched a move is.", "conf": 85 }
+    ],
+    "sources": [
+      { "url": "https://tradingeconomics.com/commodities", "date": "2026-11-08" }
+    ],
+    "facets": ["volatility", "liquidity"],
+    "verifyDays": 60
+  },
+  {
+    "cat": "market",
+    "title": "Trading Economics currency coverage",
+    "keys": ["TE", "FX", "CURRENCIES", "EXCHANGERATES", "DOLLAR", "EURO", "YEN"],
+    "claims": [
+      { "t": "The TE currencies page quotes exchange rates against a selectable base (US dollar, euro, pound, Australian and NZ dollars, yen, yuan, franc, Canadian dollar, peso, rupee, real, ruble and more).", "conf": 90 },
+      { "t": "Bitcoin and Ethereum are quoted alongside fiat currencies on the same page, so crypto moves can be read next to FX.", "conf": 85 }
+    ],
+    "sources": [
+      { "url": "https://tradingeconomics.com/currencies", "date": "2026-11-08" }
+    ],
+    "facets": ["liquidity", "positioning"],
+    "verifyDays": 90
+  },
+  {
+    "cat": "stock",
+    "title": "Trading Economics share prices by sector",
+    "keys": ["TE", "SHARES", "EQUITIES", "SECTORS", "STOCKS"],
+    "claims": [
+      { "t": "The TE Shares page quotes individual stocks grouped by sector and industry: information technology, health care, financials, consumer discretionary and staples, industrials, communication services, energy, real estate, utilities and materials, down to industry chips like semiconductors, software, banking and biotech.", "conf": 90 },
+      { "t": "Country indicator pages also carry a headline stock-market line (e.g. US stock market index level with its reference month), handy as a quick cross-check for index levels cited in calls.", "conf": 80 }
+    ],
+    "sources": [
+      { "url": "https://tradingeconomics.com/shares", "date": "2026-11-08" },
+      { "url": "https://tradingeconomics.com/united-states/indicators", "date": "2026-11-08" }
+    ],
+    "facets": ["valuation", "catalysts"],
+    "verifyDays": 90
+  },
+  {
+    "cat": "other",
+    "title": "Trading Economics as a data source",
+    "keys": ["TRADINGECONOMICS", "TE", "DATASOURCE", "API", "EXCEL"],
+    "claims": [
+      { "t": "tradingeconomics.com is free to browse and aggregates official-source macro and market data for 196 economies; per-country pages are the fastest route from a country name to its headline indicators.", "conf": 90 },
+      { "t": "Beyond the free site, TE offers Download Data/Export, an Excel add-in and API access as paid products, so desk agents should cite the public pages rather than assume API access.", "conf": 85 }
+    ],
+    "sources": [
+      { "url": "https://tradingeconomics.com/", "date": "2026-11-08" }
+    ],
+    "facets": ["general"],
+    "verifyDays": 90
+  }
+]
