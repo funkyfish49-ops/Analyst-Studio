@@ -169,15 +169,31 @@ input[type=range]{width:160px;accent-color:var(--acc)}
 .deskrow .callchart{flex:1 1 340px;margin-top:0}
 .deskrow .impanel{flex:1 1 300px;margin-top:0}
 .analystlayout{display:flex;gap:0;align-items:stretch;flex-wrap:wrap;margin-top:14px}
-.opppanel{flex:0 1 280px;min-width:240px;max-width:340px;background:var(--panel2);border:1px solid var(--line);border-right:4px solid var(--line2);border-radius:10px;padding:12px;align-self:flex-start;position:sticky;top:96px}
-.opphead{font-weight:700;font-size:14px;color:var(--gtxt);margin:0 0 10px}
+.opppanel{flex:0 1 280px;min-width:240px;max-width:340px;background:var(--panel2);border:1px solid var(--line);border-right:4px solid var(--line2);border-radius:10px;padding:10px;align-self:flex-start;position:sticky;top:96px}
+.opphead{font-weight:700;font-size:13px;color:var(--gtxt);margin:0 0 8px}
 .opppanel .tilebar{display:block;margin-top:0;max-height:calc(100vh - 150px);overflow-y:auto;overscroll-behavior:contain;padding-right:6px;scrollbar-width:thin}
-.opppanel .ctile{width:100%;min-width:0;margin-bottom:4px;flex-direction:row;align-items:baseline;gap:7px;padding:6px 10px;white-space:nowrap}
+.opppanel .ctile{width:100%;min-width:0;margin-bottom:2px;flex-direction:row;align-items:baseline;gap:6px;padding:4px 8px;white-space:nowrap}
 .opppanel .ctile b{flex:0 1 auto;overflow:hidden;text-overflow:ellipsis}
 .opppanel .ctile .act{align-self:baseline}
+.opppanel .ctile .efchip{padding:1px 6px;font-size:10px}
 .opppanel .ctile small{margin-left:auto;flex:none}
-.oppcat{font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gmut);margin:12px 0 6px}
-.oppcat:first-child{margin-top:0}
+.oppdate{display:flex;align-items:baseline;gap:6px;font-size:11.5px;font-weight:700;color:var(--gtxt);cursor:pointer;padding:4px 7px;margin:0 0 2px;border-radius:6px;background:rgba(255,255,255,.04);white-space:nowrap}
+.oppdate:hover{background:rgba(255,255,255,.09)}
+.oppdate.tdy{color:var(--acc)}
+.oppdate .car{flex:none;font-size:9px;color:var(--gmut)}
+.oppdate small{margin-left:auto;color:var(--gmut)}
+.oppcatrow{display:flex;align-items:baseline;gap:5px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gmut);cursor:pointer;padding:3px 7px 2px;margin:2px 0 2px 8px;border-radius:5px;white-space:nowrap}
+.oppcatrow:hover{color:var(--gtxt);background:rgba(255,255,255,.05)}
+.oppcatrow .car{flex:none;font-size:8px}
+.oppcatrow small{margin-left:auto;font-weight:600}
+.opprow{display:flex;align-items:baseline;gap:6px;font-size:12px;color:var(--mut);padding:2px 8px;margin:0 0 1px 14px;white-space:nowrap}
+.opprow b{flex:0 1 auto;min-width:0;font-weight:600;color:var(--gtxt);overflow:hidden;text-overflow:ellipsis}
+.opprow .act{flex:none;padding:0;font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--gmut)}
+.opprow .act.buy{color:var(--green)}
+.opprow .act.sell{color:var(--red)}
+.opprow .act.hold{color:var(--amber)}
+.opprow small{margin-left:auto;flex:none;color:var(--gmut);font-size:10px}
+.oppempty{font-size:11px;color:var(--gmut);margin-top:8px}
 .anamain{flex:1 1 320px;min-width:280px;padding-left:16px}
 .anamain .callnote{margin-top:12px}
 .cfaboard .tilebar{flex:2 1 320px;margin-top:0}
@@ -973,7 +989,7 @@ body.mode-desk #srctable table{min-width:0}
       </ul>
 
       <h3>The Analysts tab</h3>
-      <p>The <b>📈 Analysts</b> tab runs the <b>Trading Analyst Pipeline</b> for today's date: the <b>Market Scanner</b> pulls the day's analyst calls, the <b>CFA Analyst Desk</b> turns them into trade recommendations (market-native action verbs, ENTER / NO ENTRY decisions, confidence, position size and risk/reward in dollars on a $100k book), the <b>Debating Researchers</b> argue every idea for and against, and the <b>Investment Manager</b> makes her trade choice. The board shows her choice and her point-form <b>Research Report</b> — concise bullets of statistical indicators and precise qualitative statements, with key figures bolded and important dates and trading terms highlighted — press <b>Hear her take</b> to hear it spoken in her voice — tap it again to pause the take (the badge flips to a pause button while it plays), and once more to resume where it left off — plus a tile per CFA recommendation; pressing a tile loads that idea's for/against arguments. At the top of the tab there are two ways to run the desk: <b>Analysts Call</b> produces today's full call — its scout leads with the <b>forward 10-day catalyst calendar</b> (earnings, auctions, CPI/Fed prints, contracts resolving and sports inside the window, every date verified three ways: in-window, weekday-matched and source-confirmed) and treats today's street research as the secondary source, and any idea that fails price validation is dropped from the board before the show is written — and next to it the <b>📋 Ledger</b> button copies log-ready entries for the whole board in the daily scan's exact ledger format (one block per idea: analyst call, entry decision, confidence, edge, size, risk/reward, 10-day horizon, status pending) for pasting into the append-only opportunities log. The call can also run itself: under <b>Daily auto-call</b> in the Settings tab, pick <b>Prompt</b> (a banner offers today's call when you open the app) or <b>Auto</b> (today's call runs on open — prices are verified at run time, so the desk works when you open it; one auto attempt per day). Next to it the <b>Analyze</b> form runs the same research machinery on a single opportunity of your choosing — type the opportunity (e.g. <b>NVDA into earnings</b>), pick its scan category from the dropdown, and use the <b>🌍 Context</b> button next to it to select the country the symbol trades in — the desk then researches, argues and judges the idea in that country's market context: native exchange and currency, regulator and central bank, national data sources and macro drivers. Before the desk runs, the submitted symbol is also resolved against a live market-data feed (Yahoo Finance quotes through a public reader proxy — international exchange suffixes like <b>.AX</b>, <b>.TO</b>, <b>.L</b>, <b>.T</b> supported): the resolved live quote is handed to the desk as the verified price, and an UNCONFIRMED price on the final call is replaced with the live quote (an unresolvable symbol simply skips the quote — the run is unaffected). On <b>Auto</b> it infers the country from the exchange suffix (<b>.TO</b>, <b>.L</b>, <b>.T</b>…) or market keywords (TSX, FTSE, Nikkei…), defaulting to the United States; press <b>Analyze</b>, and the CFA desk researches it, the Debating Researchers argue it for and against, the Investment Manager delivers her verdict (with the same price validation as the daily call), and the result is displayed in the same call-panel format — execution strip, choice badge, research report, expert verdict and chart. While the desk is working, the <b>Analyze</b> button shows a spinner; if the run fails it turns into an <b>exclamation mark</b> — press it to retry. Every call panel opens with that idea's <b>exact trade execution details</b> at the top — entry decision, position size, risk/reward (target, stop, max loss, reward:risk) and confidence. Prices are validated end to end: every idea must carry a <b>freshly verified as-of price</b> (the desk is forbidden from quoting prices from analyst notes, price targets or older research as current), the manager re-verifies each price before deciding, and a built-in <b>price check</b> flags any idea that ships without a verified quote, whose as-of price is dated, or whose target or stop sits on the wrong side of the live price — flagged prices show an amber warning in the call panel and the production log. The Showrunner then turns the meeting into a playable episode, with the MANAGER speaking in her own distinct voice. When your <b>Experts</b> roster holds an expert whose domain fits the day's board, an <b>interactive guest</b> joins the show: the pipeline picks the best-matched roster expert, and in the show's outlook the <b>EXPERT</b> weighs the manager's call in first person — stating their position (agree, disagree, or agree with reservations) with dated, proven reasons drawn from their recorded knowledge and fresh searches, pushing back on the weakest link, and putting one sharp question to the desk, which the manager answers live. The Analysts board shows their verdict as a point right beside her call — <b>AGREE</b>, <b>DISAGREE</b> or <b>AGREE WITH RESERVATIONS</b>, with their stated reason. The guest speaks in their own distinct voice — pick it under <b>Expert guest voice</b> in Settings (Studio voices), or it auto-pairs; with browser voices it gets its own pitch. The <b>Investment Manager keeps asking the CFA desk for more ideas until her book holds 5 recommendations at 80%+ confidence in each of the four daily-scan categories</b> — STOCKS, PREDICTIONS, BONDS, OTHER — so expect several desk rounds before the show is written. Her re-asks are capped by a <b>desk clock</b>, a time limit you can configure in the <b>Settings</b> tab (default 5 minutes): when the clock runs out she produces the show with whatever high-conviction ideas the desk has delivered so far, and the log keeps her running tally per category. Stock ideas show a live daily candle chart (with technicals) sourced from <b>Finviz</b> beside the desk write-up — press a tile to see it, and pressing the chart opens its live data-source page in a new tab (the Finviz quote page for stocks, the FRED series page for bond yields). Every category has its own contextual data panel: bond ideas map to the matching yield series on <b>FRED</b> (the St. Louis Fed) — treasuries, TIPS real yields, high-yield credit spreads; prediction-market ideas link to the live contract on <b>Polymarket</b> and <b>Kalshi</b>; sports and odds ideas link to current lines across books. If a chart source fails or is blocked, the panel tries its backup source (Finviz's new chart CDN, then its legacy endpoint; FRED with a rolling 1-year window, then the default range) and then links straight to the live chart — Finviz and Yahoo Finance for stocks, FRED for yields — so a failed image never leaves a blank panel. In the Episode tab, the daily call displays as a <b>live indicator board</b> instead of the raw script: one minimal card per idea, grouped by the four categories, showing the quantitative indicators (entry decision, position size, risk/reward, confidence) and the qualitative ones (the desk's case, the researchers' best for and against arguments). As the manager reads the script and discusses each opportunity, that idea's card lights up and the indicators she is talking about highlight; toggle back to the raw script with the <b>Show script</b> button — the script is always saved with the episode. From research to verdict, the desk agents apply an <b>advanced analytics toolkit</b>: separating prediction from causation, Double/Debiased-ML-style confounder reasoning, causal-forest thinking about which sub-groups an effect concentrates in, agent-based simulation of emergent system behavior (bank runs, market failures, supply-chain disruptions beyond DSGE-style equilibrium), market-design analysis for pricing claims, and data-harmonization checks on messy or digitized series.</p>
+      <p>The <b>📈 Analysts</b> tab runs the <b>Trading Analyst Pipeline</b> for today's date: the <b>Market Scanner</b> pulls the day's analyst calls, the <b>CFA Analyst Desk</b> turns them into trade recommendations (market-native action verbs, ENTER / NO ENTRY decisions, confidence, position size and risk/reward in dollars on a $100k book), the <b>Debating Researchers</b> argue every idea for and against, and the <b>Investment Manager</b> makes her trade choice. The board shows her choice and her point-form <b>Research Report</b> — concise bullets of statistical indicators and precise qualitative statements, with key figures bolded and important dates and trading terms highlighted — press <b>Hear her take</b> to hear it spoken in her voice — tap it again to pause the take (the badge flips to a pause button while it plays), and once more to resume where it left off — plus a tile per CFA recommendation; pressing a tile loads that idea's for/against arguments. The <b>Opportunities</b> side panel files every daily call under its date — the loaded call stays expanded for working the board, and past calls (synced while signed in) expand by date, then by category, to their opportunities. At the top of the tab there are two ways to run the desk: <b>Analysts Call</b> produces today's full call — its scout leads with the <b>forward 10-day catalyst calendar</b> (earnings, auctions, CPI/Fed prints, contracts resolving and sports inside the window, every date verified three ways: in-window, weekday-matched and source-confirmed) and treats today's street research as the secondary source, and any idea that fails price validation is dropped from the board before the show is written — and next to it the <b>📋 Ledger</b> button copies log-ready entries for the whole board in the daily scan's exact ledger format (one block per idea: analyst call, entry decision, confidence, edge, size, risk/reward, 10-day horizon, status pending) for pasting into the append-only opportunities log. The call can also run itself: under <b>Daily auto-call</b> in the Settings tab, pick <b>Prompt</b> (a banner offers today's call when you open the app) or <b>Auto</b> (today's call runs on open — prices are verified at run time, so the desk works when you open it; one auto attempt per day). Next to it the <b>Analyze</b> form runs the same research machinery on a single opportunity of your choosing — type the opportunity (e.g. <b>NVDA into earnings</b>), pick its scan category from the dropdown, and use the <b>🌍 Context</b> button next to it to select the country the symbol trades in — the desk then researches, argues and judges the idea in that country's market context: native exchange and currency, regulator and central bank, national data sources and macro drivers. Before the desk runs, the submitted symbol is also resolved against a live market-data feed (Yahoo Finance quotes through a public reader proxy — international exchange suffixes like <b>.AX</b>, <b>.TO</b>, <b>.L</b>, <b>.T</b> supported): the resolved live quote is handed to the desk as the verified price, and an UNCONFIRMED price on the final call is replaced with the live quote (an unresolvable symbol simply skips the quote — the run is unaffected). On <b>Auto</b> it infers the country from the exchange suffix (<b>.TO</b>, <b>.L</b>, <b>.T</b>…) or market keywords (TSX, FTSE, Nikkei…), defaulting to the United States; press <b>Analyze</b>, and the CFA desk researches it, the Debating Researchers argue it for and against, the Investment Manager delivers her verdict (with the same price validation as the daily call), and the result is displayed in the same call-panel format — execution strip, choice badge, research report, expert verdict and chart. While the desk is working, the <b>Analyze</b> button shows a spinner; if the run fails it turns into an <b>exclamation mark</b> — press it to retry. Every call panel opens with that idea's <b>exact trade execution details</b> at the top — entry decision, position size, risk/reward (target, stop, max loss, reward:risk) and confidence. Prices are validated end to end: every idea must carry a <b>freshly verified as-of price</b> (the desk is forbidden from quoting prices from analyst notes, price targets or older research as current), the manager re-verifies each price before deciding, and a built-in <b>price check</b> flags any idea that ships without a verified quote, whose as-of price is dated, or whose target or stop sits on the wrong side of the live price — flagged prices show an amber warning in the call panel and the production log. The Showrunner then turns the meeting into a playable episode, with the MANAGER speaking in her own distinct voice. When your <b>Experts</b> roster holds an expert whose domain fits the day's board, an <b>interactive guest</b> joins the show: the pipeline picks the best-matched roster expert, and in the show's outlook the <b>EXPERT</b> weighs the manager's call in first person — stating their position (agree, disagree, or agree with reservations) with dated, proven reasons drawn from their recorded knowledge and fresh searches, pushing back on the weakest link, and putting one sharp question to the desk, which the manager answers live. The Analysts board shows their verdict as a point right beside her call — <b>AGREE</b>, <b>DISAGREE</b> or <b>AGREE WITH RESERVATIONS</b>, with their stated reason. The guest speaks in their own distinct voice — pick it under <b>Expert guest voice</b> in Settings (Studio voices), or it auto-pairs; with browser voices it gets its own pitch. The <b>Investment Manager keeps asking the CFA desk for more ideas until her book holds 5 recommendations at 80%+ confidence in each of the four daily-scan categories</b> — STOCKS, PREDICTIONS, BONDS, OTHER — so expect several desk rounds before the show is written. Her re-asks are capped by a <b>desk clock</b>, a time limit you can configure in the <b>Settings</b> tab (default 5 minutes): when the clock runs out she produces the show with whatever high-conviction ideas the desk has delivered so far, and the log keeps her running tally per category. Stock ideas show a live daily candle chart (with technicals) sourced from <b>Finviz</b> beside the desk write-up — press a tile to see it, and pressing the chart opens its live data-source page in a new tab (the Finviz quote page for stocks, the FRED series page for bond yields). Every category has its own contextual data panel: bond ideas map to the matching yield series on <b>FRED</b> (the St. Louis Fed) — treasuries, TIPS real yields, high-yield credit spreads; prediction-market ideas link to the live contract on <b>Polymarket</b> and <b>Kalshi</b>; sports and odds ideas link to current lines across books. If a chart source fails or is blocked, the panel tries its backup source (Finviz's new chart CDN, then its legacy endpoint; FRED with a rolling 1-year window, then the default range) and then links straight to the live chart — Finviz and Yahoo Finance for stocks, FRED for yields — so a failed image never leaves a blank panel. In the Episode tab, the daily call displays as a <b>live indicator board</b> instead of the raw script: one minimal card per idea, grouped by the four categories, showing the quantitative indicators (entry decision, position size, risk/reward, confidence) and the qualitative ones (the desk's case, the researchers' best for and against arguments). As the manager reads the script and discusses each opportunity, that idea's card lights up and the indicators she is talking about highlight; toggle back to the raw script with the <b>Show script</b> button — the script is always saved with the episode. From research to verdict, the desk agents apply an <b>advanced analytics toolkit</b>: separating prediction from causation, Double/Debiased-ML-style confounder reasoning, causal-forest thinking about which sub-groups an effect concentrates in, agent-based simulation of emergent system behavior (bank runs, market failures, supply-chain disruptions beyond DSGE-style equilibrium), market-design analysis for pricing claims, and data-harmonization checks on messy or digitized series.</p>
 
       <h3>The Monitor tab</h3>
       <p>The <b>📊 Monitor</b> tab tracks everything your latest episode claimed. Pick an entry from the <b>watchlist dropdown</b> — the <b>trading opportunities</b> from the analyst board (grouped into their trading categories: STOCKS / PREDICTIONS / BONDS / OTHER) alongside <b>Topics</b>, one entry per episode segment listed by its whole topic name; re-checked entries carry a status marker (✓ / ↻ / ✖). The right panel shows, top to bottom: the <b>verdict or point</b> (the call with its action badge and thesis tag, or the segment's point), the <b>quantitative proof</b> (entry, size, risk/reward, confidence — or the dated sources behind a topic), the <b>qualitative proof</b> (the case, for/against arguments, or the segment script), and a <b>still-valid check</b>. Press <b>Re-check with live search</b> and the <b>Monitor Analyst</b> agent searches the live web for what has changed since the episode was produced, then rules the item <b>STILL VALID</b>, <b>SHOULD CHANGE</b>, or <b>EVOLVED</b> — with a severity grade on the change impact: <b>HIGH</b> means the direction flipped (a buy is now a sell — requires immediate attention), <b>MEDIUM</b> means the call stands but entry, size or timing must change, <b>LOW</b> means minor nuance. The Monitor Analyst weighs the evidence with the same <b>advanced analytics toolkit</b> as the desk — causal vs. predictive claims, heterogeneous effects, emergent-behavior simulation, and data-quality checks — before ruling. Re-checks are saved with the episode, and any sources the Monitor Analyst finds are added to the Sources &amp; Dates registry. Producing a new episode starts a fresh watchlist.</p>
@@ -2907,6 +2923,115 @@ function actionLabel(action, category) {
   return kind === "buy" ? "BUY" : "SELL";
 }
 
+/* opportunities tree (round 25) — the Analysts side panel files every daily call under its
+   date; each date expands to its categories, each category to its opportunities. The loaded
+   call stays open for working the board (its tiles select calls and carry the entropic
+   chip); past calls come from the cloud opportunities collection, pulled lazily here and
+   on sync passes, rendered as compact history rows. */
+var OPPTREE = { items: null, err: "", last: 0, busy: false, open: {} };
+function oppTreeDue() { return !OPPTREE.items || (Date.now() - OPPTREE.last > 120000); }
+function oppTreeIsOpen(k, def) { var v = OPPTREE.open[k]; return v === undefined ? !!def : v; }
+function oppTreeToggle(k, def) { OPPTREE.open[k] = !oppTreeIsOpen(k, def); renderOppSide(); }
+function oppSelIdx(d) {
+  var choice = (d.manager.choice || "").toLowerCase();
+  var mgrPick = -1;
+  d.calls.forEach(function (c, i) {
+    if (mgrPick < 0 && c.asset && choice.indexOf(c.asset.toLowerCase()) >= 0) mgrPick = i;
+  });
+  var sel = (S.analystsSel >= 0 && S.analystsSel < d.calls.length) ? S.analystsSel : (mgrPick >= 0 ? mgrPick : 0);
+  return { sel: sel, choice: choice };
+}
+function oppDateRow(date, n, tdy, defOpen) {
+  var open = oppTreeIsOpen("d:" + date, defOpen);
+  return '<div class="oppdate' + (tdy ? " tdy" : "") + '" onclick="oppTreeToggle(\'d:' + date + '\',' + (defOpen ? " true" : " false") + ')">' +
+    '<span class="car">' + (open ? "▾" : "▸") + "</span><span>📅 " + esc(date || "Current call") +
+    "</span><small>" + n + "</small></div>";
+}
+function oppCatRow(key, cat, n, defOpen) {
+  var open = oppTreeIsOpen(key, defOpen);
+  return '<div class="oppcatrow" onclick="oppTreeToggle(\'' + key + '\',' + (defOpen ? " true" : " false") + ')">' +
+    '<span class="car">' + (open ? "▾" : "▸") + "</span><span>" + esc(cat) + "</span><small>" + n + "</small></div>";
+}
+function oppBoardCats(d, choice, sel, curDate) {
+  if (!oppTreeIsOpen("d:" + curDate, true)) return "";
+  var html = "";
+  CALL_CATEGORIES.forEach(function (cat) {
+    var idxs = [];
+    d.calls.forEach(function (c, i) { if (c.category === cat) idxs.push(i); });
+    if (!idxs.length) return;
+    var key = "c:" + curDate + "|" + cat;
+    html += oppCatRow(key, cat, idxs.length, true);
+    if (!oppTreeIsOpen(key, true)) return;
+    idxs.forEach(function (i) {
+      var c = d.calls[i];
+      var crown = (c.asset && choice.indexOf(c.asset.toLowerCase()) >= 0) ? "👑 " : "";
+      html += '<button class="ctile' + (i === sel ? " on" : "") + '" style="margin-left:10px;width:calc(100% - 10px)" onclick="selectCall(' + i + ')">' +
+        "<b>" + crown + esc(c.asset || "Idea " + (i + 1)) + "</b>" +
+        (c.action ? '<span class="act ' + callActionClass(actionLabel(c.action, c.category)) + '">' + esc(actionLabel(c.action, c.category)) + "</span>" : "") +
+        "<small>" + esc(c.confidence || "") + "</small>" +
+        entropicChip(c) +
+        "</button>";
+    });
+  });
+  return html;
+}
+function oppCloudRow(it) {
+  var lbl = actionLabel(it.action || "", it.cat);
+  return '<div class="opprow"><b>' + esc(it.title || "Idea") + "</b>" +
+    (it.action ? '<span class="act ' + callActionClass(lbl) + '">' + esc(lbl) + "</span>" : "") +
+    "<small>" + esc(it.conf || "") + "</small></div>";
+}
+function renderOppSide() {
+  var bar = el("cfatiles");
+  if (!bar) return;
+  var ep = S.ep;
+  if (!(ep && ep.style === "analysts" && ep.analysts && ep.analysts.calls && ep.analysts.calls.length)) { bar.innerHTML = ""; return; }
+  var d = ep.analysts;
+  var pick = oppSelIdx(d);
+  var curDate = String(ep.created || "").slice(0, 10) || "Current call";
+  var groups = {}, order = [];
+  (OPPTREE.items || []).forEach(function (it) {
+    if (!it || it.epId === ep.id) return; /* the loaded call shows as its own board above */
+    var dt = String(it.created || "").slice(0, 10);
+    if (!dt) return;
+    if (!groups[dt]) { groups[dt] = []; order.push(dt); }
+    groups[dt].push(it);
+  });
+  order.sort().reverse();
+  var html = oppDateRow(curDate, d.calls.length, true, true);
+  html += oppBoardCats(d, pick.choice, pick.sel, curDate);
+  order.forEach(function (dt) {
+    html += oppDateRow(dt, groups[dt].length, false, false);
+    if (!oppTreeIsOpen("d:" + dt, false)) return;
+    CALL_CATEGORIES.forEach(function (cat) {
+      var rows = groups[dt].filter(function (it) { return (it.cat || "OTHER") === cat; });
+      if (!rows.length) return;
+      var key = "c:" + dt + "|" + cat;
+      html += oppCatRow(key, cat, rows.length, false);
+      if (!oppTreeIsOpen(key, false)) return;
+      rows.forEach(function (it) { html += oppCloudRow(it); });
+    });
+  });
+  if (OPPTREE.err) html += '<div class="oppempty">⚠️ Cloud history failed to load: ' + esc(OPPTREE.err) + "</div>";
+  else if (!cloudEnabled() && !order.length) html += '<div class="oppempty">Sign in to file your past daily calls here.</div>';
+  var keepScroll = bar.scrollTop;
+  bar.innerHTML = html;
+  bar.scrollTop = keepScroll;
+}
+async function oppTreePull() {
+  if (!cloudEnabled() || OPPTREE.busy) return;
+  OPPTREE.busy = true;
+  try {
+    var fs = FB.mod.fs;
+    var q = fs.query(fs.collection(FB.db, "opportunities"), fs.where("userId", "==", S.cloudUser.uid));
+    var snap = await fs.getDocs(q);
+    OPPTREE.items = snap.docs.map(function (dd) { return resDocItem(dd.id, dd.data() || {}); });
+    OPPTREE.err = "";
+  } catch (e) { OPPTREE.err = cloudErrMsg(e); }
+  OPPTREE.last = Date.now();
+  OPPTREE.busy = false;
+  try { renderOppSide(); } catch (e2) {}
+}
 function renderAnalysts() {
   var board = el("analysts-board"), empty = el("analysts-empty");
   if (!board || !empty) return;
@@ -2915,35 +3040,11 @@ function renderAnalysts() {
   board.style.display = ok ? "block" : "none";
   empty.style.display = ok ? "none" : "block";
   if (!ok) return;
-  var d = ep.analysts;
-  var choice = (d.manager.choice || "").toLowerCase();
-  var mgrPick = -1;
-  d.calls.forEach(function (c, i) {
-    if (mgrPick < 0 && c.asset && choice.indexOf(c.asset.toLowerCase()) >= 0) mgrPick = i;
-  });
-  var sel = (S.analystsSel >= 0 && S.analystsSel < d.calls.length) ? S.analystsSel : (mgrPick >= 0 ? mgrPick : 0);
-  var html = "";
-  CALL_CATEGORIES.forEach(function (cat) {
-    var idxs = [];
-    d.calls.forEach(function (c, i) { if (c.category === cat) idxs.push(i); });
-    if (!idxs.length) return;
-    html += '<div class="oppcat">' + esc(cat) + "</div>";
-    idxs.forEach(function (i) {
-      var c = d.calls[i];
-      var crown = (c.asset && choice.indexOf(c.asset.toLowerCase()) >= 0) ? "\uD83D\uDC51 " : "";
-      html += '<button class="ctile' + (i === sel ? " on" : "") + '" onclick="selectCall(' + i + ')">' +
-        "<b>" + crown + esc(c.asset || "Idea " + (i + 1)) + "</b>" +
-        (c.action ? '<span class="act ' + callActionClass(actionLabel(c.action, c.category)) + '">' + esc(actionLabel(c.action, c.category)) + "</span>" : "") +
-        "<small>" + esc(c.confidence || "") + "</small>" +
-        entropicChip(c) +
-        "</button>";
-    });
-  });
-  var bar = el("cfatiles"), keepScroll = bar.scrollTop;
-  bar.innerHTML = html;
-  bar.scrollTop = keepScroll;
-  S.analystsSel = sel;
-  renderCall(sel);
+  var pick = oppSelIdx(ep.analysts);
+  S.analystsSel = pick.sel;
+  renderOppSide();
+  renderCall(pick.sel);
+  if (cloudEnabled() && oppTreeDue()) { try { oppTreePull(); } catch (e) {} }
 }
 
 /* is this call the one the manager named as her trade choice? */
@@ -8308,6 +8409,9 @@ async function cloudSyncAll(reason) {
     /* round 24: follow the current-episode pointer — devices converge on the episode you
        opened last, and a device with no episode opens the newest one by itself */
     try { await cloudFollowEpisode(); } catch (e6) {}
+    /* round 25: keep the Opportunities tree's history fresh — past calls' opportunities
+       pull at most every 2 minutes while sync passes run */
+    if (oppTreeDue()) { try { await oppTreePull(); } catch (e7) {} }
     SYNC.last = Date.now();
     if (reason === "signin" || pulled || pushed || news) {
       var bits = [];
