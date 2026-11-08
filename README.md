@@ -129,6 +129,17 @@ device that signs in with an empty base pulls the cloud copy automatically — s
 base travels between phone and PC. The coverage line shows the last sync time, and the base
 still lives in local storage, so nothing is lost offline.
 
+Round 18 adds the evolution dashboard. The **📈 Evolution** card on the Knowledge tab plots,
+per lens, the full weight history — long-trust (×wl) and short-trust (×ws) as lines over time
+against the neutral 1.0 baseline — next to a bar strip of the P&L of every resolved decision
+the lens shaped (hover a bar for its date and %). Attribution mirrors the weight updater
+exactly: only buy/sell decisions, only lenses that held a real view (|d| ≥ 0.05), voids never
+count. Under each chart: resolved counts and win rate, average win/loss, total P&L, and the
+split that matters — the win rate when the lens was *aligned* with the trade versus when it
+*dissented* (warned against the side taken) — so you can see whether a lens's trust is
+actually earned. A ledger strip on top summarizes every resolved decision, and a lens only
+counts as "trusted" once it holds 5+ outcomes, exactly as the desk does.
+
 ## Forecast Lab
 
 The standalone **Entropic Forecast Lab** lives at

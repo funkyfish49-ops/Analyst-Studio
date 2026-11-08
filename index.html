@@ -834,6 +834,11 @@ body.mode-desk #srctable table{min-width:0}
         <button class="btn ghost small" onclick="kbuiSyncKb()">☁️ Sync KB</button>
       </div>
     </div>
+    <div class="card">
+      <h2>📈 Evolution</h2>
+      <div class="hint">How each lens's long-trust (×wl, green) and short-trust (×ws, amber) weights moved as resolved outcomes landed, against the P&amp;L of the decisions the lens shaped — bars up/down per resolved decision, hover one for its date and %. A lens only enters desk prompts once trusted at 5+ outcomes.</div>
+      <div id="kb-evomap"></div>
+    </div>
   </section>
 
   <!-- ============ ECONOMICS ============ -->
@@ -966,7 +971,7 @@ body.mode-desk #srctable table{min-width:0}
       <p>The <b>Settings</b> tab has a <b>☁️ Cloud sync</b> card: sign in with Google and every episode you produce — podcast or analyst call — is saved to your Firebase cloud library, together with one trackable document per board opportunity and per episode topic. The <b>Monitor</b> tab doubles as your track record: each re-check appends to that item's cloud history, and the <b>🏆 Track record</b> row lets you resolve any opportunity as <b>Won</b>, <b>Lost</b> or <b>Void</b> — or reopen it — with the outcome saved with the episode and synced to the cloud. Press <b>Load cloud library</b> in Settings to bring any past episode back onto this device with its full watchlist and track record intact. Everything works offline too: without sign-in (or without a connection) the app runs entirely on this browser's local storage.</p>
 
       <h3>🧠 The Knowledge tab</h3>
-      <p>The <b>🧠 Knowledge</b> tab is the desk's living knowledge base. Every card is one established fact or theme with <b>claims</b> (each with a 0-100 confidence and an optional basis), <b>dated sources</b>, <b>link keys</b>, and a place in a category facet rubric — six evolving categories (Market, Economic, Industry, Social media, Stock-specific, Other), each with its own rubric of facets that make depth measurable. Cards are versioned: every commit, edit, verification or retirement lands in a per-card <b>version timeline</b>. Freshness is policy-driven — each card declares its own <b>re-verify window</b>, and cards past it go <b>stale</b>, then <b>overdue</b>, surfacing in the <b>🧐 Review queue</b> where you can mark them verified, revise or retire them in one click. The <b>🗺️ Coverage &amp; depth</b> map shows how many cards cover each facet per category (with their average claim confidence), a bar per category, and how far each lens is <b>trusted</b>: once a category accumulates 5 resolved outcomes, its learned reliability weights (long / short) start showing beside it — below that it is still learning. Use <b>＋ New card</b> to add knowledge manually, or expand a card and press <b>✎ Edit</b> — the editor takes claims one per line in the form <b>text | confidence | basis</b> and sources as <b>url | date</b>. The desk is wired to this base: while forming calls the desk and manager read the established cards and the earned lens-reliability weights (a lens activates at <b>5 resolved outcomes</b>), the manager records which lenses moved each call in the CALL DATA, those vectors are frozen into decisions at board freeze, and every <b>Won / Lost</b> resolution feeds the lens weights automatically — voids, expiries and re-resolutions never double-count. The <b>📡 Sources &amp; digestion</b> card feeds the base: add any URL as a one-time read or a repeatable feed, press <b>🍽️ Digest now</b> (or <b>🍽️ Digest due</b> for every pending source), and the research agent reads the source and proposes new cards, claims to add to existing cards, and contradictions — the proposals wait in the review queue, where you save, apply or edit them one by one. Cards, decisions, weights and sources sync through your private Firebase cloud: press <b>☁️ Sync KB</b> in the Coverage card to push and pull the whole base between phone and PC, and while you are signed in every knowledge write also syncs automatically a few seconds later. Everything also stays stored locally on this device.</p>
+      <p>The <b>🧠 Knowledge</b> tab is the desk's living knowledge base. Every card is one established fact or theme with <b>claims</b> (each with a 0-100 confidence and an optional basis), <b>dated sources</b>, <b>link keys</b>, and a place in a category facet rubric — six evolving categories (Market, Economic, Industry, Social media, Stock-specific, Other), each with its own rubric of facets that make depth measurable. Cards are versioned: every commit, edit, verification or retirement lands in a per-card <b>version timeline</b>. Freshness is policy-driven — each card declares its own <b>re-verify window</b>, and cards past it go <b>stale</b>, then <b>overdue</b>, surfacing in the <b>🧐 Review queue</b> where you can mark them verified, revise or retire them in one click. The <b>🗺️ Coverage &amp; depth</b> map shows how many cards cover each facet per category (with their average claim confidence), a bar per category, and how far each lens is <b>trusted</b>: once a category accumulates 5 resolved outcomes, its learned reliability weights (long / short) start showing beside it — below that it is still learning. Use <b>＋ New card</b> to add knowledge manually, or expand a card and press <b>✎ Edit</b> — the editor takes claims one per line in the form <b>text | confidence | basis</b> and sources as <b>url | date</b>. The desk is wired to this base: while forming calls the desk and manager read the established cards and the earned lens-reliability weights (a lens activates at <b>5 resolved outcomes</b>), the manager records which lenses moved each call in the CALL DATA, those vectors are frozen into decisions at board freeze, and every <b>Won / Lost</b> resolution feeds the lens weights automatically — voids, expiries and re-resolutions never double-count. The <b>📡 Sources &amp; digestion</b> card feeds the base: add any URL as a one-time read or a repeatable feed, press <b>🍽️ Digest now</b> (or <b>🍽️ Digest due</b> for every pending source), and the research agent reads the source and proposes new cards, claims to add to existing cards, and contradictions — the proposals wait in the review queue, where you save, apply or edit them one by one. Cards, decisions, weights and sources sync through your private Firebase cloud: press <b>☁️ Sync KB</b> in the Coverage card to push and pull the whole base between phone and PC, and while you are signed in every knowledge write also syncs automatically a few seconds later. Everything also stays stored locally on this device. The 📈 Evolution card on the Knowledge tab plots each lens's weight history and the P&amp;L of the decisions it shaped, with aligned-versus-dissenting win rates showing whether a lens's trust is earned.</p>
 
       <h3>🌀 Entropic second opinion</h3>
       <p>Every BUY / SELL opportunity the desk produces is auto-scored by an embedded <b>causal-entropic engine</b> (F = T·∇Sτ, after Alex Wissner-Gross's work on intelligence as freedom-seeking): it simulates thousands of ten-day futures from the idea's <b>own board numbers</b> — conviction, reward:risk, position size — and asks whether committing to the trade preserves more of the desk's future freedom of action than staying in cash. The board tiles, indicator cards and Monitor panels show the resulting <b>🌀 F chip</b> (green = the trade keeps more future options open, red = it forecloses them), and every opportunity carries a <b>🌀 Entropic deep-dive</b> — its regime priors, expected value, ∇Sτ and impairment probability, with editable priors you can re-score against your own view. PREDICTIONS and OTHER ideas are proxy-scored as price paths, so treat those F values as rougher. Treat the score as a <b>second opinion</b> beside the desk's expected value, never a replacement for analyst judgment: walk-forward backtests of this engine show entropic scores can be anti-predictive on some structures — which is exactly why the app surfaces the raw F instead of hiding it. When cloud sync is on, each opportunity's entropic score is stored in your cloud track record alongside its outcome, so over time you can see whether high-F calls really did keep more options open.</p>
@@ -7244,6 +7249,7 @@ function renderKnowledge() {
   kbuiRenderReview(now);
   kbuiSrcRender();
   kbuiRenderCoverage();
+  kbvRender();
 }
 
 /* ============================== sources & digestion (round 16) ============================== */
@@ -7869,6 +7875,159 @@ function kbcOnSignIn() {
     logLine("☁️ Empty knowledge base on this device — pulling your cloud copy…");
     kbcPull(true);
   }
+}
+
+/* ============================== kb evolution dashboards (round 18) ============================== */
+/* The KB's user-visible evolution: per lens, the full weight time series (long-trust ×wl and
+   short-trust ×ws after each resolved outcome, read straight from the engine's capped hist) set
+   against the P&L of the decisions that lens shaped. Everything is read-only rendering over the
+   same data the weight updater wrote — no new storage, no new writes, no sync surface. Lens
+   attribution mirrors kbWApply exactly: only buy/sell decisions, only attrs with |d| >= 0.05,
+   voids never count, noenter never counts; "aligned" is the lens pointing the same way the
+   trade went, "dissenting" is the lens warning against the side taken — win-rate split between
+   the two shows whether a lens's trust is actually earned. */
+
+function kbvCollectDecs() {
+  var ix = KB.ix(), out = [];
+  for (var i = 0; i < ix.decs.length; i++) {
+    var d = KB.getDecision(ix.decs[i].id);
+    if (d) out.push(d);
+  }
+  return out;
+}
+
+function kbvWinRate(wins, n) { return n ? Math.round(100 * wins / n) + "%" : "—"; }
+function kbvPct(x) { return (x >= 0 ? "+" : "") + (Math.round(x * 10) / 10) + "%"; }
+
+/* ledger-wide summary: every resolved buy/sell decision, any outcome */
+function kbvOverall(decs) {
+  var o = { resolved: 0, wins: 0, losses: 0, voids: 0, sumPct: 0 };
+  for (var i = 0; i < decs.length; i++) {
+    var d = decs[i], oc = d.outcome;
+    if (!oc || (d.action !== "buy" && d.action !== "sell")) continue;
+    o.resolved++;
+    if (oc.res === "win") { o.wins++; o.sumPct += (oc.pnlPct || 0); }
+    else if (oc.res === "loss") { o.losses++; o.sumPct += (oc.pnlPct || 0); }
+    else o.voids++;
+  }
+  return o;
+}
+
+/* per-lens stats with kbWApply's exact attribution rules */
+function kbvLensStats(decs, weights) {
+  var st = {};
+  for (var ci = 0; ci < KB.cats.length; ci++) st[KB.cats[ci]] = {
+    n: 0, wins: 0, losses: 0, voids: 0, sumPct: 0, sumWinPct: 0, sumLossPct: 0,
+    alignedN: 0, alignedWins: 0, dissentN: 0, dissentWins: 0, pnls: []
+  };
+  for (var i = 0; i < decs.length; i++) {
+    var d = decs[i], oc = d.outcome;
+    if (!oc || (d.action !== "buy" && d.action !== "sell")) continue;
+    var a = d.action === "buy" ? 1 : -1;
+    for (var c = 0; c < KB.cats.length; c++) {
+      var cat = KB.cats[c], at = d.attrs && d.attrs[cat];
+      if (!at || typeof at.d !== "number" || Math.abs(at.d) < 0.05) continue;
+      var s = st[cat];
+      s.n++;
+      if (oc.res === "void") { s.voids++; continue; }
+      if (at.d * a > 0) { s.alignedN++; if (oc.res === "win") s.alignedWins++; }
+      else { s.dissentN++; if (oc.res === "win") s.dissentWins++; }
+      if (oc.res === "win") { s.wins++; s.sumWinPct += (oc.pnlPct || 0); }
+      else if (oc.res === "loss") { s.losses++; s.sumLossPct += (oc.pnlPct || 0); }
+      if (oc.res === "win" || oc.res === "loss") { s.sumPct += (oc.pnlPct || 0); s.pnls.push({ at: oc.at || d.at || 0, pct: oc.pnlPct || 0 }); }
+    }
+  }
+  return st;
+}
+
+/* weight-history chart: fixed y range [0.5, 2] (the engine clamp bounds), x over time */
+function kbvSpark(hist) {
+  if (!hist || !hist.length) return "";
+  var H = 64, L = 8, R = 292, yTop = 6, yBot = 58;
+  var n = hist.length;
+  var span = hist[n - 1].at - hist[0].at;
+  var xAt = function (i) { return span > 0 ? L + (hist[i].at - hist[0].at) / span * (R - L) : (L + R) / 2; };
+  var yAt = function (v) { return Math.round((yTop + (2 - v) / 1.5 * (yBot - yTop)) * 10) / 10; };
+  var yMid = yAt(1);
+  var pts = function (key) {
+    var out = [];
+    for (var i = 0; i < n; i++) out.push(xAt(i).toFixed(1) + "," + yAt(hist[i][key]).toFixed(1));
+    return out.join(" ");
+  };
+  var svg = '<svg viewBox="0 0 300 ' + H + '" preserveAspectRatio="none" style="width:100%;height:64px;display:block;margin:6px 0 2px" role="img" aria-label="weight history">';
+  svg += '<line x1="' + L + '" y1="' + yMid + '" x2="' + R + '" y2="' + yMid + '" stroke="var(--dim)" stroke-width="1" stroke-dasharray="3,4" opacity=".5"></line>';
+  if (n === 1 || span <= 0) {
+    svg += '<circle cx="' + xAt(0).toFixed(1) + '" cy="' + yAt(hist[0].wl) + '" r="3" fill="var(--green)"></circle>';
+    svg += '<circle cx="' + xAt(0).toFixed(1) + '" cy="' + yAt(hist[0].ws) + '" r="3" fill="var(--amber)"></circle>';
+  } else {
+    svg += '<polyline points="' + pts("wl") + '" fill="none" stroke="var(--green)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>';
+    svg += '<polyline points="' + pts("ws") + '" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>';
+  }
+  svg += '<text x="298" y="' + Math.max(10, Math.min(H - 2, yAt(hist[n - 1].wl) - 6)) + '" text-anchor="end" font-size="9" fill="var(--green)">×' + hist[n - 1].wl.toFixed(2) + '</text>';
+  svg += '<text x="298" y="' + Math.max(10, Math.min(H - 2, yAt(hist[n - 1].ws) + 12)) + '" text-anchor="end" font-size="9" fill="var(--amber)">×' + hist[n - 1].ws.toFixed(2) + '</text>';
+  svg += '</svg>';
+  return svg;
+}
+
+/* P&L strip: one bar per resolved win/loss the lens shaped, |pct| capped at 20 for scale */
+function kbvPnlBars(pnls) {
+  if (!pnls || !pnls.length) return "";
+  var n = pnls.length, H = 48, base = 24, cap = 20;
+  var step = 284 / n;
+  var bw = Math.max(2, Math.min(10, step - 1));
+  var svg = '<svg viewBox="0 0 300 ' + H + '" preserveAspectRatio="none" style="width:100%;height:48px;display:block;margin:2px 0" role="img" aria-label="decision P&L">';
+  svg += '<line x1="8" y1="' + base + '" x2="292" y2="' + base + '" stroke="var(--dim)" stroke-width="1" opacity=".5"></line>';
+  for (var i = 0; i < n; i++) {
+    var p = pnls[i];
+    var h = Math.round(Math.min(cap, Math.abs(p.pct)) / cap * cap);
+    var x = 8 + i * step + Math.max(0, (step - bw) / 2);
+    var fill = p.pct >= 0 ? "var(--green)" : "var(--red)";
+    var y = p.pct >= 0 ? base - h : base;
+    var when = p.at ? new Date(p.at).toISOString().slice(0, 10) : "";
+    svg += '<rect x="' + x.toFixed(1) + '" y="' + y + '" width="' + bw.toFixed(1) + '" height="' + Math.max(1, h) + '" fill="' + fill + '" opacity=".85"><title>' + when + " · " + kbvPct(p.pct) + '</title></rect>';
+  }
+  svg += '</svg>';
+  return svg;
+}
+
+function kbvRender() {
+  var box = el("kb-evomap"); if (!box) return;
+  var decs = kbvCollectDecs();
+  var w = KB.wLoad();
+  var ov = kbvOverall(decs);
+  var st = kbvLensStats(decs, w);
+  var html = "";
+  if (!ov.resolved) html += '<div class="hint" style="margin:4px 0 2px">No resolved decisions in the ledger yet — lens weights start moving once positions close (won / lost / void).</div>';
+  else html += '<div class="indrow" style="margin:4px 0 2px"><span class="lbl">Ledger</span><span class="val"><b>' + ov.resolved + '</b> resolved · <span class="respos">' + ov.wins + ' won</span> · <span class="resneg">' + ov.losses + ' lost</span> · ' + ov.voids + ' void · win rate ' + kbvWinRate(ov.wins, ov.wins + ov.losses) + ' · P&amp;L ' + esc(kbvPct(ov.sumPct)) + '</span></div>';
+  var any = false;
+  for (var i = 0; i < KB.cats.length; i++) {
+    var cat = KB.cats[i], s = st[cat]; if (!s) continue;
+    var wc = w[cat] || { wl: 1, ws: 1, n: 0, wins: 0, hist: [] };
+    var hist = wc.hist || [];
+    if (!s.n && !hist.length) continue;
+    any = true;
+    var we = KB.wEffective(w, cat);
+    html += '<div class="resdet" style="margin-top:10px">';
+    html += '<div class="indrow"><span class="lbl">' + esc(KB.catLabels[cat] || cat) + '</span><span class="val">' +
+      (we.ready ? 'trusted · long ×' + we.wl.toFixed(2) + ' · short ×' + we.ws.toFixed(2) : 'learning · ' + (wc.n || 0) + '/' + KB_W.minN + ' outcomes') +
+      (s.n ? ' · shaped ' + s.n + ' decision' + (s.n > 1 ? 's' : '') : '') + '</span></div>';
+    var spark = kbvSpark(hist);
+    html += spark ? spark : '<div class="hint" style="margin:4px 0">No weight movement recorded yet.</div>';
+    if (s.n) {
+      html += '<div class="indrow"><span class="lbl">Resolved</span><span class="val">' + s.n + ' shaped · <span class="respos">' + s.wins + ' won</span> · <span class="resneg">' + s.losses + ' lost</span> · ' + s.voids + ' void · win rate ' + kbvWinRate(s.wins, s.wins + s.losses) + '</span></div>';
+      html += '<div class="indrow"><span class="lbl">P&amp;L</span><span class="val">' + esc(kbvPct(s.sumPct)) +
+        (s.wins ? ' · avg win ' + esc(kbvPct(s.sumWinPct / s.wins)) : '') +
+        (s.losses ? ' · avg loss ' + esc(kbvPct(s.sumLossPct / s.losses)) : '') + '</span></div>';
+      html += '<div class="indrow"><span class="lbl">Alignment</span><span class="val">aligned ' + kbvWinRate(s.alignedWins, s.alignedN) + ' (' + s.alignedWins + '/' + s.alignedN + ') · dissented ' + kbvWinRate(s.dissentWins, s.dissentN) + ' (' + s.dissentWins + '/' + s.dissentN + ')</span></div>';
+      var bars = kbvPnlBars(s.pnls);
+      if (bars) html += bars;
+    } else {
+      html += '<div class="hint" style="margin:4px 0">Weights have history but no resolved decision carried this lens with a real view (|d| ≥ 0.05) yet.</div>';
+    }
+    html += '</div>';
+  }
+  if (!any && ov.resolved) html += '<div class="hint" style="margin:8px 0 2px">No lens carried a strong enough view (|d| ≥ 0.05) in any resolved decision yet.</div>';
+  box.innerHTML = html;
 }
 
 function init() {
