@@ -903,7 +903,7 @@ body.mode-desk #srctable table{min-width:0}
     </div>
     <div class="card">
       <h2>💹 Market data key <span class="dim" style="font-weight:400;font-size:12px">(optional)</span></h2>
-      <div class="hint">A free <b>Alpha Vantage</b> key powers the <b>Global stocks &amp; commodities</b> tile in the <b>Economics</b> tab — S&amp;P 500, world &amp; emerging equities, gold, silver and oil via ETF quotes. Get a free key at <b>alphavantage.co/support/#api-key</b> (25 requests/day; one refresh uses 6, paced a few seconds apart to avoid rate-limiting). Stored only in this browser, sent only to <code>www.alphavantage.co</code>.</div>
+      <div class="hint">A free <b>Alpha Vantage</b> key powers the <b>Global stocks &amp; commodities</b> tile in the <b>Economics</b> tab — S&amp;P 500, world &amp; emerging equities, gold, silver and oil via ETF quotes. Get a free key at <b>alphavantage.co/support/#api-key</b> (25 requests/day; one refresh uses 6, paced a few seconds apart to avoid rate-limiting). Stored in this browser, sent only to <code>www.alphavantage.co</code> — and once you sign in with Google (Settings → ☁️ Cloud sync), the key syncs privately through your cloud profile: every device you sign into picks it up automatically. Clearing it here clears it on this device only.</div>
       <input type="text" id="avkey" placeholder="Alpha Vantage API key (optional — Economics tab)" style="width:100%;min-width:240px" oninput="saveAVKey()">
     </div>
     <div class="card">
@@ -976,7 +976,7 @@ body.mode-desk #srctable table{min-width:0}
       <h3>🌀 Entropic second opinion</h3>
       <p>Every BUY / SELL opportunity the desk produces is auto-scored by an embedded <b>causal-entropic engine</b> (F = T·∇Sτ, after Alex Wissner-Gross's work on intelligence as freedom-seeking): it simulates thousands of ten-day futures from the idea's <b>own board numbers</b> — conviction, reward:risk, position size — and asks whether committing to the trade preserves more of the desk's future freedom of action than staying in cash. The board tiles, indicator cards and Monitor panels show the resulting <b>🌀 F chip</b> (green = the trade keeps more future options open, red = it forecloses them), and every opportunity carries a <b>🌀 Entropic deep-dive</b> — its regime priors, expected value, ∇Sτ and impairment probability, with editable priors you can re-score against your own view. PREDICTIONS and OTHER ideas are proxy-scored as price paths, so treat those F values as rougher. Treat the score as a <b>second opinion</b> beside the desk's expected value, never a replacement for analyst judgment: walk-forward backtests of this engine show entropic scores can be anti-predictive on some structures — which is exactly why the app surfaces the raw F instead of hiding it. When cloud sync is on, each opportunity's entropic score is stored in your cloud track record alongside its outcome, so over time you can see whether high-F calls really did keep more options open.</p>
 
-      <p>The <b>📊 Economics</b> tab is a live dashboard of economic indicators built from <b>free, keyless official APIs</b> (Trading Economics has no free API — its guest access was discontinued — so the app uses open sources instead): the <b>US Treasury</b> daily par yield curve (3-month bill through 30-year bond, plus the 2s–10s and 3M–10Y spreads, updated every business day), <b>BLS</b> labour market and inflation releases (unemployment, nonfarm payrolls, participation, average hourly earnings, CPI, core CPI, PPI — refreshed with each official monthly release), and <b>World Bank</b> GDP growth and inflation across the major economies. The dashboard loads when you open the tab, reloads on <b>⟳ Refresh indicators</b>, and keeps its last successful read cached for offline use — the keyless BLS public access is capped at about 25 dashboard loads per day, so the refresh button is not unlimited. Every value links to its source: press an indicator's label to open the underlying series page (Treasury or FRED for yields, BLS for labour and prices, World Bank for global growth). Press <b>▶ Analysts Call</b> and a <b>business journalist</b> researches the latest business and economic headlines via live web search (needs your Mistral API key) and delivers a spoken <b>one-minute update</b> — press the button again to pause it, and once more to resume — while each headline appears beside the update as a <b>named link</b> that opens the source website in a new tab. The update speaks through your configured voice engine (browser voices or Studio voices), and the last one stays on the tab for replay with <b>Hear again</b>. Beyond the growth tile, the World Bank also feeds a <b>Global macro</b> tile — unemployment, GDP per capita and current-account balance for the same economies — and three market tiles round out the dashboard: <b>💱 FX</b> (ECB daily reference rates for the US dollar via the keyless Frankfurter API), <b>🪙 Crypto</b> (live BTC, ETH and SOL with 24-hour moves from Binance's public data API, CoinGecko as fallback), and <b>🌐 Global stocks &amp; commodities</b> (S&amp;P 500, developed-world and emerging equities, gold, silver and oil via ETF quotes from Alpha Vantage — this one is optional and needs a free Alpha Vantage key in <b>Settings</b>, since no keyless, browser-callable source exists for live equity and commodity prices; Yahoo, Stooq and the FRED API all block browser requests). Market data is informational, not a recommendation.</p>
+      <p>The <b>📊 Economics</b> tab is a live dashboard of economic indicators built from <b>free, keyless official APIs</b> (Trading Economics has no free API — its guest access was discontinued — so the app uses open sources instead): the <b>US Treasury</b> daily par yield curve (3-month bill through 30-year bond, plus the 2s–10s and 3M–10Y spreads, updated every business day), <b>BLS</b> labour market and inflation releases (unemployment, nonfarm payrolls, participation, average hourly earnings, CPI, core CPI, PPI — refreshed with each official monthly release), and <b>World Bank</b> GDP growth and inflation across the major economies. The dashboard loads when you open the tab, reloads on <b>⟳ Refresh indicators</b>, and keeps its last successful read cached for offline use — the keyless BLS public access is capped at about 25 dashboard loads per day, so the refresh button is not unlimited. Every value links to its source: press an indicator's label to open the underlying series page (Treasury or FRED for yields, BLS for labour and prices, World Bank for global growth). Press <b>▶ Analysts Call</b> and a <b>business journalist</b> researches the latest business and economic headlines via live web search (needs your Mistral API key) and delivers a spoken <b>one-minute update</b> — press the button again to pause it, and once more to resume — while each headline appears beside the update as a <b>named link</b> that opens the source website in a new tab. The update speaks through your configured voice engine (browser voices or Studio voices), and the last one stays on the tab for replay with <b>Hear again</b>. Beyond the growth tile, the World Bank also feeds a <b>Global macro</b> tile — unemployment, GDP per capita and current-account balance for the same economies — and three market tiles round out the dashboard: <b>💱 FX</b> (ECB daily reference rates for the US dollar via the keyless Frankfurter API), <b>🪙 Crypto</b> (live BTC, ETH and SOL with 24-hour moves from Binance's public data API, CoinGecko as fallback), and <b>🌐 Global stocks &amp; commodities</b> (S&amp;P 500, developed-world and emerging equities, gold, silver and oil via ETF quotes from Alpha Vantage — this one is optional and needs a free Alpha Vantage key in <b>Settings</b> — it syncs automatically to every device you sign into — since no keyless, browser-callable source exists for live equity and commodity prices; Yahoo, Stooq and the FRED API all block browser requests). Market data is informational, not a recommendation.</p>
 
       <h3>1 · The agents</h3>
       <div class="hint" style="margin:6px 0">Each style has its own agent team — the agent cards above the log show exactly who's working on your episode. While a pipeline is creating an episode or an analyst call, a centered animated <b>thinking icon</b> marks the wait — it pulses in the middle of the screen until the item is created, then disappears. The app stays fully usable in the meantime, so you can still press <b>Stop</b> to cancel the run.</div>
@@ -3661,7 +3661,7 @@ function econCrypto() {
 }
 
 /* ---- global equities & commodities via ETF quotes (Alpha Vantage, optional free key) ---- */
-function saveAVKey() { lsSet(LSAVKEY, el("avkey").value.trim()); }
+function saveAVKey() { lsSet(LSAVKEY, el("avkey").value.trim()); cloudAVKeySave(); }
 function avKey() { return el("avkey") ? el("avkey").value.trim() : ""; }
 function econAVRow(q) { /* pure, testable */
   var g = q && q["Global Quote"];
@@ -4213,6 +4213,7 @@ async function cloudInit() {
       S.cloudUser = u ? { uid: u.uid, name: u.displayName || String(u.email || "analyst").split("@")[0], email: u.email || "" } : null;
       if (!S.cloudUser) S.cloudEps = null;
       try { if (S.cloudUser) kbcOnSignIn(); } catch (e2) {}
+      try { if (S.cloudUser) cloudAVKeyOnSignIn(); } catch (e3) {}
       renderCloudPanel();
     });
   } catch (e) {
@@ -8028,6 +8029,61 @@ function kbvRender() {
   }
   if (!any && ov.resolved) html += '<div class="hint" style="margin:8px 0 2px">No lens carried a strong enough view (|d| ≥ 0.05) in any resolved decision yet.</div>';
   box.innerHTML = html;
+}
+
+/* ============================== cloud profile sync (round 19) ============================== */
+/* The Alpha Vantage key rides the existing owner-scoped /users/{uid} profile doc. The
+   deployed rules already allow the owner to create it (userId + email + createdAt at
+   request.time) and to update it (userId + createdAt immutable, everything else free),
+   so no rules change is needed — the key follows the Google account between phone and
+   PC. Sign-in reconciles both directions: a device with no local key adopts the cloud
+   key automatically, and a device holding a key the cloud lacks (or an older one) pushes
+   it up. An empty local key never propagates — clearing the key is local-only, and the
+   local input stays the source of truth while you type (the push is debounced 1.5 s). */
+
+var CLDAV = { timer: null, busy: false };
+
+function cloudAVKeyValid(k) { return typeof k === "string" && /^[A-Za-z0-9_-]{4,64}$/.test(k); }
+
+/* push the local key to the cloud profile (silent — offline convention: local stays the truth) */
+async function cloudAVKeyPush() {
+  if (!cloudEnabled() || CLDAV.busy) return;
+  var key = String(lsGet(LSAVKEY) || "").trim();
+  if (!cloudAVKeyValid(key)) return;
+  CLDAV.busy = true;
+  try {
+    var fs = FB.mod.fs, ref = fs.doc(FB.db, "users", S.cloudUser.uid), exists = false;
+    try { var snap = await fs.getDoc(ref); exists = !!(snap && snap.exists && snap.exists()); } catch (e) { exists = false; }
+    if (exists) await fs.setDoc(ref, { userId: S.cloudUser.uid, avKey: key, updatedAt: fs.serverTimestamp() }, { merge: true });
+    else await fs.setDoc(ref, { userId: S.cloudUser.uid, email: String(S.cloudUser.email || ""), avKey: key, createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp() });
+  } catch (e) { /* offline / permission: keep quiet, local storage remains the truth */ }
+  finally { CLDAV.busy = false; }
+}
+
+/* the Settings input saves on every keystroke — debounce the cloud push */
+function cloudAVKeySave() {
+  if (!cloudEnabled()) return;
+  if (CLDAV.timer) clearTimeout(CLDAV.timer);
+  CLDAV.timer = setTimeout(function () { CLDAV.timer = null; cloudAVKeyPush(); }, 1500);
+}
+
+/* sign-in reconcile: adopt the cloud key when local is empty; push local when it differs */
+async function cloudAVKeyOnSignIn() {
+  if (!cloudEnabled()) return;
+  var fs = FB.mod.fs, data = {};
+  try {
+    var snap = await fs.getDoc(fs.doc(FB.db, "users", S.cloudUser.uid));
+    if (snap && snap.exists && snap.exists() && snap.data) data = snap.data() || {};
+  } catch (e) { data = {}; }
+  var cloudKey = typeof data.avKey === "string" ? data.avKey : "";
+  var localKey = String(lsGet(LSAVKEY) || "").trim();
+  if (cloudAVKeyValid(cloudKey) && !localKey) {
+    lsSet(LSAVKEY, cloudKey);
+    var inp = el("avkey"); if (inp) inp.value = cloudKey;
+    logLine("🔑 Alpha Vantage key restored from your cloud profile.");
+  } else if (cloudAVKeyValid(localKey) && localKey !== cloudKey) {
+    await cloudAVKeyPush();
+  }
 }
 
 function init() {

@@ -157,4 +157,9 @@ to your own private Firestore (see the [firebaseSA](https://github.com/funkyfish
 repo for the database design and security rules). The Monitor tab tracks each opportunity's
 track record (won / lost / void) and its check history — with each opportunity's entropic score
 stored at decision time, so the track record doubles as the engine's out-of-sample evaluation.
+Your optional **Alpha Vantage key** rides the same sign-in: once you're signed in it is
+stored on your private cloud profile and restored automatically on every device you sign
+into (clearing it stays local to that device), so the Economics market tiles work on phone
+and PC without re-entering it.
+
 Without sign-in, the app works fully offline from browser local storage.
