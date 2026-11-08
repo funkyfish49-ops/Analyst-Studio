@@ -759,7 +759,6 @@ body.mode-desk #srctable table{min-width:0}
           <option value="conf">Highest confidence</option>
           <option value="horizon">Horizon end</option>
         </select>
-        <button class="btn ghost small" onclick="resultsRefresh()"><span id="res-refresh-ic">⟳</span> Refresh</button>
       </div>
       <div class="hint" id="res-summary" style="margin-top:10px"></div>
       <div class="errbox" id="reserr" style="display:none"></div>
@@ -831,7 +830,6 @@ body.mode-desk #srctable table{min-width:0}
       <div class="row" style="margin-top:10px">
         <span class="dim" id="kb-store" style="font-size:12.5px"></span>
         <button class="btn ghost small" onclick="kbuiCompact()">Compact storage</button>
-        <button class="btn ghost small" onclick="kbuiSyncKb()">☁️ Sync KB</button>
         <button class="btn ghost small" onclick="kbuiImportToggle()">📥 Import cards</button>
       </div>
     </div>
@@ -982,10 +980,10 @@ body.mode-desk #srctable table{min-width:0}
 
       <h3>Cloud sync &amp; track record</h3>
       <p>The <b>🏁 Results</b> tab is the ledger of every opportunity the desk has ever produced — one line per idea, with a category filter, status filter, free-text filter and sort at the top, and a running summary of won / lost / void / expired / open with closed and open P&amp;L. Each line shows the entry price, stop, target, the current price and the position's profit / loss; press a line for the details behind it (decision, size, max loss, confidence, entropic F, the case, and how it closed). Positions are tracked the way their category works: <b>stock and bond</b> positions close themselves when the target or stop is crossed, <b>prediction-market</b> positions when the contract resolves (price ≈ 100¢ / 0¢), and <b>odds &amp; sports</b> positions are resolved with the Won / Lost buttons (odds have no universal price scale). Anything still open past its 10-day horizon completes as <b>expired</b>. Feed prices with the per-line <b>✎ Price</b> (type the quote) or <b>🔎 Live</b> (the desk agent searches the current price) — the same 📈 Position panel lives in the Monitor tab. Signed in, the ledger reads and writes your cloud track record directly; signed out it shows this device's current episode.</p>
-      <p>The <b>Settings</b> tab has a <b>☁️ Cloud sync</b> card: sign in with Google and every episode you produce — podcast or analyst call — is saved to your Firebase cloud library, together with one trackable document per board opportunity and per episode topic. The <b>Monitor</b> tab doubles as your track record: each re-check appends to that item's cloud history, and the <b>🏆 Track record</b> row lets you resolve any opportunity as <b>Won</b>, <b>Lost</b> or <b>Void</b> — or reopen it — with the outcome saved with the episode and synced to the cloud. Press <b>Load cloud library</b> in Settings to bring any past episode back onto this device with its full watchlist and track record intact. Everything works offline too: without sign-in (or without a connection) the app runs entirely on this browser's local storage.</p>
+      <p>The <b>Settings</b> tab has a <b>☁️ Cloud sync</b> card: sign in with Google and every episode you produce — podcast or analyst call — is saved to your Firebase cloud library, together with one trackable document per board opportunity and per episode topic. The <b>Monitor</b> tab doubles as your track record: each re-check appends to that item's cloud history, and the <b>🏆 Track record</b> row lets you resolve any opportunity as <b>Won</b>, <b>Lost</b> or <b>Void</b> — or reopen it — with the outcome saved with the episode and synced to the cloud. Your <b>☁️ Cloud sync</b> panel in Settings lists every past episode automatically — press <b>Load</b> on one to bring it back onto this device with its full watchlist and track record intact. Everything works offline too: without sign-in (or without a connection) the app runs entirely on this browser's local storage.</p>
 
       <h3>🧠 The Knowledge tab</h3>
-      <p>The <b>🧠 Knowledge</b> tab is the desk's living knowledge base. Every card is one established fact or theme with <b>claims</b> (each with a 0-100 confidence and an optional basis), <b>dated sources</b>, <b>link keys</b>, and a place in a category facet rubric — six evolving categories (Market, Economic, Industry, Social media, Stock-specific, Other), each with its own rubric of facets that make depth measurable. Cards are versioned: every commit, edit, verification or retirement lands in a per-card <b>version timeline</b>. Freshness is policy-driven — each card declares its own <b>re-verify window</b>, and cards past it go <b>stale</b>, then <b>overdue</b>, surfacing in the <b>🧐 Review queue</b> where you can mark them verified, revise or retire them in one click. The <b>🗺️ Coverage &amp; depth</b> map shows how many cards cover each facet per category (with their average claim confidence), a bar per category, and how far each lens is <b>trusted</b>: once a category accumulates 5 resolved outcomes, its learned reliability weights (long / short) start showing beside it — below that it is still learning. Use <b>＋ New card</b> to add knowledge manually, or expand a card and press <b>✎ Edit</b> — the editor takes claims one per line in the form <b>text | confidence | basis</b> and sources as <b>url | date</b>. The desk is wired to this base: while forming calls the desk and manager read the established cards and the earned lens-reliability weights (a lens activates at <b>5 resolved outcomes</b>), the manager records which lenses moved each call in the CALL DATA, those vectors are frozen into decisions at board freeze, and every <b>Won / Lost</b> resolution feeds the lens weights automatically — voids, expiries and re-resolutions never double-count. The <b>📡 Sources &amp; digestion</b> card feeds the base: add any URL as a one-time read or a repeatable feed, press <b>🍽️ Digest now</b> (or <b>🍽️ Digest due</b> for every pending source), and the research agent reads the source and proposes new cards, claims to add to existing cards, and contradictions — the proposals wait in the review queue, where you save, apply or edit them one by one. Cards, decisions, weights and sources sync through your private Firebase cloud: press <b>☁️ Sync KB</b> in the Coverage card to push and pull the whole base between phone and PC, and while you are signed in every knowledge write also syncs automatically a few seconds later. Everything also stays stored locally on this device. The <b>📥 Import cards</b> button in the Coverage card loads starter packs that ship with the app (the Trading Economics pack catalogues its market and macro data sections) or pasted card JSON — every entry is validated against the rubric, invalid entries are skipped, and cards whose category + title already exists are left alone. The 📈 Evolution card on the Knowledge tab plots each lens's weight history and the P&amp;L of the decisions it shaped, with aligned-versus-dissenting win rates showing whether a lens's trust is earned.</p>
+      <p>The <b>🧠 Knowledge</b> tab is the desk's living knowledge base. Every card is one established fact or theme with <b>claims</b> (each with a 0-100 confidence and an optional basis), <b>dated sources</b>, <b>link keys</b>, and a place in a category facet rubric — six evolving categories (Market, Economic, Industry, Social media, Stock-specific, Other), each with its own rubric of facets that make depth measurable. Cards are versioned: every commit, edit, verification or retirement lands in a per-card <b>version timeline</b>. Freshness is policy-driven — each card declares its own <b>re-verify window</b>, and cards past it go <b>stale</b>, then <b>overdue</b>, surfacing in the <b>🧐 Review queue</b> where you can mark them verified, revise or retire them in one click. The <b>🗺️ Coverage &amp; depth</b> map shows how many cards cover each facet per category (with their average claim confidence), a bar per category, and how far each lens is <b>trusted</b>: once a category accumulates 5 resolved outcomes, its learned reliability weights (long / short) start showing beside it — below that it is still learning. Use <b>＋ New card</b> to add knowledge manually, or expand a card and press <b>✎ Edit</b> — the editor takes claims one per line in the form <b>text | confidence | basis</b> and sources as <b>url | date</b>. The desk is wired to this base: while forming calls the desk and manager read the established cards and the earned lens-reliability weights (a lens activates at <b>5 resolved outcomes</b>), the manager records which lenses moved each call in the CALL DATA, those vectors are frozen into decisions at board freeze, and every <b>Won / Lost</b> resolution feeds the lens weights automatically — voids, expiries and re-resolutions never double-count. The <b>📡 Sources &amp; digestion</b> card feeds the base: add any URL as a one-time read or a repeatable feed, press <b>🍽️ Digest now</b> (or <b>🍽️ Digest due</b> for every pending source), and the research agent reads the source and proposes new cards, claims to add to existing cards, and contradictions — the proposals wait in the review queue, where you save, apply or edit them one by one. Cards, decisions, weights and sources sync through your private Firebase cloud: while you are signed in the whole base syncs itself between phone and PC — every write pushes a few seconds later, and remote changes pull in when you sign in, when you return to the tab and every few minutes. There are no sync buttons; nothing to press. Everything also stays stored locally on this device. The <b>📥 Import cards</b> button in the Coverage card loads starter packs that ship with the app (the Trading Economics pack catalogues its market and macro data sections) or pasted card JSON — every entry is validated against the rubric, invalid entries are skipped, and cards whose category + title already exists are left alone. The 📈 Evolution card on the Knowledge tab plots each lens's weight history and the P&amp;L of the decisions it shaped, with aligned-versus-dissenting win rates showing whether a lens's trust is earned.</p>
 
       <h3>🌀 Entropic second opinion</h3>
       <p>Every BUY / SELL opportunity the desk produces is auto-scored by an embedded <b>causal-entropic engine</b> (F = T·∇Sτ, after Alex Wissner-Gross's work on intelligence as freedom-seeking): it simulates thousands of ten-day futures from the idea's <b>own board numbers</b> — conviction, reward:risk, position size — and asks whether committing to the trade preserves more of the desk's future freedom of action than staying in cash. The board tiles, indicator cards and Monitor panels show the resulting <b>🌀 F chip</b> (green = the trade keeps more future options open, red = it forecloses them), and every opportunity carries a <b>🌀 Entropic deep-dive</b> — its regime priors, expected value, ∇Sτ and impairment probability, with editable priors you can re-score against your own view. PREDICTIONS and OTHER ideas are proxy-scored as price paths, so treat those F values as rougher. Treat the score as a <b>second opinion</b> beside the desk's expected value, never a replacement for analyst judgment: walk-forward backtests of this engine show entropic scores can be anti-predictive on some structures — which is exactly why the app surfaces the raw F instead of hiding it. When cloud sync is on, each opportunity's entropic score is stored in your cloud track record alongside its outcome, so over time you can see whether high-F calls really did keep more options open.</p>
@@ -1064,7 +1062,7 @@ body.mode-desk #srctable table{min-width:0}
 "use strict";
 /* ============================== state ============================== */
 var LSKEY = "topiccast-key", LSMODEL = "topiccast-model", LSEP = "topiccast-episode", LSVOICE = "topiccast-voices", LSSTYLE = "topiccast-style", LSDESK = "topiccast-deskmins", LSEXPERTS = "topiccast-experts", LSDEV = "topiccast-devmode", LSCLOUD = "topiccast-cloud-eps", LSCOUNTRY = "topiccast-country", LSAUTO = "topiccast-autocall", LSAUTOLAST = "topiccast-autocall-lastrun", LSAUTODISMISSED = "topiccast-autocall-dismissed", LSKBSYNC = "topiccast-kb-sync";
-var S = { running: false, cancel: false, ep: null, dur: "medium", plan: null, engine: "browser", voxVoices: null, style: "story", analystsSel: 0, analystsView: "indicators", takeAudio: null, takeState: "", experts: null, expertSel: "", monitorSel: "", monitorRun: "", monitorErr: "", deviceMode: "auto", cloudUser: null, cloudEps: null, cloudLoading: false };
+var S = { running: false, cancel: false, ep: null, dur: "medium", plan: null, engine: "browser", voxVoices: null, style: "story", analystsSel: 0, analystsView: "indicators", takeAudio: null, takeState: "", experts: null, expertSel: "", monitorSel: "", monitorRun: "", monitorErr: "", deviceMode: "auto", cloudUser: null, cloudEps: null };
 var TTS = { playing: false, paused: false, seg: 0, line: 0, cursor: 0, gapTimer: null, inUtterance: false };
 var VOX = { groups: null, idx: 0, token: 0, cur: null, cache: {}, voicesLoaded: false };
 
@@ -4143,7 +4141,7 @@ async function cloudWriteDoc(coll, docId, data) {
   await fs.setDoc(ref, out, { merge: true });
   FB.savedEps[docId] = 1;
 }
-async function cloudSaveEpisode() {
+async function cloudSaveEpisode(silent) {
   if (!cloudEnabled() || !S.ep) return false;
   var ep = S.ep;
   try {
@@ -4158,7 +4156,7 @@ async function cloudSaveEpisode() {
       await cloudWriteDoc(x.kind === "opportunity" ? "opportunities" : "topics", cloudDocIdForItem(ep, x), rec);
     }
     lsSet(LSCLOUD, JSON.stringify(FB.savedEps));
-    logLine("☁️ Episode synced to your cloud library.", "ok");
+    if (!silent) logLine("☁️ Episode synced to your cloud library.", "ok");
     return true;
   } catch (e) {
     logLine("☁️ Cloud sync failed: " + cloudErrMsg(e), "err");
@@ -4246,23 +4244,6 @@ async function cloudSignOut() {
   try { await FB.mod.auth.signOut(FB.auth); } catch (e) {}
   S.cloudUser = null; S.cloudEps = null; renderCloudPanel();
 }
-async function cloudLoadLibrary() {
-  if (!cloudEnabled()) return;
-  S.cloudLoading = true; S.cloudEps = null; FB.panelErr = ""; renderCloudPanel();
-  try {
-    var fs = FB.mod.fs;
-    var q = fs.query(fs.collection(FB.db, "episodes"), fs.where("userId", "==", S.cloudUser.uid));
-    var snap = await fs.getDocs(q);
-    S.cloudEps = snap.docs.map(function (d) {
-      var v = d.data() || {};
-      return { id: d.id, title: v.title || "Episode", created: v.createdLabel || "", when: (v.createdAt && v.createdAt.seconds) ? v.createdAt.seconds : 0 };
-    }).sort(function (a, b) { return b.when - a.when; });
-  } catch (e) {
-    FB.panelErr = "Library failed to load: " + cloudErrMsg(e);
-  }
-  S.cloudLoading = false;
-  renderCloudPanel();
-}
 async function cloudLoadEpisode(id) {
   if (!cloudEnabled()) return;
   FB.panelErr = "";
@@ -4296,14 +4277,12 @@ function renderCloudPanel() {
       (FB.authErr ? '<div class="errbox" style="margin-top:8px">' + esc(FB.authErr) + "</div>" : "") +
       '<div class="row" style="margin-top:10px"><button class="btn" onclick="cloudSignIn()">🔐 Sign in with Google</button></div>';
   } else {
-    html = '<div class="chips"><span class="chip acc">☁️ ' + esc(S.cloudUser.name || S.cloudUser.email || "signed in") + '</span></div>' +
+    html = '<div class="chips"><span class="chip acc">☁️ ' + esc(S.cloudUser.name || S.cloudUser.email || "signed in") + '</span>' +
+      (SYNC.last ? '<span class="chip">auto-sync · ' + syncStampText() + '</span>' : '') + '</div>' +
       '<div class="row" style="margin-top:10px">' +
-      '<button class="btn small" onclick="cloudSaveEpisode()">☁️ Sync current episode</button>' +
-      '<button class="btn small" onclick="cloudLoadLibrary()">Load cloud library</button>' +
       '<button class="btn small" onclick="cloudSignOut()">Sign out</button></div>' +
-      '<div class="hint" style="margin-top:8px">While you are signed in everything syncs itself — knowledge, episodes, outcomes and the market data key push as they change, and the app reconciles with the cloud when you return to the tab and every few minutes. The buttons below are manual controls; loading an episode is always deliberate.</div>';
-    if (S.cloudLoading) html += '<div class="hint" style="margin-top:8px">Loading your cloud library…</div>';
-    else if (S.cloudEps && S.cloudEps.length) {
+      '<div class="hint" style="margin-top:8px">Syncing is fully automatic while you are signed in — knowledge, episodes, outcomes and the market data key push as they change, the app reconciles with the cloud when you sign in, when you return to the tab and every few minutes, and the current episode rides every pass. The library below lists itself; loading an episode is the only deliberate action.</div>';
+    if (S.cloudEps && S.cloudEps.length) {
       html += '<div class="hint" style="margin-top:10px">Cloud library — press Load to open an episode on this device:</div>';
       S.cloudEps.forEach(function (e) {
         html += '<div class="indrow"><span class="lbl">' + esc(e.title) + '</span><span class="val">' + esc(e.created || "") +
@@ -4311,6 +4290,8 @@ function renderCloudPanel() {
       });
     } else if (S.cloudEps) {
       html += '<div class="hint" style="margin-top:8px">No episodes in your cloud library yet — produce one and it syncs automatically.</div>';
+    } else {
+      html += '<div class="hint" style="margin-top:8px">Syncing your cloud library…</div>';
     }
     if (FB.panelErr) html += '<div class="errbox" style="margin-top:8px">' + esc(FB.panelErr) + "</div>";
   }
@@ -4917,7 +4898,7 @@ async function monLivePrice(id) {
 function resultsTabShown() {
   posCheckExpiry();
   resultsRender();
-  if (cloudEnabled() && !RES.loaded) resultsRefresh();
+  if (cloudEnabled()) resultsRefresh();
 }
 async function resultsRefresh() {
   if (!cloudEnabled()) { resultsRender(); return; }
@@ -5074,8 +5055,6 @@ function resultsRender() {
   var html = "";
   rows.forEach(function (it) { html += resRowHtml(it); });
   list.innerHTML = html;
-  var ic = el("res-refresh-ic");
-  if (ic) ic.textContent = RES.loading ? "⏳" : "⟳";
 }
 function resPctHtml(it) {
   if (it.pnlPct == null) return "";
@@ -7860,23 +7839,6 @@ async function kbcPull(silent) {
   return { ok: true, stats: stats };
 }
 
-/* the Sync KB button: pull first (merge remote changes), then push the reconciled state */
-async function kbcSync() {
-  if (!cloudEnabled()) { logLine("Sign in from the Settings tab (☁️ Cloud sync) to sync the knowledge base between devices."); return; }
-  if (KBSYNC.busy) { logLine("☁️ Knowledge base sync is already running…"); return; }
-  var p = await kbcPull(true);
-  if (!p || p.off || p.busy) return;
-  var q2 = await kbcPush(true);
-  var st = p.stats || {}, st2 = (q2 && q2.stats) || {};
-  var pulled = (st.cards + st.events + st.decs + st.srcs + st.digs + st.weights) || 0;
-  var pushed = (st2.cards + st2.events + st2.decs + st2.srcs + st2.digs + st2.weights) || 0;
-  logLine("☁️ Knowledge base synced" + ((pulled || pushed) ? " — pulled " + pulled + " and pushed " + pushed + " docs." : " — already in sync."), (pulled || pushed) ? "ok" : "");
-  /* round 21: the Sync KB button also reconciles the Alpha Vantage key, so a device that
-     was already signed in picks up a key stored from another device without a reload */
-  try { if (S.cloudUser) await cloudAVKeyOnSignIn(); } catch (e4) {}
-}
-function kbuiSyncKb() { kbcSync(); }
-
 /* debounced auto-push after every meaningful KB write while signed in */
 function kbcAutoPush() {
   if (!cloudEnabled()) return;
@@ -8222,12 +8184,20 @@ async function kbuiImportPack(name) {
    deliberate, because it replaces the one on screen. Triggers: sign-in, tab focus (at
    most once per 2 minutes), a slow heartbeat (every 5 minutes), and the 15 s knowledge
    debounce now rides the same engine, so every local write also picks up remote changes.
-   Single-flight — overlapping triggers coalesce — and the manual buttons stay as explicit
-   fallbacks. The Mistral API key and model settings remain device-local by design. */
+   Single-flight — overlapping triggers coalesce. Round 23 removed the manual sync buttons:
+   this engine is the only sync path, and it also keeps an open Results tab live. Loading an
+   episode from the library stays deliberate, because it replaces the one on screen. The
+   Mistral API key and model settings remain device-local by design. */
 
 var SYNC = { busy: false, last: 0, knownEps: null };
 
 function syncDue(minMs) { return !SYNC.last || (Date.now() - SYNC.last) >= minMs; }
+
+function syncStampText() {
+  if (!SYNC.last) return "";
+  var d = new Date(SYNC.last);
+  return "synced " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
 
 function syncStatTotal(st) {
   st = st || {};
@@ -8237,6 +8207,7 @@ function syncStatTotal(st) {
 /* silent library refresh — reports how many episodes arrived from other devices */
 async function syncLibrary() {
   if (!cloudEnabled()) return 0;
+  FB.panelErr = "";
   var fresh = [];
   try {
     var fs = FB.mod.fs;
@@ -8246,7 +8217,7 @@ async function syncLibrary() {
       var v = d.data() || {};
       return { id: d.id, title: v.title || "Episode", created: v.createdLabel || "", when: (v.createdAt && v.createdAt.seconds) ? v.createdAt.seconds : 0 };
     }).sort(function (a, b) { return b.when - a.when; });
-  } catch (e) { return 0; }
+  } catch (e) { FB.panelErr = "Library failed to load: " + cloudErrMsg(e); return 0; }
   var news = 0;
   if (SYNC.knownEps) for (var i = 0; i < fresh.length; i++) if (!SYNC.knownEps[fresh[i].id]) news++;
   var known = {};
@@ -8272,11 +8243,14 @@ async function cloudSyncAll(reason) {
     if (p && p.ok) pulled = syncStatTotal(p.stats);
     var q2 = await kbcPush(true);
     if (q2 && q2.ok) pushed = syncStatTotal(q2.stats);
-    /* an episode created while signed out (or whose push once failed) has never reached the
-       cloud — the engine gives it a first-class ticket at the next sync */
-    if (S.ep && !FB.savedEps[cloudEpId(S.ep)]) { try { await cloudSaveEpisode(); } catch (e1) {} }
+    /* the current episode rides every pass silently (idempotent setDoc-merge writes) — a
+       push missed because of sign-out, offline or a failure cannot outlive the next sync,
+       and there is no manual button to press anymore */
+    if (S.ep) { try { await cloudSaveEpisode(true); } catch (e1) {} }
     try { if (S.cloudUser) await cloudAVKeyOnSignIn(); } catch (e2) {}
     news = await syncLibrary();
+    /* keep an open Results tab live: remote outcome and price changes land without a reload */
+    try { var vr = el("view-results"); if (vr && vr.classList.contains("on") && typeof resultsTabShown === "function") resultsTabShown(); } catch (e5) {}
     SYNC.last = Date.now();
     if (reason === "signin" || pulled || pushed || news) {
       var bits = [];

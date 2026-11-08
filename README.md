@@ -114,8 +114,8 @@ source's last digest and contributed-card count show beside it. This round also 
 `mistral-large-4` to the Settings model select — Large 4 is GA and supports built-in connectors
 again — with stale stored models falling back to the default.
 
-Round 17 syncs the knowledge base itself. A new **☁️ Sync KB** button beside "Compact storage"
-in the Coverage card does a stateless, idempotent two-way sync over the owner-scoped
+Round 17 added knowledge-base cloud sync (originally via a Sync KB button, since
+retired): a stateless, idempotent two-way sync over the owner-scoped
 `kb_*` Firestore collections (cards, timeline events, decisions, sources, digests and the
 per-category weight docs; the security rules shipped with the cloud rounds already cover
 them): pull merges the cloud into the local base first — cards by version number, events as
@@ -168,15 +168,16 @@ stored at decision time, so the track record doubles as the engine's out-of-samp
 Your optional **Alpha Vantage key** rides the same sign-in: once you're signed in it is
 stored on your private cloud profile and restored automatically on every device you sign
 into (clearing it stays local to that device), so the Economics market tiles work on phone
-and PC without re-entering it. The ☁️ Sync KB button re-checks the key as well, so a
-device that was already signed in picks up a newly stored key without reloading, and the
+and PC without re-entering it. The automatic sync passes re-check the key too, so a
+device that is already signed in picks up a newly stored key without reloading, and the
 Settings card links straight to Alpha Vantage's free-key page if you need a fresh one.
 
-Syncing itself is seamless while signed in: knowledge, episodes, board outcomes and the market
-data key commit the moment they change, and one reconciler pulls the cloud copy at sign-in,
-whenever you return to the tab and on a slow heartbeat — work done on the phone shows up on
-the PC without pressing anything. The manual buttons (☁️ Sync KB, ☁️ Sync current episode,
-Load cloud library) remain as explicit controls, and loading an episode is always
-deliberate since it replaces the one on screen.
+Syncing is fully automatic while signed in — there are no sync buttons. Knowledge, episodes,
+board outcomes and the market data key commit the moment they change, the current episode
+rides every sync pass, and one reconciler pulls the cloud copy at sign-in, whenever you
+return to the tab and on a slow heartbeat — work done on the phone shows up on the PC
+without pressing anything. The Results tab refreshes itself whenever it is open, and the
+cloud library lists itself in Settings; loading an episode from it is the only deliberate
+action, since it replaces the one on screen.
 
 Without sign-in, the app works fully offline from browser local storage.
