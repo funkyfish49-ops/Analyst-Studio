@@ -13,7 +13,9 @@ works when you open it), and any idea that fails price validation is dropped fro
 the show is written. The **📋 Ledger** button copies the whole board as log-ready entries in the
 daily scan's ledger format for the append-only trading opportunity log. The **Opportunities** side
 panel files every daily call under its date — the loaded call stays expanded for working the board,
-and past calls (synced while signed in) expand by date, then by category, to their opportunities.
+and past calls (synced while signed in) expand by date, then by category, to their opportunities;
+tapping a past opportunity recalls its full details — that daily call loads onto the desk with
+the idea selected (execution strip, research report, arguments, chart, expert verdict).
 
 Every BUY/SELL opportunity on the board is auto-scored by an embedded causal-entropic engine
 (F = T·∇Sτ): a second opinion on whether committing to the trade preserves more of the desk's
